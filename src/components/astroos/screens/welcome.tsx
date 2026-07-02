@@ -165,6 +165,74 @@ export function WelcomeScreen({ onNavigate }: WelcomeProps = {}) {
         </div>
       </FadeIn>
 
+      {/* Testimonials — social proof quotes */}
+      <FadeIn delay={0.33}>
+        <div className="mx-auto max-w-3xl">
+          <h3 className="mb-3 text-center font-display text-lg text-[#9A9AA8]">
+            {L("What readers say", "Что говорят читатели", "पाठक क्या कहते हैं", locale)}
+          </h3>
+          <div className="grid gap-2.5 sm:grid-cols-3">
+            {[
+              {
+                name: "Mira",
+                sign: "Scorpio",
+                glyph: "♏",
+                stars: 5,
+                text: L(
+                  "The BaZi pillar explained a tension I've felt for years. Finally language for it.",
+                  "Столп BaZi объяснил напряжение, которое я чувствовал годами. Наконец-то слова для этого.",
+                  "BaZi स्तंभ ने वह तनाव समझाया जो मैंने सालों महसूस किया।",
+                  locale,
+                ),
+              },
+              {
+                name: "Jonas",
+                sign: "Aquarius",
+                glyph: "♒",
+                stars: 5,
+                text: L(
+                  "Astrocartography pointed me to Porto. Moved 6 months ago — best decision.",
+                  "Астрокартография указала на Порту. Переехал 6 месяцев назад — лучшее решение.",
+                  "एस्ट्रोकार्टोग्राफी ने मुझे पोर्टो की ओर इशारा किया। 6 महीने हो गए — सर्वश्रेष्ठ निर्णय।",
+                  locale,
+                ),
+              },
+              {
+                name: "Anya",
+                sign: "Pisces",
+                glyph: "♓",
+                stars: 4,
+                text: L(
+                  "The 2 a.m. companion caught me on a hard night. No paywall, no judgment.",
+                  "Спутник в 2 ночи поймал меня в тяжёлую ночь. Без paywall, без осуждения.",
+                  "2 a.m. साथी ने मुश्किल रात में मुझे पकड़ा। कोई paywall नहीं।",
+                  locale,
+                ),
+              },
+            ].map((r, i) => (
+              <motion.div
+                key={r.name}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: 0.35 + i * 0.08 }}
+                className="rounded-xl border border-[#2A2A35] bg-[#12121A]/60 p-3"
+              >
+                <div className="mb-1.5 flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-sm font-medium text-[#F5F0E8]">{r.name}</span>
+                    <span className="text-[#E8B86D]">{r.glyph}</span>
+                  </div>
+                  <span className="font-mono text-[10px] text-[#E8B86D]">
+                    {"★".repeat(r.stars)}<span className="text-[#2A2A35]">{"★".repeat(5 - r.stars)}</span>
+                  </span>
+                </div>
+                <p className="text-[11px] leading-relaxed text-[#9A9AA8]">"{r.text}"</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </FadeIn>
+
       {/* What you'll get — preview of the journey */}
       <FadeIn delay={0.35}>
         <div className="mx-auto max-w-3xl">

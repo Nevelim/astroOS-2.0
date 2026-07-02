@@ -12,6 +12,7 @@ import type { ScreenKey } from "@/lib/astroos/data";
 import { motion, AnimatePresence } from "framer-motion";
 import { RealHoroscopePanel } from "../real/RealHoroscopePanel";
 import { RealMoonPhasePanel } from "../real/RealMoonPhasePanel";
+import { RealMoonVoCPanel } from "../real/RealMoonVoCPanel";
 import { RealPlanetaryHoursPanel } from "../real/RealPlanetaryHoursPanel";
 import { RealTransitForecastPanel } from "../real/RealTransitForecastPanel";
 import { RealCosmicAspectsPanel } from "../real/RealCosmicAspectsPanel";
@@ -221,6 +222,9 @@ export function TodayScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => voi
       <FadeIn delay={0.04}>
         <RealMoonPhasePanel locale={locale} />
       </FadeIn>
+
+      {/* Moon Void of Course — when the Moon makes no major aspect before changing signs */}
+      <RealMoonVoCPanel locale={locale} />
 
       {/* Real planetary hours — ancient timekeeping system with astronomy-engine */}
       <FadeIn delay={0.045}>

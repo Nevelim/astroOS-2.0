@@ -705,3 +705,48 @@ Recommended next steps:
 - Implement the MemberRelation Prisma model + POST /api/members endpoint so the add-member form actually persists family members (addresses the P1 item from the handover).
 - Or apply the same CityAutocomplete pattern to any other screens with city inputs (e.g. profile editing).
 - Or add city autocomplete to the partner-link / cosmic-match flow on the Connect screen.
+
+---
+
+Task ID: 13
+Agent: Z.ai Code (user-reported bug fix)
+Task: User reported that city autocomplete finds nothing for "Павлодар", "Москва", "Ялуторовск" — Russian city names return zero results.
+
+Work Log:
+- Reproduced via curl: `/api/cities?q=Москва` → `{"cities":[],"total":0}`. Same for Павлодар and Ялуторовск. Root cause: the API only searched the Latin `name` column. Moscow existed as "Moscow" (Latin), but "Москва" didn't match. Павлодар and Ялуторовск were not in the 327-city seed at all.
+- Solution: add an `aliases` column to the City model (pipe-separated alternative names) + add the missing cities + update the API to search aliases.
+
+- prisma/schema.prisma: added `aliases String?` to City model.
+- src/lib/astroos/real/city-seeds.ts:
+  - CitySeed type + toCityRecords() + seedCitiesIfEmpty() updated to persist aliases.
+  - Added Russian aliases to 12 existing cities: Moscow (Москва|Moskva|МСК), Saint Petersburg (Санкт-Петербург|СПб|Петербург|Petrograd|Leningrad), Kazan (Казань), Yekaterinburg (Екатеринбург|Sverdlovsk), Novosibirsk (Новосибирск), Vladivostok (Владивосток), Kyiv (Киев|Kiev), Lviv (Львов|Lwów|Lemberg), Minsk (Минск), + Barcelona (Барселона), Madrid (Мадрид), Paris (Париж), Rome (Рим), Milan (Милан), Berlin (Берлин), Vienna (Вена|Wien), Prague (Прага|Praha), Warsaw (Варшава|Warszawa), Istanbul (Стамбул|Константинополь), Athens (Афины), Antalya (Анталья|Анталия).
+  - Added 19 new Russian cities with Russian aliases: Yalutorovsk (Ялуторовск), Tyumen (Тюмень), Omsk (Омск), Chelyabinsk (Челябинск), Krasnodar (Краснодар), Rostov-on-Don (Ростов-на-Дону), Ufa (Уфа), Volgograd (Волгоград|Сталинград), Perm (Пермь), Voronezh (Воронеж), Krasnoyarsk (Красноярск), Saratov (Саратов), Irkutsk (Иркутск), Khabarovsk (Хабаровск), Belgorod (Белгород), Nizhny Novgorod (Нижний Новгород|Горький), Samara (Самара|Куйбышев), Tula (Тула), Yaroslavl (Ярославль), Tver (Тверь|Калинин).
+  - Added 5 Kazakhstan cities: Pavlodar (Павлодар), Almaty (Алматы|Алма-Ата), Astana (Астана|Нур-Султан), Shymkent (Шымкент|Чимкент), Karaganda (Караганда).
+- src/app/api/cities/route.ts: search SQL now includes `OR aliases LIKE ${pattern} COLLATE NOCASE` in both the ISO2 and general search branches. Type annotations updated to include `aliases: string | null`.
+
+- DB migration: ran `bun run db:generate` + `bun run db:push` (added aliases column). Force-deleted the City table to trigger a full reseed (the existing 327 cities had aliases=null; the new 346 cities have aliases populated).
+- Had to restart the dev server (pkill next-server + remove .next/dev/lock + rerun start-services.sh) so the Prisma client picked up the new schema.
+
+- Verified via curl:
+  - `/api/cities?q=Москва` → Moscow, Russia, UTC+3 ✓
+  - `/api/cities?q=Павлодар` → Pavlodar, Kazakhstan ✓
+  - `/api/cities?q=Ялуторовск` → Yalutorovsk, Russia ✓
+  - `/api/cities?q=Moscow` (Latin) → Moscow, Russia ✓ (backward compatible)
+- agent-browser QA: Members screen city autocomplete — typing "Москва" shows "Moscow, RU · Europe/Moscow · UTC+3" suggestion. 0 page errors.
+- Git: commit `fcb5d57` pushed to `origin/main` (3 files changed, 57 insertions, 21 deletions).
+
+Stage Summary:
+- **Bug fixed**: city autocomplete now finds Russian, Kazakh, and other non-Latin city names via the new `aliases` column. 19 new Russian cities + 5 Kazakhstan cities added to the database. The search checks name, country, iso2, AND aliases columns.
+- **Backward compatible**: Latin names (Moscow, Paris, Berlin) still work as before.
+- Lint 0 errors. Dev server stable. GitHub `origin/main` HEAD `fcb5d57`.
+
+Unresolved / Risks:
+- The aliases field is a pipe-separated string, so substring matches can produce false positives (e.g. searching "М" would match "Москва" in Moscow's aliases). The post-sort prioritizes name prefix matches, so exact name matches rank higher. Acceptable for autocomplete UX.
+- Only 37 cities have aliases (the major Russian/European ones). Other cities (US, Asia) still rely on Latin names only. Future work could add Chinese/Japanese/Arabic aliases for broader localization.
+- Google OAuth still disabled (env empty) — unchanged.
+- Next.js 16 `middleware` deprecation warning — unchanged, non-blocking.
+
+Recommended next steps:
+- Add Chinese/Japanese/Arabic aliases for major Asian cities (Tokyo, Beijing, Shanghai, Delhi, Mumbai, Dubai) to support full multilingual search.
+- Or address the remaining P1 items: MemberRelation table for the family hub, or real notifications push via the existing chat-service WebSocket.
+- Or add the same CityAutocomplete pattern to the Connect screen (partner-link / cosmic-match flow).

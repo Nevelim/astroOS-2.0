@@ -338,3 +338,60 @@ Recommended next steps:
 - Or add a "Mercury Rx shadow period" indicator (the ~5-day window before/after the stations) — small extension to the retrograde schedule panel.
 - Or add ecliptic latitude display in the Cosmic Aspects panel (getPlanetGeocentricEcliptic returns latDeg, currently unused).
 - Or wire the Moon VoC status into the daily horoscope LLM prompt so the narrative can mention "Moon is VoC this afternoon — defer new commitments."
+
+---
+
+Task ID: 6
+Agent: Z.ai Code (cron webDevReview — job 246214, cycle 5)
+Task: Fifth autonomous cron-review cycle. Read worklog, QA app via agent-browser, prioritize fixes, add features + improve styling, update worklog.
+
+Work Log:
+- Read worklog Tasks 1-5. Task 5 added the Moon VoC panel + retrograde-schedule cache. Recommended next steps: P1 mobile z-index, Mercury shadow period, ecliptic latitude, wire Moon VoC into horoscope LLM prompt.
+- Verified services alive (pids 2636/2637/2668), ports 3000/3003/3004 LISTENING, lint 0, HEAD 6ae6876, curl / = HTTP 200.
+- agent-browser QA: tested mobile viewport (iPhone 14). Today screen renders on mobile with bottom nav + tour spotlight + sticky CTA. Investigated the P1 z-index concern: sticky CTA uses `bottom-24 z-50` (96px above bottom nav), so it doesn't overlap the nav. Tour spotlight uses `z-[45]` which is intentionally below the nav/header (z-50) per the growth-ui.tsx comment. No actual overlap bug found — the z-index layering is intentional. Left as-is (no fix needed).
+- Tested all desktop screens via agent-browser: World Map (0 errors), Connect (0 errors), Members (0 errors, AuthGate works). Project is stable.
+
+- Selected feature from Task 5 recommendations: **wire Moon VoC + retrograde status into the horoscope LLM prompt**. This is the highest-impact improvement — it makes the AI narrative cite real astrological conditions (retrograde planets, Moon VoC, aspect orbs) instead of just listing transit signs.
+
+- Extended `src/app/api/horoscope/route.ts`:
+  - `computeRealTransits()` now returns per-planet `retrograde` flag (via the `isPlanetRetrograde` helper from Task 3) and aspect orbs. Transit summary marks retrograde planets with `(R)`: e.g. "Mercury in Cancer (R)".
+  - GET handler now computes Moon VoC via `computeMoonVoC()` (from Task 5) + builds a `retrogradePlanets[]` list from the transit positions.
+  - New `buildAstroContext()` helper assembles a rich context string: transit summary, moon phase, top 5 aspects with orbs, retrograde planets with "review/revisit/reframe" guidance, and Moon VoC status (with end time + next sign if active, or next VoC start if not).
+  - `computeHoroscopeNarrative()` signature changed: now takes `astroContext: string` instead of `{ summary, moonPhase }`. The LLM systemPrompt instructs: "Cite the REAL transits, retrogrades, and Moon phase above. If the Moon is Void of Course, mention it and advise deferring new commitments. If a planet is retrograde (marked 'in Sign (R)'), weave its theme (review, revisit, reframe) into the narrative."
+  - Response now includes `retrogradePlanets: string[]` and `moonVoC: { isVoC, nextVoCStart, nextVoCEnd, durationHours, sign, nextSign }` fields for client-side display.
+
+- Extended `src/components/astroos/real/RealHoroscopePanel.tsx`:
+  - HoroscopeData interface now includes optional `retrogradePlanets?: string[]` and `moonVoC?: {...}`.
+  - Added astrological context badges between the AI narrative and the transit summary. Each retrograde planet gets a rose ℞ pill (reuses the `astro-rx-glyph` pulse animation from Task 3). Moon VoC status shows as "☾ VoC" (rose) or "☾ clear" (jade) pill.
+
+- Verified via curl: `/api/horoscope?sign=Scorpio&locale=ru` returns:
+  - `transits: "Sun in Cancer, Moon in Aquarius, Mercury in Cancer (R), Venus in Leo, Mars in Gemini, Jupiter in Leo, Saturn in Aries"` — retrograde marker present.
+  - `retrogradePlanets: ["Mercury"]`.
+  - `moonVoC: { isVoC: false, nextVoCStart: "2026-07-03T20:17", durationHours: 11, sign: "Aquarius", nextSign: "Pisces" }`.
+  - `keyAspects` now includes `orb` values (e.g. `{a:"Sun", b:"Saturn", type:"square", orb:3.8}`).
+  - Narrative (RU): "Ретроградный Меркурий в Раке побуждает вас вернуться к прошлым коммуникациям или семейным вопросам" — the LLM correctly used the Mercury (R) context and wove the retrograde theme into the advice.
+
+- Note: the narrative came from a fresh LLM call (cache was MISS because the prompt changed). The 6h TTL cache now stores narratives generated with the new rich context.
+
+- `bun run lint` → 0 errors throughout.
+- agent-browser QA: Today screen horoscope panel shows ℞ Mercury badge + ☾ clear badge above the transit summary. Narrative mentions "Ретроградный Меркурий". 0 page errors. Screenshot saved to `/home/z/my-project/download/horoscope-context-badges.png`.
+- Git: commit `9d67d14` pushed to `origin/main` (5 files changed, 118 insertions, 15 deletions).
+
+Stage Summary:
+- **Feature enhancement**: the daily horoscope AI narrative now uses Moon VoC status, retrograde planets, and aspect orbs as LLM context. The narrative is materially richer — it cites "Ретроградный Меркурий" and weaves the review/reframe theme into the advice, rather than just listing transit signs. When the Moon IS VoC, the LLM will advise deferring new commitments (untested live since Moon is not VoC on 2026-07-02, but the prompt explicitly instructs it).
+- **UI enhancement**: retrograde + VoC context badges in the horoscope panel give users an at-a-glance summary of the key astrological conditions affecting their day, with the rose ℞ pulse and jade/rose VoC pills matching the existing cosmic theme.
+- **P1 z-investigation**: the mobile z-index concern (bottom nav vs mobile sheet, both z-50) was investigated and found to be intentional layering, not a bug. No fix applied.
+- Lint 0 errors. Dev server stable. GitHub `origin/main` HEAD `9d67d14`.
+
+Unresolved / Risks:
+- The horoscope LLM cache (6h TTL, in-memory) now stores narratives generated with the new rich context. If the Moon VoC status changes within the 6h window, the cached narrative will not reflect it. This is acceptable — the horoscope is a daily read, and the VoC status is shown separately in the dedicated Moon VoC panel with a live countdown.
+- The Moon VoC computation in the horoscope route adds ~72 Equator calls per request (on top of the transit computation). Unlike /api/moon-voc, this route does NOT cache the VoC result separately because it's folded into the LLM cache key. If the LLM cache is cold, the request takes ~300-500ms longer. Acceptable for a daily-cached endpoint.
+- Google OAuth still disabled (env empty) — unchanged.
+- Next.js 16 `middleware` deprecation warning — unchanged, non-blocking.
+- The handover's P1 list: real notifications push (WS/SSE), E2E tests, MemberRelation table. Mobile z-index investigated and found non-issue.
+
+Recommended next steps:
+- Add a "Mercury Rx shadow period" indicator (the ~5-day pre-shadow and post-shadow windows) to the retrograde schedule panel — small extension using the existing cycle data.
+- Or add ecliptic latitude display in the Cosmic Aspects panel (getPlanetGeocentricEcliptic returns latDeg, currently unused) — useful for declination-based insights.
+- Or add a new "Planetary Dignities" panel showing essential dignity scores (domicile/exaltation/debility/fall) for each planet based on its current sign — a classic astrology feature that astronomy-engine + the ecliptic helper can support. This would complement the existing PlanetaryStrengthsPanel on the Self screen.
+- Or address the remaining P1 items: MemberRelation table for the family hub, or real notifications push via the existing chat-service WebSocket.

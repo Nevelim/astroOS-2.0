@@ -54,6 +54,12 @@ export interface RetrogradeCycle {
   sign: string;
   /** Whether this cycle is currently active (now is between start and end). */
   isActive: boolean;
+  /** Pre-shadow start: when the planet first hits the degree it will retrograde back to. ISO date. */
+  preShadowStart: string;
+  /** Post-shadow end: when the planet finally leaves the degree where it stationed retrograde. ISO date. */
+  postShadowEnd: string;
+  /** Whether we are currently in the shadow (but not Rx itself). */
+  isShadowActive: boolean;
 }
 
 type AstronomyEngineSearchLike = AstronomyEngineLike & {
@@ -139,6 +145,93 @@ function findStationsAround(
 }
 
 /**
+ * Find the shadow period bounds for a retrograde cycle.
+ *
+ * The pre-shadow starts when the planet first passes the DIRECT-station
+ * degree (the longitude where it will eventually end its retrograde) while
+ * moving forward — this is the moment the planet enters the "zone" it will
+ * later retrace during Rx. The post-shadow ends when the planet finally
+ * leaves the RX-station degree (the longitude where it began retrograding)
+ * while moving forward again after the Rx period.
+ *
+ * We scan backward from retrogradeStart to find when the planet last crossed
+ * the direct-station longitude (pre-shadow start), and forward from directEnd
+ * to find when the planet next crosses the rx-station longitude (post-shadow end).
+ *
+ * Returns ISO date strings for preShadowStart and postShadowEnd.
+ */
+function findShadowBounds(
+  Astro: AstronomyEngineLike,
+  planet: string,
+  retrogradeStart: Date,
+  directEnd: Date,
+): { preShadowStart: string; postShadowEnd: string } {
+  const rxStationLon = getPlanetEclipticLongitude(Astro, planet, retrogradeStart);
+  const directStationLon = getPlanetEclipticLongitude(Astro, planet, directEnd);
+
+  // Pre-shadow: scan backward from retrogradeStart to find when the planet
+  // last crossed the DIRECT-station longitude (entering the Rx zone).
+  let preShadowStart: Date = retrogradeStart;
+  if (directStationLon !== null) {
+    let prevLon = getPlanetEclipticLongitude(Astro, planet, retrogradeStart);
+    for (let d = 1; d <= 90; d++) {
+      const date = new Date(retrogradeStart.getTime() - d * 86400000);
+      const lon = getPlanetEclipticLongitude(Astro, planet, date);
+      if (lon === null || prevLon === null) break;
+      let delta = prevLon - lon; // forward motion = positive
+      if (delta > 180) delta -= 360;
+      if (delta < -180) delta += 360;
+      if (delta > 0) {
+        let crossed = false;
+        if (lon <= prevLon) {
+          crossed = directStationLon >= lon && directStationLon <= prevLon;
+        } else {
+          crossed = directStationLon >= lon || directStationLon <= prevLon;
+        }
+        if (crossed) {
+          preShadowStart = date;
+          break;
+        }
+      }
+      prevLon = lon;
+    }
+  }
+
+  // Post-shadow: scan forward from directEnd to find when the planet next
+  // crosses the RX-station longitude (leaving the Rx zone for good).
+  let postShadowEnd: Date = directEnd;
+  if (rxStationLon !== null) {
+    let prevLon = getPlanetEclipticLongitude(Astro, planet, directEnd);
+    for (let d = 1; d <= 90; d++) {
+      const date = new Date(directEnd.getTime() + d * 86400000);
+      const lon = getPlanetEclipticLongitude(Astro, planet, date);
+      if (lon === null || prevLon === null) break;
+      let delta = lon - prevLon;
+      if (delta > 180) delta -= 360;
+      if (delta < -180) delta += 360;
+      if (delta > 0) {
+        let crossed = false;
+        if (prevLon <= lon) {
+          crossed = rxStationLon >= prevLon && rxStationLon <= lon;
+        } else {
+          crossed = rxStationLon >= prevLon || rxStationLon <= lon;
+        }
+        if (crossed) {
+          postShadowEnd = date;
+          break;
+        }
+      }
+      prevLon = lon;
+    }
+  }
+
+  return {
+    preShadowStart: preShadowStart.toISOString(),
+    postShadowEnd: postShadowEnd.toISOString(),
+  };
+}
+
+/**
  * Find the next N retrograde cycles for a planet, starting from `now`.
  *
  * Two strategies:
@@ -198,6 +291,8 @@ function findInferiorCycles(
 
     const startLon = getPlanetEclipticLongitude(Astro, planet, new Date(stations.retrogradeStart));
     const isActive = now >= stations.retrogradeStart && now <= stations.directEnd;
+    const shadow = findShadowBounds(Astro, planet, stations.retrogradeStart, stations.directEnd);
+    const isShadowActive = !isActive && now >= new Date(shadow.preShadowStart) && now <= new Date(shadow.postShadowEnd);
     cycles.push({
       planet,
       startDate: stations.retrogradeStart.toISOString(),
@@ -206,6 +301,9 @@ function findInferiorCycles(
       centerDate: centerDate.toISOString(),
       sign: lonToSignName(startLon),
       isActive,
+      preShadowStart: shadow.preShadowStart,
+      postShadowEnd: shadow.postShadowEnd,
+      isShadowActive,
     });
   }
   return cycles;
@@ -275,6 +373,8 @@ function findSuperiorCycles(
     const startLon = getPlanetEclipticLongitude(Astro, planet, rs);
     const centerDate = new Date((rs.getTime() + de.getTime()) / 2);
     const isActive = now >= rs && now <= de;
+    const shadow = findShadowBounds(Astro, planet, rs, de);
+    const isShadowActive = !isActive && now >= new Date(shadow.preShadowStart) && now <= new Date(shadow.postShadowEnd);
     cycles.push({
       planet,
       startDate: rs.toISOString(),
@@ -283,6 +383,9 @@ function findSuperiorCycles(
       centerDate: centerDate.toISOString(),
       sign: lonToSignName(startLon),
       isActive,
+      preShadowStart: shadow.preShadowStart,
+      postShadowEnd: shadow.postShadowEnd,
+      isShadowActive,
     });
   }
   return cycles;

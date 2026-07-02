@@ -30,6 +30,9 @@ interface RetrogradeCycle {
   centerDate: string;
   sign: string;
   isActive: boolean;
+  preShadowStart?: string;
+  postShadowEnd?: string;
+  isShadowActive?: boolean;
 }
 interface RetrogradeStation {
   planet: string;
@@ -115,6 +118,9 @@ export function RealRetrogradeSchedulePanel({ locale }: { locale: "ru" | "en" | 
 
   const activeCycles = data?.byPlanet.flatMap((p) =>
     p.cycles.filter((c) => c.isActive).map((c) => ({ ...c, planet: p.planet }))
+  ) ?? [];
+  const shadowCycles = data?.byPlanet.flatMap((p) =>
+    p.cycles.filter((c) => c.isShadowActive && !c.isActive).map((c) => ({ ...c, planet: p.planet }))
   ) ?? [];
   const upcomingStations = data?.stations.filter((s) => s.daysFromNow > 0).slice(0, 8) ?? [];
 
@@ -209,6 +215,21 @@ export function RealRetrogradeSchedulePanel({ locale }: { locale: "ru" | "en" | 
                                 }}
                               />
                             </div>
+                            {/* shadow period info */}
+                            {c.postShadowEnd && new Date(c.postShadowEnd).getTime() > new Date(c.endDate).getTime() + 86400000 && (
+                              <div className="mt-1.5 flex items-center gap-1.5 rounded border border-[#E8B86D]/20 bg-[#E8B86D]/[0.05] px-2 py-1 text-[9px] text-[#E8B86D]/80">
+                                <span aria-hidden>◐</span>
+                                <span>
+                                  {t(locale, "Shadow until", "Тень до", "छाया तक")}:{" "}
+                                  <span className="tabular-nums">
+                                    {new Date(c.postShadowEnd).toLocaleDateString(locale === "ru" ? "ru-RU" : "en-US", { month: "short", day: "numeric" })}
+                                  </span>
+                                </span>
+                                <span className="ml-auto text-[#6B6B78]" title={t(locale, "Post-shadow: Rx effects may linger", "Пост-тень: эффекты ℞ могут сохраняться", "पश्च-छाया")}>
+                                  {t(locale, "post-shadow", "пост-тень", "पश्च-छाया")}
+                                </span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </motion.div>
@@ -217,6 +238,41 @@ export function RealRetrogradeSchedulePanel({ locale }: { locale: "ru" | "en" | 
                 </div>
               )}
             </div>
+
+            {/* ── Shadow-active planets (in shadow but not Rx) ── */}
+            {shadowCycles.length > 0 && (
+              <div>
+                <div className="mb-2 text-[10px] uppercase tracking-[0.18em] text-[#E8B86D]/70">
+                  {t(locale, "IN SHADOW (pre/post)", "В ТЕНИ (пре/пост)", "छाया में")}
+                  <span className="ml-2 text-[#9A9AA8]">({shadowCycles.length})</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {shadowCycles.map((c) => {
+                    const color = PLANET_COLORS[c.planet] ?? "#E8B86D";
+                    const isPre = new Date(c.startDate).getTime() > Date.now();
+                    return (
+                      <span
+                        key={`shadow-${c.planet}`}
+                        className="inline-flex items-center gap-1.5 rounded-full border border-[#E8B86D]/30 bg-[#E8B86D]/[0.06] px-2.5 py-1 text-[11px] text-[#E8B86D]/90"
+                        title={isPre
+                          ? t(locale, "Pre-shadow: entering Rx zone", "Пре-тень: входит в зону Rx", "पूर्व-छाया")
+                          : t(locale, "Post-shadow: leaving Rx zone", "Пост-тень: покидает зону Rx", "पश्च-छाया")}
+                      >
+                        <span style={{ color }}>◐</span>
+                        <span style={{ color }}>{PLANET_GLYPHS[c.planet] ?? "·"}</span>
+                        <span>{c.planet}</span>
+                        <span className="text-[#6B6B78]">·</span>
+                        <span className="text-[10px]">
+                          {isPre
+                            ? t(locale, "pre-shadow", "пре-тень", "पूर्व")
+                            : t(locale, "post-shadow", "пост-тень", "पश्च")}
+                        </span>
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             {/* ── Upcoming stations timeline ── */}
             <div>

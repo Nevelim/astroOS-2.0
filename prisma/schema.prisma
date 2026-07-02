@@ -1,8 +1,9 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// AstroOS 2.0 — production Prisma schema
+// Clean Architecture: Prisma здесь — в infrastructure слое.
+// 27 моделей: Member, MemberStats, MemberTier, MentorMemory, MentorMessage,
+// CalculationCache, BaZiCache, City, CustomCity, CitySocialProof, AstroLine,
+// Ritual, Streak, IChingCast, TarotDraw, Subscription, Payment, Notification,
+// PartnerLink, PowerCard, ABTest, ABAssignment, FeatureFlag, AuditLog, B2BSeat, JobProfile, B2BOrg
 
 generator client {
   provider = "prisma-client-js"
@@ -13,20 +14,339 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// === MEMBER ===
+model Member {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  passwordHash    String?
+  displayName     String
+  avatarUrl       String?
+  // birth data
+  birthDateTime   String   // ISO local "1989-11-07T04:17"
+  birthLat        Float
+  birthLng        Float
+  birthTzOffset   Float    // hours
+  birthPlaceName  String
+  gender          Int      // 0=female, 1=male
+  // BaZi snapshot (cache)
+  baziStem        String?  // Day Master stem
+  baziElement     String?  // Day Master element
+  baziJson        String?  // full BaZi JSON
+  // stats
+  streak          Int      @default(0)
+  wardThisWeek    Int      @default(0)
+  ritualsCompleted Int     @default(0)
+  citiesExplored  Int      @default(0)
+  mentorMessages  Int      @default(0)
+  dailyMessagesUsed Int    @default(0)
+  dailyQuotaResetAt DateTime?
+  // tier
+  tier            String   @default("free") // free|trial|pro_monthly|pro_annual|lifetime|b2b
+  trialEndsAt     DateTime?
+  subscriptionRenewsAt DateTime?
+  // prefs
+  locale          String   @default("en")
+  voice           String   @default("calm")
+  twoAmEnabled    Boolean  @default(false)
+  onboardingDone  Boolean  @default(false)
+  // meta
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  lastLoginAt     DateTime?
+
+  @@index([email])
+  @@index([tier])
+  @@index([createdAt])
 }
 
-model Post {
-  id        String   @id @default(cuid())
-  title     String
-  content   String?
-  published Boolean  @default(false)
-  authorId  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// === MENTOR ===
+model MentorMemory {
+  id          String   @id @default(cuid())
+  memberId    String   @unique
+  persona     String
+  keyFacts    String   // JSON array
+  updatedAt   DateTime @updatedAt
+  createdAt   DateTime @default(now())
+
+  messages    MentorMessage[]
+
+  @@index([memberId])
+}
+
+model MentorMessage {
+  id           String   @id @default(cuid())
+  memoryId     String
+  role         String   // user|assistant|system
+  content      String
+  voice        String?
+  citedTransits String? // JSON
+  createdAt    DateTime @default(now())
+
+  memory       MentorMemory @relation(fields: [memoryId], references: [id], onDelete: Cascade)
+
+  @@index([memoryId, createdAt])
+  @@index([createdAt])
+}
+
+// === CHART CACHE ===
+model CalculationCache {
+  id          String   @id @default(cuid())
+  cacheKey    String   @unique
+  payload     String   // JSON ChartResult
+  schemaVersion String
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime
+
+  @@index([cacheKey])
+  @@index([expiresAt])
+}
+
+model BaZiCache {
+  id          String   @id @default(cuid())
+  cacheKey    String   @unique
+  payload     String   // JSON BaZi
+  source      String   // python|ts-fallback|static-template
+  createdAt   DateTime @default(now())
+  expiresAt   DateTime
+
+  @@index([cacheKey])
+  @@index([expiresAt])
+}
+
+// === CITIES ===
+model City {
+  id            String   @id @default(cuid())
+  name          String
+  country       String
+  lat           Float
+  lng           Float
+  timezone      String
+  tzOffsetHours Float
+  population    Int?
+  qolIndex      Int?
+  costIndex     Int?
+  climate       String?
+  iso2          String?
+  createdAt     DateTime @default(now())
+
+  @@index([name])
+  @@index([country])
+  @@index([lat, lng])
+}
+
+model CustomCity {
+  id            String   @id @default(cuid())
+  ownerId       String
+  name          String
+  country       String
+  lat           Float
+  lng           Float
+  timezone      String
+  tzOffsetHours Float
+  createdAt     DateTime @default(now())
+
+  @@index([ownerId])
+}
+
+model CitySocialProof {
+  cityId        String
+  chosenCount   Int      @default(0)
+  editorPick    Boolean  @default(false)
+  anchorCity    Boolean  @default(false)
+  updatedAt     DateTime @updatedAt
+
+  @@id([cityId])
+}
+
+// === RITUALS / STREAKS ===
+model Ritual {
+  id          String   @id @default(cuid())
+  memberId    String
+  type        String   // today|reveal|cast-iching|tarot|mentor|explore-city
+  screenKey   String?
+  metadata    String?  // JSON
+  createdAt   DateTime @default(now())
+
+  @@index([memberId, createdAt])
+  @@index([type, createdAt])
+}
+
+// === DIVINATION ===
+model IChingCast {
+  id              String   @id @default(cuid())
+  memberId        String
+  primaryNumber   Int
+  primaryName     String
+  changingLines   String   // JSON [1,3,5]
+  secondaryNumber Int?
+  judgment        String?
+  image           String?
+  question        String?
+  createdAt       DateTime @default(now())
+
+  @@index([memberId, createdAt])
+}
+
+model TarotDraw {
+  id          String   @id @default(cuid())
+  memberId    String
+  spread      String   // single|three|celtic
+  cardsJson   String   // JSON array of {card, reversed, position}
+  question    String?
+  createdAt   DateTime @default(now())
+
+  @@index([memberId, createdAt])
+}
+
+// === BILLING ===
+model Subscription {
+  id              String   @id @default(cuid())
+  memberId        String   @unique
+  tier            String   // pro_monthly|pro_annual|lifetime|b2b
+  provider        String   // stripe|apple|google
+  providerSubId   String?
+  status          String   @default("active") // active|canceled|past_due|trialing
+  currentPeriodEnd DateTime?
+  cancelAt        DateTime?
+  pppCountry      String?
+  pppDiscountPct  Int?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([memberId])
+  @@index([status])
+}
+
+model Payment {
+  id              String   @id @default(cuid())
+  memberId        String
+  subscriptionId  String?
+  amount          Int      // cents
+  currency        String   @default("usd")
+  provider        String
+  providerChargeId String?
+  status          String
+  createdAt       DateTime @default(now())
+
+  @@index([memberId, createdAt])
+}
+
+// === GROWTH ===
+model PartnerLink {
+  id           String   @id @default(cuid())
+  memberId     String   @unique
+  code         String   @unique
+  clicks       Int      @default(0)
+  signups      Int      @default(0)
+  createdAt    DateTime @default(now())
+
+  @@index([code])
+}
+
+model PowerCard {
+  id          String   @id @default(cuid())
+  memberId    String
+  cardType    String
+  title       String
+  description String
+  sharedCount Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  @@index([memberId])
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  memberId    String
+  type        String   // transit|streak|city|trial|divine
+  title       String
+  body        String
+  data        String?  // JSON
+  readAt      DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([memberId, readAt])
+  @@index([createdAt])
+}
+
+// === A/B ===
+model ABTest {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  variants    String   // JSON ["A","B","C"]
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+}
+
+model ABAssignment {
+  id          String   @id @default(cuid())
+  testId      String
+  memberId    String
+  variant     String
+  assignedAt  DateTime @default(now())
+
+  @@unique([testId, memberId])
+  @@index([testId, variant])
+}
+
+model FeatureFlag {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  enabled     Boolean  @default(false)
+  rolloutPct  Int      @default(0)
+  description String?
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  actorId     String?
+  action      String
+  entityType  String
+  entityId    String?
+  metadata    String?  // JSON
+  ip          String?
+  createdAt   DateTime @default(now())
+
+  @@index([actorId, createdAt])
+  @@index([entityType, entityId])
+}
+
+// === B2B HR ===
+model B2BOrg {
+  id          String   @id @default(cuid())
+  name        String
+  domain      String?  @unique
+  seats       Int      @default(0)
+  dpaSigned   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  seats_users B2BSeat[]
+
+  @@index([domain])
+}
+
+model B2BSeat {
+  id          String   @id @default(cuid())
+  orgId       String
+  memberId    String   @unique
+  role        String   @default("viewer") // viewer|hr|admin
+  consentGiven Boolean @default(false)
+  consentAt   DateTime?
+  createdAt   DateTime @default(now())
+
+  org         B2BOrg   @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId])
+}
+
+model JobProfile {
+  id          String   @id @default(cuid())
+  seatId      String   @unique
+  title       String
+  department  String?
+  requiredTraits String? // JSON
+  createdAt   DateTime @default(now())
+
+  @@index([seatId])
 }

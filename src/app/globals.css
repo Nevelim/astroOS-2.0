@@ -6,8 +6,9 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-sans);
+  --font-serif: var(--font-serif);
+  --font-mono: var(--font-mono);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -41,75 +42,61 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+
+  /* AstroOS cosmic palette */
+  --color-astro-bg: #0B0B0F;
+  --color-astro-bg-elevated: #121218;
+  --color-astro-surface: #16161D;
+  --color-astro-surface-2: #1C1C26;
+  --color-astro-border: #2A2A35;
+  --color-astro-border-soft: #22222C;
+  --color-astro-gold: #E8B86D;
+  --color-astro-gold-dim: #B58E4D;
+  --color-astro-jade: #5BB89C;
+  --color-astro-jade-dim: #4A9A82;
+  --color-astro-rose: #D98E7A;
+  --color-astro-rose-dim: #B27361;
+  --color-astro-text: #F5F0E8;
+  --color-astro-text-muted: #9A9AA8;
+  --color-astro-text-faint: #6B6B78;
+  --color-astro-water: #5E8FA8;
+  --font-display: var(--font-serif);
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
-
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.922 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.556 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
+  --radius: 0.75rem;
+  /* AstroOS cosmic dark — always dark, no light mode */
+  --background: #0B0B0F;
+  --foreground: #F5F0E8;
+  --card: #16161D;
+  --card-foreground: #F5F0E8;
+  --popover: #16161D;
+  --popover-foreground: #F5F0E8;
+  --primary: #E8B86D;
+  --primary-foreground: #0B0B0F;
+  --secondary: #1C1C26;
+  --secondary-foreground: #F5F0E8;
+  --muted: #1C1C26;
+  --muted-foreground: #9A9AA8;
+  --accent: #5BB89C;
+  --accent-foreground: #0B0B0F;
+  --destructive: #D98E7A;
+  --border: #2A2A35;
+  --input: #2A2A35;
+  --ring: #E8B86D;
+  --chart-1: #E8B86D;
+  --chart-2: #5BB89C;
+  --chart-3: #D98E7A;
+  --chart-4: #5E8FA8;
+  --chart-5: #B58E4D;
+  --sidebar: #0B0B0F;
+  --sidebar-foreground: #F5F0E8;
+  --sidebar-primary: #E8B86D;
+  --sidebar-primary-foreground: #0B0B0F;
+  --sidebar-accent: #1C1C26;
+  --sidebar-accent-foreground: #F5F0E8;
+  --sidebar-border: #2A2A35;
+  --sidebar-ring: #E8B86D;
 }
 
 @layer base {
@@ -118,5 +105,1116 @@
   }
   body {
     @apply bg-background text-foreground;
+    background-color: #0B0B0F;
+    color: #F5F0E8;
   }
 }
+
+/* ===== AstroOS cosmic utilities ===== */
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-serif), Georgia, serif;
+  }
+  .font-mono-astro {
+    font-family: var(--font-mono), monospace;
+  }
+
+  /* Starfield background — layered radial gradients */
+  .starfield {
+    background-color: #0B0B0F;
+    background-image:
+      radial-gradient(1px 1px at 12% 18%, rgba(245,240,232,0.55), transparent 50%),
+      radial-gradient(1px 1px at 23% 67%, rgba(232,184,109,0.45), transparent 50%),
+      radial-gradient(1px 1px at 38% 9%, rgba(245,240,232,0.4), transparent 50%),
+      radial-gradient(1px 1px at 47% 88%, rgba(91,184,156,0.4), transparent 50%),
+      radial-gradient(1px 1px at 58% 33%, rgba(245,240,232,0.5), transparent 50%),
+      radial-gradient(1.5px 1.5px at 67% 71%, rgba(232,184,109,0.5), transparent 50%),
+      radial-gradient(1px 1px at 76% 21%, rgba(245,240,232,0.45), transparent 50%),
+      radial-gradient(1px 1px at 84% 55%, rgba(217,142,122,0.4), transparent 50%),
+      radial-gradient(1px 1px at 91% 12%, rgba(245,240,232,0.5), transparent 50%),
+      radial-gradient(1px 1px at 95% 79%, rgba(91,184,156,0.45), transparent 50%),
+      radial-gradient(1px 1px at 5% 92%, rgba(245,240,232,0.45), transparent 50%),
+      radial-gradient(1px 1px at 31% 42%, rgba(245,240,232,0.35), transparent 50%),
+      radial-gradient(1px 1px at 64% 92%, rgba(245,240,232,0.4), transparent 50%),
+      radial-gradient(1px 1px at 18% 50%, rgba(232,184,109,0.35), transparent 50%);
+    background-size: 100% 100%;
+  }
+
+  .cosmic-glow {
+    background:
+      radial-gradient(ellipse 1200px 600px at 80% -10%, rgba(232,184,109,0.08), transparent 60%),
+      radial-gradient(ellipse 1000px 500px at -10% 110%, rgba(91,184,156,0.06), transparent 60%);
+  }
+
+  /* Glassmorphism cards */
+  .glass {
+    background: linear-gradient(135deg, rgba(28,28,38,0.72), rgba(22,22,29,0.62));
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(42,42,53,0.8);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+  }
+
+  .glass-gold {
+    background: linear-gradient(135deg, rgba(232,184,109,0.10), rgba(22,22,29,0.70));
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(232,184,109,0.30);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(232,184,109,0.15);
+  }
+  .glass-jade {
+    background: linear-gradient(135deg, rgba(91,184,156,0.10), rgba(22,22,29,0.70));
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(91,184,156,0.30);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(91,184,156,0.15);
+  }
+  .glass-rose {
+    background: linear-gradient(135deg, rgba(217,142,122,0.10), rgba(22,22,29,0.70));
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(217,142,122,0.30);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.45), inset 0 1px 0 rgba(217,142,122,0.15);
+  }
+
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #E8B86D 0%, #D98E7A 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .text-gradient-cosmic {
+    background: linear-gradient(135deg, #E8B86D 0%, #5BB89C 50%, #D98E7A 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .glow-gold { box-shadow: 0 0 24px rgba(232,184,109,0.35); }
+  .glow-jade { box-shadow: 0 0 24px rgba(91,184,156,0.35); }
+  .glow-rose { box-shadow: 0 0 24px rgba(217,142,122,0.35); }
+
+  /* scrollbar-astro moved to enhanced section below */
+}
+
+/* Gentle entrance animation */
+@keyframes astro-fade-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.astro-fade-up { animation: astro-fade-up 0.6s ease-out both; }
+
+@keyframes astro-twinkle {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+.astro-twinkle { animation: astro-twinkle 3s ease-in-out infinite; }
+
+@keyframes astro-pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(232,184,109,0.25); }
+  50% { box-shadow: 0 0 36px rgba(232,184,109,0.55); }
+}
+.astro-pulse-glow { animation: astro-pulse-glow 4s ease-in-out infinite; }
+
+@keyframes astro-spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.astro-spin-slow { animation: astro-spin-slow 120s linear infinite; }
+
+/* ============ Cosmic scrollbar (Hades 2 polish) ============ */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(11, 11, 15, 0.6);
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(232,184,109,0.4), rgba(91,184,156,0.3));
+  border-radius: 4px;
+  border: 1px solid rgba(232,184,109,0.2);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(232,184,109,0.7), rgba(91,184,156,0.5));
+  box-shadow: 0 0 8px rgba(232,184,109,0.4);
+}
+::-webkit-scrollbar-corner {
+  background: rgba(11, 11, 15, 0.8);
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(232,184,109,0.4) rgba(11,11,15,0.6);
+}
+
+/* ============ Hades 2 text selection ============ */
+::selection {
+  background: rgba(232, 184, 109, 0.3);
+  color: #F5F0E8;
+}
+::selection:hover {
+  background: rgba(232, 184, 109, 0.5);
+}
+
+/* ============ Ornamental shimmer for headings ============ */
+@keyframes astro-shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.astro-shimmer-text {
+  background: linear-gradient(90deg, #E8B86D 0%, #F5F0E8 50%, #E8B86D 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: astro-shimmer 6s linear infinite;
+}
+
+/* ============ Card flip 3D ============ */
+.astro-card-3d {
+  perspective: 1000px;
+}
+.astro-card-3d-inner {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.astro-card-3d.flipped .astro-card-3d-inner {
+  transform: rotateY(180deg);
+}
+
+/* ============ Glass texture overlay (Hades 2 tactility) ============ */
+.glass-texture::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: 
+    radial-gradient(circle at 20% 30%, rgba(255,255,255,0.02) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(232,184,109,0.02) 0%, transparent 50%);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* ============ Hades 2 ambient glow on headings ============ */
+.astro-ambient-glow {
+  position: relative;
+}
+.astro-ambient-glow::before {
+  content: "";
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 60px;
+  background: radial-gradient(ellipse, rgba(232,184,109,0.12) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ============ Nav hover micro-animations ============ */
+@keyframes astro-nav-glow {
+  0%, 100% { box-shadow: 0 0 0 rgba(232,184,109,0); }
+  50% { box-shadow: 0 0 12px rgba(232,184,109,0.3); }
+}
+.astro-nav-item:hover {
+  animation: astro-nav-glow 1.5s ease-in-out infinite;
+}
+
+/* ============ Hades 2 ornamental divider ============ */
+.astro-ornamental-divider {
+  position: relative;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(232,184,109,0.3), transparent);
+}
+.astro-ornamental-divider::before,
+.astro-ornamental-divider::after {
+  content: "✦";
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(232,184,109,0.4);
+  font-size: 10px;
+  background: #0B0B0F;
+  padding: 0 8px;
+}
+.astro-ornamental-divider::before { left: 30%; }
+.astro-ornamental-divider::after { right: 30%; }
+
+/* ============ Hades 2 tooltip polish ============ */
+.leaflet-tooltip {
+  background: rgba(11, 11, 15, 0.92) !important;
+  border: 1px solid rgba(232, 184, 109, 0.3) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(232, 184, 109, 0.1) !important;
+  color: #F5F0E8 !important;
+  font-family: var(--font-sans) !important;
+  padding: 6px 10px !important;
+}
+.leaflet-tooltip-top:before,
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+  border-color: transparent !important;
+}
+
+/* ============ Hades 2 popup polish ============ */
+.leaflet-popup-content-wrapper {
+  background: rgba(11, 11, 15, 0.95) !important;
+  border: 1px solid rgba(232, 184, 109, 0.3) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(232, 184, 109, 0.1) !important;
+  color: #F5F0E8 !important;
+}
+.leaflet-popup-tip {
+  background: rgba(11, 11, 15, 0.95) !important;
+  border: 1px solid rgba(232, 184, 109, 0.3) !important;
+}
+
+/* ============ Hades 2 GlassCard hover lift + glow ============ */
+.glass, .glass-gold, .glass-jade, .glass-rose {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+}
+.glass:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(245, 240, 232, 0.1);
+}
+.glass-gold:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(232, 184, 109, 0.2), 0 0 0 1px rgba(232, 184, 109, 0.3);
+}
+.glass-jade:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(91, 184, 156, 0.2), 0 0 0 1px rgba(91, 184, 156, 0.3);
+}
+.glass-rose:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 20px rgba(217, 142, 122, 0.2), 0 0 0 1px rgba(217, 142, 122, 0.3);
+}
+
+/* ============ Hades 2 staggered entrance ============ */
+@keyframes astro-stagger-in {
+  0% { opacity: 0; transform: translateY(12px) scale(0.97); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.astro-stagger > * {
+  opacity: 0;
+  animation: astro-stagger-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.astro-stagger > *:nth-child(1) { animation-delay: 0.05s; }
+.astro-stagger > *:nth-child(2) { animation-delay: 0.12s; }
+.astro-stagger > *:nth-child(3) { animation-delay: 0.19s; }
+.astro-stagger > *:nth-child(4) { animation-delay: 0.26s; }
+.astro-stagger > *:nth-child(5) { animation-delay: 0.33s; }
+.astro-stagger > *:nth-child(6) { animation-delay: 0.40s; }
+
+/* ============ Hades 2 button press ============ */
+button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+/* ============ Hades 2 focus visible (cosmic) ============ */
+*:focus-visible {
+  outline: 2px solid rgba(232, 184, 109, 0.6);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ============ Hades 2 nav active indicator + pulse ============ */
+@keyframes astro-nav-active-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(232,184,109,0.4); }
+  50% { box-shadow: 0 0 0 4px rgba(232,184,109,0); }
+}
+.astro-nav-active {
+  position: relative;
+  animation: astro-nav-active-pulse 2.5s ease-in-out infinite;
+}
+.astro-nav-active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background: linear-gradient(180deg, #E8B86D, #D98E7A);
+  border-radius: 2px;
+  box-shadow: 0 0 8px rgba(232,184,109,0.6);
+}
+
+/* ============ Hades 2 natal wheel glow ============ */
+@keyframes astro-wheel-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.astro-wheel-glow {
+  filter: drop-shadow(0 0 8px rgba(232,184,109,0.15));
+}
+
+/* ============ Hades 2 planet pulse ============ */
+@keyframes astro-planet-pulse {
+  0%, 100% { filter: drop-shadow(0 0 3px currentColor); }
+  50% { filter: drop-shadow(0 0 6px currentColor); }
+}
+.astro-planet-marker {
+  animation: astro-planet-pulse 3s ease-in-out infinite;
+}
+
+/* ============ Hades 2 section reveal ============ */
+@keyframes astro-section-reveal {
+  0% { opacity: 0; transform: translateY(20px); filter: blur(4px); }
+  100% { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+.astro-section-reveal {
+  animation: astro-section-reveal 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* ============ Hades 2 ornamental badge ============ */
+.astro-badge-ornament {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+}
+.astro-badge-ornament::before {
+  content: "✦";
+  font-size: 8px;
+  opacity: 0.7;
+}
+
+/* ============ Birth screen: animated gradient border ============ */
+@keyframes astro-gradient-border {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.astro-gradient-border-wrap {
+  position: relative;
+  border-radius: 0.75rem;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(232, 184, 109, 0.45),
+    rgba(91, 184, 156, 0.35),
+    rgba(217, 142, 122, 0.35),
+    rgba(232, 184, 109, 0.45)
+  );
+  background-size: 300% 300%;
+  animation: astro-gradient-border 8s ease infinite;
+}
+.astro-gradient-border-wrap > .astro-gradient-border-inner {
+  border-radius: calc(0.75rem - 1px);
+  height: 100%;
+}
+
+/* ============ Birth screen: cosmic input glow on focus ============ */
+@keyframes astro-input-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(232, 184, 109, 0.15), 0 0 2px rgba(232, 184, 109, 0.1); }
+  50% { box-shadow: 0 0 16px rgba(232, 184, 109, 0.3), 0 0 4px rgba(232, 184, 109, 0.2); }
+}
+.astro-input-cosmic:focus {
+  border-color: rgba(232, 184, 109, 0.6) !important;
+  animation: astro-input-glow 2.5s ease-in-out infinite;
+}
+
+/* ============ Birth screen: DST badge gentle pulse ============ */
+@keyframes astro-dst-pulse {
+  0%, 100% { opacity: 0.85; box-shadow: 0 0 4px rgba(232, 184, 109, 0.2); }
+  50% { opacity: 1; box-shadow: 0 0 12px rgba(232, 184, 109, 0.5); }
+}
+.astro-dst-badge {
+  animation: astro-dst-pulse 2.5s ease-in-out infinite;
+}
+
+/* ============ Birth screen: resolved data glow ============ */
+@keyframes astro-resolved-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(91, 184, 156, 0.15), inset 0 0 8px rgba(91, 184, 156, 0.03); }
+  50% { box-shadow: 0 0 20px rgba(91, 184, 156, 0.3), inset 0 0 12px rgba(91, 184, 156, 0.06); }
+}
+.astro-resolved-glow {
+  animation: astro-resolved-glow 3s ease-in-out infinite;
+}
+
+/* ============ Birth screen: submit ready glow ============ */
+@keyframes astro-submit-ready {
+  0% { box-shadow: 0 0 16px rgba(232, 184, 109, 0.3); }
+  50% { box-shadow: 0 0 36px rgba(232, 184, 109, 0.6), 0 0 60px rgba(232, 184, 109, 0.15); }
+  100% { box-shadow: 0 0 16px rgba(232, 184, 109, 0.3); }
+}
+.astro-submit-ready {
+  animation: astro-submit-ready 2.5s ease-in-out infinite;
+}
+
+/* ============ Cosmic card hover lift effect ============ */
+.cosmic-card-hover {
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+}
+.cosmic-card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.4), 0 0 20px rgba(232,184,109,0.08);
+}
+
+/* ============ Shimmer loading effect for skeleton states ============ */
+.cosmic-shimmer {
+  background: linear-gradient(90deg, transparent 0%, rgba(232,184,109,0.06) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ============ Floating animation for decorative elements ============ */
+.cosmic-float {
+  animation: cosmic-float 6s ease-in-out infinite;
+}
+@keyframes cosmic-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+/* ============ Pulse ring animation for important indicators ============ */
+.cosmic-pulse-ring {
+  animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+@keyframes pulse-ring {
+  0% { box-shadow: 0 0 0 0 rgba(232,184,109,0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(232,184,109,0); }
+  100% { box-shadow: 0 0 0 0 rgba(232,184,109,0); }
+}
+
+/* ============ Glow text effect ============ */
+.cosmic-text-glow {
+  text-shadow: 0 0 20px rgba(232,184,109,0.3), 0 0 40px rgba(232,184,109,0.1);
+}
+
+/* ============ Rotating border gradient ============ */
+.cosmic-rotate-border {
+  background: conic-gradient(from 0deg, #E8B86D, #5BB89C, #D98E7A, #5E8FA8, #E8B86D);
+  animation: rotate-border 8s linear infinite;
+}
+@keyframes rotate-border {
+  from { --border-angle: 0deg; }
+  to { --border-angle: 360deg; }
+}
+
+/* ============ Staggered fade-in for lists ============ */
+.cosmic-stagger > * {
+  opacity: 0;
+  animation: stagger-in 0.5s forwards;
+}
+.cosmic-stagger > *:nth-child(1) { animation-delay: 0.05s; }
+.cosmic-stagger > *:nth-child(2) { animation-delay: 0.1s; }
+.cosmic-stagger > *:nth-child(3) { animation-delay: 0.15s; }
+.cosmic-stagger > *:nth-child(4) { animation-delay: 0.2s; }
+.cosmic-stagger > *:nth-child(5) { animation-delay: 0.25s; }
+.cosmic-stagger > *:nth-child(6) { animation-delay: 0.3s; }
+@keyframes stagger-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============ Decorative line animate-in from left ============ */
+@keyframes line-grow-right {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+.cosmic-line-animate {
+  transform-origin: left;
+  animation: line-grow-right 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* ============ Mobile nav gold underline ============ */
+@keyframes nav-underline-in {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+.cosmic-nav-underline::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%) scaleX(0);
+  width: 16px;
+  height: 2px;
+  background: linear-gradient(90deg, #E8B86D, #D98E7A);
+  border-radius: 1px;
+  animation: nav-underline-in 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* ============ Enhanced scrollbar for main content area ============ */
+.scrollbar-astro {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(232,184,109,0.2) transparent;
+}
+.scrollbar-astro::-webkit-scrollbar {
+  width: 6px;
+}
+.scrollbar-astro::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-astro::-webkit-scrollbar-thumb {
+  background: rgba(232,184,109,0.2);
+  border-radius: 3px;
+}
+.scrollbar-astro::-webkit-scrollbar-thumb:hover {
+  background: rgba(232,184,109,0.4);
+}
+
+/* ============ Moon phase widget — subtle float + gold glow pulse ============ */
+@keyframes moon-glow-pulse {
+  0%, 100% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+}
+.moon-glow-pulse {
+  animation: moon-glow-pulse 4.5s ease-in-out infinite;
+  transform-origin: center;
+  transform-box: fill-box;
+}
+
+/* ============ AuthGate + cosmic ring animations ============ */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/* ============ Cosmic gradient border — animated conic shimmer ============ */
+@keyframes cosmic-conic-spin {
+  to { transform: rotate(360deg); }
+}
+.cosmic-gradient-border {
+  position: relative;
+  isolation: isolate;
+}
+.cosmic-gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg,
+    #E8B86D 60deg,
+    #5BB89C 180deg,
+    #D98E7A 300deg,
+    transparent 360deg
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.35;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+  z-index: -1;
+}
+.cosmic-gradient-border:hover::before {
+  opacity: 0.7;
+  animation: cosmic-conic-spin 4s linear infinite;
+}
+
+/* ============ Cosmic focus ring — keyboard a11y ============ */
+.cosmic-focus-ring:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px rgba(11, 11, 15, 1),
+    0 0 0 4px rgba(232, 184, 109, 0.5);
+}
+
+/* ============ Cosmic ripple — radial hover highlight ============ */
+.cosmic-ripple {
+  position: relative;
+  overflow: hidden;
+}
+.cosmic-ripple::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--x, 50%) var(--y, 50%), rgba(232, 184, 109, 0.18), transparent 50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.cosmic-ripple:hover::after {
+  opacity: 1;
+}
+
+/* ============ Cosmic entrance — stagger reveal for list items ============ */
+@keyframes cosmic-rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.cosmic-rise {
+  animation: cosmic-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ============ Subtle pulse for "live" indicators ============ */
+@keyframes cosmic-live-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+.cosmic-live-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #5BB89C;
+  box-shadow: 0 0 8px rgba(91, 184, 156, 0.6);
+  animation: cosmic-live-pulse 1.8s ease-in-out infinite;
+}
+
+/* ============ Natal Chart Wheel — ambient rotation of outer ring ============ */
+@keyframes astro-wheel-ambient {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.astro-wheel-ambient-rotate {
+  animation: astro-wheel-ambient 90s linear infinite;
+  transform-origin: center;
+}
+
+/* ============ Aspect line draw-in animation ============ */
+@keyframes astro-aspect-draw {
+  from { stroke-dashoffset: 400; }
+  to { stroke-dashoffset: 0; }
+}
+.astro-aspect-draw {
+  stroke-dasharray: 400;
+  animation: astro-aspect-draw 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* ============ Planet marker hover glow ============ */
+.astro-planet-hover {
+  transition: all 0.2s ease;
+}
+.astro-planet-hover:hover {
+  filter: brightness(1.3) drop-shadow(0 0 8px currentColor);
+  transform: scale(1.15);
+  transform-origin: center;
+}
+
+/* ============ Glass card enhanced border gradient ============ */
+@keyframes astro-border-flow {
+  0% { border-color: rgba(232,184,109,0.3); }
+  33% { border-color: rgba(91,184,156,0.3); }
+  66% { border-color: rgba(217,142,122,0.3); }
+  100% { border-color: rgba(232,184,109,0.3); }
+}
+.astro-border-flow {
+  animation: astro-border-flow 6s ease-in-out infinite;
+}
+
+/* ============ Section heading decorative line — enhanced ============ */
+.astro-heading-line {
+  position: relative;
+  overflow: hidden;
+  height: 2px;
+  background: rgba(42,42,53,0.6);
+  border-radius: 1px;
+}
+.astro-heading-line::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(232,184,109,0.6), transparent);
+  animation: astro-line-shimmer 3s ease-in-out infinite;
+}
+@keyframes astro-line-shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* ============ Card entrance — staggered with blur ============ */
+@keyframes astro-card-enter {
+  from { opacity: 0; transform: translateY(16px); filter: blur(4px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+.astro-card-enter {
+  animation: astro-card-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ============ Tooltip cosmic style ============ */
+.astro-tooltip {
+  position: relative;
+}
+.astro-tooltip::after {
+  content: attr(data-tip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-4px);
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(11,11,15,0.95);
+  border: 1px solid rgba(232,184,109,0.3);
+  color: #F5F0E8;
+  font-size: 10px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  z-index: 50;
+}
+.astro-tooltip:hover::after {
+  opacity: 1;
+}
+
+/* ============ Cosmic aura — pulsing radial glow behind cards ============ */
+@keyframes astro-aura-pulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.95); }
+  50% { opacity: 0.6; transform: scale(1.05); }
+}
+.astro-aura {
+  position: absolute;
+  inset: -20px;
+  border-radius: inherit;
+  background: radial-gradient(circle at 50% 50%, rgba(232,184,109,0.15) 0%, transparent 70%);
+  animation: astro-aura-pulse 5s ease-in-out infinite;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ============ Comet trail animation for nav active item ============ */
+@keyframes astro-comet-trail {
+  0% { transform: translateX(-100%) rotate(0deg); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateX(100%) rotate(180deg); opacity: 0; }
+}
+.astro-comet-trail::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 40px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #E8B86D, transparent);
+  animation: astro-comet-trail 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ============ Cosmic breathing — subtle scale for ambient orbs ============ */
+@keyframes astro-breathing {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50% { transform: scale(1.08); opacity: 0.7; }
+}
+.astro-breathing {
+  animation: astro-breathing 7s ease-in-out infinite;
+}
+
+/* ============ Gradient text shift — animated rainbow for special headings ============ */
+@keyframes astro-text-rainbow {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.astro-text-rainbow {
+  background: linear-gradient(90deg, #E8B86D, #5BB89C, #D98E7A, #5E8FA8, #E8B86D);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: astro-text-rainbow 8s linear infinite;
+}
+
+/* ============ Planet orbital ring — decorative dashed circle that rotates ============ */
+@keyframes astro-orbital-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+.astro-orbital-ring {
+  animation: astro-orbital-rotate 60s linear infinite;
+  transform-origin: center;
+}
+
+/* ============ Card sheen — diagonal light sweep on hover ============ */
+.astro-card-sheen {
+  position: relative;
+  overflow: hidden;
+}
+.astro-card-sheen::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -75%;
+  width: 50%;
+  height: 200%;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    rgba(232, 184, 109, 0.08) 50%,
+    transparent 100%
+  );
+  transform: skewX(-25deg);
+  transition: left 0.7s ease;
+  pointer-events: none;
+}
+.astro-card-sheen:hover::after {
+  left: 125%;
+}
+
+/* ============ Glow pulse for live indicators — enhanced ============ */
+@keyframes astro-glow-pulse {
+  0%, 100% { box-shadow: 0 0 4px currentColor, 0 0 8px currentColor; }
+  50% { box-shadow: 0 0 8px currentColor, 0 0 16px currentColor, 0 0 24px currentColor; }
+}
+.astro-glow-pulse {
+  animation: astro-glow-pulse 2.5s ease-in-out infinite;
+}
+
+/* ============ Glass card 3D tilt on hover (subtle) ============ */
+.astro-card-tilt {
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-style: preserve-3d;
+}
+.astro-card-tilt:hover {
+  transform: perspective(1000px) rotateX(2deg) rotateY(-2deg) translateY(-2px);
+}
+
+/* ============ Number counter animation ============ */
+@keyframes astro-count-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.astro-count-up {
+  animation: astro-count-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ============ Sacred geometry background pattern ============ */
+.astro-sacred-bg {
+  background-image:
+    radial-gradient(circle at 25% 25%, rgba(232,184,109,0.03) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, rgba(91,184,156,0.03) 0%, transparent 50%),
+    radial-gradient(circle at 50% 50%, rgba(217,142,122,0.02) 0%, transparent 70%);
+}
+
+/* ============ Constellation dot pattern ============ */
+.astro-constellation::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 10% 20%, rgba(245,240,232,0.4), transparent),
+    radial-gradient(1px 1px at 30% 70%, rgba(232,184,109,0.3), transparent),
+    radial-gradient(1.5px 1.5px at 60% 40%, rgba(91,184,156,0.3), transparent),
+    radial-gradient(1px 1px at 80% 10%, rgba(245,240,232,0.3), transparent),
+    radial-gradient(1px 1px at 90% 80%, rgba(217,142,122,0.3), transparent),
+    radial-gradient(1.5px 1.5px at 50% 90%, rgba(245,240,232,0.4), transparent);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ============ Moon glow — for lunar phase widgets ============ */
+@keyframes astro-moon-glow {
+  0%, 100% { filter: drop-shadow(0 0 6px rgba(196,211,224,0.3)); }
+  50% { filter: drop-shadow(0 0 12px rgba(196,211,224,0.5)); }
+}
+.astro-moon-glow {
+  animation: astro-moon-glow 4s ease-in-out infinite;
+}
+
+/* ============ Sun glow — for solar widgets ============ */
+@keyframes astro-sun-glow {
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(251,191,36,0.4)); }
+  50% { filter: drop-shadow(0 0 16px rgba(251,191,36,0.6)); }
+}
+.astro-sun-glow {
+  animation: astro-sun-glow 4s ease-in-out infinite;
+}
+
+/* ============ Sticky CTA enhanced pulse ============ */
+@keyframes astro-cta-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 8px 24px rgba(232,184,109,0.3); }
+  50% { transform: scale(1.02); box-shadow: 0 12px 32px rgba(232,184,109,0.5); }
+}
+.astro-cta-pulse {
+  animation: astro-cta-pulse 3s ease-in-out infinite;
+}
+
+/* ============ Planet trail — orbiting dot around a center ============ */
+@keyframes astro-orbit {
+  from { transform: rotate(0deg) translateX(var(--orbit-r, 20px)) rotate(0deg); }
+  to { transform: rotate(360deg) translateX(var(--orbit-r, 20px)) rotate(-360deg); }
+}
+.astro-orbit-dot {
+  animation: astro-orbit var(--orbit-duration, 8s) linear infinite;
+}
+
+/* ============ Reveal shimmer — for card flip animations ============ */
+@keyframes astro-reveal-shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+.astro-reveal-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(232,184,109,0.15), transparent);
+  background-size: 200% auto;
+  animation: astro-reveal-shimmer 1.5s ease-in-out;
+}
+
+/* ============ Floating particle — decorative ambient element ============ */
+@keyframes astro-particle-float {
+  0%, 100% { transform: translate(0, 0); opacity: 0.3; }
+  25% { transform: translate(10px, -15px); opacity: 0.6; }
+  50% { transform: translate(-5px, -25px); opacity: 0.4; }
+  75% { transform: translate(-12px, -10px); opacity: 0.5; }
+}
+.astro-particle {
+  animation: astro-particle-float var(--float-duration, 12s) ease-in-out infinite;
+}
+
+/* ============ Glow ring — expanding ring for important elements ============ */
+@keyframes astro-glow-ring {
+  0% { box-shadow: 0 0 0 0 rgba(232,184,109,0.4); }
+  70% { box-shadow: 0 0 0 12px rgba(232,184,109,0); }
+  100% { box-shadow: 0 0 0 0 rgba(232,184,109,0); }
+}
+.astro-glow-ring {
+  animation: astro-glow-ring 2s ease-out infinite;
+}
+
+/* ============ Text typewriter — for AI mentor responses ============ */
+@keyframes astro-typewriter {
+  from { width: 0; }
+  to { width: 100%; }
+}
+.astro-typewriter {
+  overflow: hidden;
+  white-space: nowrap;
+  animation: astro-typewriter 2s steps(40, end);
+}
+
+/* ============ Sign ingress flash — for transit forecast ============ */
+@keyframes astro-ingress-flash {
+  0%, 100% { background-color: rgba(217,142,122,0.06); }
+  50% { background-color: rgba(217,142,122,0.18); }
+}
+.astro-ingress-flash {
+  animation: astro-ingress-flash 3s ease-in-out infinite;
+}
+
+/* ============ Card 3D hover with depth layers ============ */
+.astro-card-3d-hover {
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+  transform-style: preserve-3d;
+}
+.astro-card-3d-hover:hover {
+  transform: perspective(1200px) rotateX(3deg) rotateY(-3deg) translateZ(10px);
+}
+.astro-card-3d-hover:hover .astro-card-3d-layer-1 {
+  transform: translateZ(20px);
+}
+.astro-card-3d-hover:hover .astro-card-3d-layer-2 {
+  transform: translateZ(40px);
+}
+
+/* ============ Gradient border animated — for premium cards ============ */
+@keyframes astro-gradient-border-rotate {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.astro-premium-border {
+  position: relative;
+  background: #0B0B0F;
+  border-radius: 12px;
+}
+.astro-premium-border::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(135deg, #E8B86D, #5BB89C, #D98E7A, #5E8FA8, #E8B86D);
+  background-size: 300% 300%;
+  animation: astro-gradient-border-rotate 6s ease infinite;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ============ Star twinkle — for constellation backgrounds ============ */
+@keyframes astro-twinkle-1 {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+@keyframes astro-twinkle-2 {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(0.9); }
+}
+.astro-twinkle-1 { animation: astro-twinkle-1 3s ease-in-out infinite; }
+.astro-twinkle-2 { animation: astro-twinkle-2 4s ease-in-out infinite; }
+
+/* ============ Number flip — for stat counters ============ */
+@keyframes astro-number-flip {
+  0% { transform: rotateX(0deg); }
+  50% { transform: rotateX(90deg); opacity: 0; }
+  100% { transform: rotateX(0deg); opacity: 1; }
+}
+.astro-number-flip {
+  animation: astro-number-flip 0.6s ease-in-out;
+}
+
+/* ============ Section divider with star ============ */
+.astro-divider-star {
+  position: relative;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(232,184,109,0.3), transparent);
+}
+.astro-divider-star::after {
+  content: "✦";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #0B0B0F;
+  color: rgba(232,184,109,0.6);
+  font-size: 10px;
+  padding: 0 8px;
+}
+
+/* ============ Glass morphism with blur backdrop ============ */
+.astro-glass-blur {
+  background: rgba(22, 22, 29, 0.5);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(232, 184, 109, 0.15);
+}
+
+/* ============ Hover lift with shadow ============ */
+.astro-hover-lift {
+  transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+}
+.astro-hover-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.4), 0 0 20px rgba(232,184,109,0.1);
+}
+
+

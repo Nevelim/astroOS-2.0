@@ -1,37 +1,52 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Cormorant_Garamond, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/toaster";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const cormorant = Cormorant_Garamond({
+  variable: "--font-serif",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const inter = Inter({
+  variable: "--font-sans",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+});
+
+const jetbrains = JetBrains_Mono({
+  variable: "--font-mono",
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Z.ai Code Scaffold - AI-Powered Development",
-  description: "Modern Next.js scaffold optimized for AI-powered development with Z.ai. Built with TypeScript, Tailwind CSS, and shadcn/ui.",
-  keywords: ["Z.ai", "Next.js", "TypeScript", "Tailwind CSS", "shadcn/ui", "AI development", "React"],
-  authors: [{ name: "Z.ai Team" }],
+  title: "AstroOS · Your Cosmic Operating System",
+  description:
+    "AstroOS v2.0 — Product Designer prototype. Western astrology × BaZi × AI mentor × Cosmic Match × Remedies × B2B HR. Cosmic dark premium design.",
+  keywords: [
+    "AstroOS",
+    "astrocartography",
+    "BaZi",
+    "AI mentor",
+    "daily horoscope",
+    "cosmic match",
+    "I-Ching",
+    "Tarot",
+  ],
+  authors: [{ name: "AstroOS Product Design" }],
   icons: {
     icon: "https://z-cdn.chatglm.cn/z-ai/static/logo.svg",
   },
   openGraph: {
-    title: "Z.ai Code Scaffold",
-    description: "AI-powered development with modern React stack",
-    url: "https://chat.z.ai",
-    siteName: "Z.ai",
+    title: "AstroOS · Your Cosmic Operating System",
+    description: "Western astrology × BaZi × AI mentor — v2.0 design prototype",
     type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Z.ai Code Scaffold",
-    description: "AI-powered development with modern React stack",
   },
 };
 
@@ -41,9 +56,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="dark">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
+        className={`${cormorant.variable} ${inter.variable} ${jetbrains.variable} antialiased font-sans bg-astro-bg text-astro-text`}
       >
         {children}
         <Toaster />

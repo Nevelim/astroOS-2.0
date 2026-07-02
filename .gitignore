@@ -52,3 +52,11 @@ prompt
 server.log
 # Skills directory
 /skills/
+
+# AstroOS runtime artifacts
+*.pid
+db/*.db
+db/*.db-journal
+dev-startup.log
+bazi-service.log
+chat-service.log

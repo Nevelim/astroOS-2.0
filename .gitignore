@@ -60,3 +60,5 @@ db/*.db-journal
 dev-startup.log
 bazi-service.log
 chat-service.log
+# Temp tool output
+tool-results/

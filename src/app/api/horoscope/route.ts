@@ -24,6 +24,7 @@ import { getOrComputeWithStatus, buildDailyKey, TTL } from "@/lib/astroos/real/l
 import { getHoroscopeFallback } from "@/lib/astroos/real/horoscope-fallbacks";
 import { getPlanetEclipticLongitude, isPlanetRetrograde, lonToSignName, type AstronomyEngineLike } from "@/lib/astroos/real/ecliptic";
 import { computeMoonVoC } from "@/lib/astroos/real/moon-voc";
+import { getPlanetDignity, type DignityType } from "@/lib/astroos/real/planetary-dignity";
 
 const ZODIAC_TRAITS: Record<string, { element: string; ruler: string; qualities: string }> = {
   Aries: { element: "Fire", ruler: "Mars", qualities: "courage, initiative, pioneering" },
@@ -65,16 +66,20 @@ export async function GET(req: NextRequest) {
     const transits = await computeRealTransits();
     const traits = ZODIAC_TRAITS[sign];
 
-    // Moon Void of Course + retrograde list — for richer LLM context.
+    // Moon Void of Course + retrograde list + dignity — for richer LLM context.
     const Astro = (await loadEngine()) as AstronomyEngineLike;
     const now = new Date();
     const moonVoC = computeMoonVoC(Astro, now);
     const retrogradePlanets = transits.positions
       .filter((p) => p.retrograde)
       .map((p) => p.planet);
+    // Non-neutral dignities — for the LLM prompt and the response.
+    const dignityHighlights = transits.positions
+      .filter((p) => p.dignity && p.dignity !== "Neutral")
+      .map((p) => ({ planet: p.planet, sign: p.sign, dignity: p.dignity as DignityType, score: p.dignityScore }));
 
     // Build a single rich context string for the LLM prompt.
-    const astroContext = buildAstroContext(transits, moonVoC, retrogradePlanets);
+    const astroContext = buildAstroContext(transits, moonVoC, retrogradePlanets, dignityHighlights);
 
     // AI narrative via ZAI — cached per (sign, locale, day) with 6h TTL.
     // 429 / 5xx / network errors degrade gracefully: stale → hand-written.
@@ -108,6 +113,7 @@ export async function GET(req: NextRequest) {
       moonPhase: transits.moonPhase,
       keyAspects: transits.aspects.slice(0, 3),
       retrogradePlanets,
+      dignityHighlights,
       moonVoC: {
         isVoC: moonVoC.isVoC,
         nextVoCStart: moonVoC.currentOrNext?.startTime ?? null,
@@ -143,6 +149,7 @@ Rules:
 - No fear-mongering. No paywall traps.
 - Cite the REAL transits, retrogrades, and Moon phase above. If the Moon is Void of Course, mention it and advise deferring new commitments.
 - If a planet is retrograde (marked "in Sign (R)"), weave its theme (review, revisit, reframe) into the narrative.
+- If a planet has a non-neutral dignity (Ruler/Exalted/Detriment/Fall), reflect its strength: strong planets (Ruler/Exalted) favor their domains; weak planets (Detriment/Fall) suggest caution or delays in their domains. Mention this qualitatively — don't just list the dignity label.
 - End with a gentle, actionable reflection.
 - 2-3 paragraphs max.
 
@@ -173,9 +180,11 @@ async function computeRealTransits() {
   const planets = ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn"];
   const positions = planets.map((p) => {
     const lonDeg = getPlanetEclipticLongitude(Astro, p, now);
-    if (lonDeg === null) return { planet: p, lonDeg: 0, sign: "Unknown", retrograde: false };
+    if (lonDeg === null) return { planet: p, lonDeg: 0, sign: "Unknown", retrograde: false, dignity: "Neutral" as DignityType, dignityScore: 0 };
     const retrograde = isPlanetRetrograde(Astro, p, now) ?? false;
-    return { planet: p, lonDeg: Math.round(lonDeg * 100) / 100, sign: lonToSignName(lonDeg), retrograde };
+    const sign = lonToSignName(lonDeg);
+    const { dignity, score } = getPlanetDignity(p, sign);
+    return { planet: p, lonDeg: Math.round(lonDeg * 100) / 100, sign, retrograde, dignity, dignityScore: score };
   });
 
   // Summary includes retrograde marker (℞) for retrograde planets.
@@ -218,6 +227,7 @@ function buildAstroContext(
   transits: { summary: string; aspects: Array<{ a: string; b: string; type: string; orb: number }>; moonPhase: string },
   moonVoC: { isVoC: boolean; currentOrNext: { startTime: string; endTime: string; durationHours: number; sign: string; nextSign: string } | null },
   retrogradePlanets: string[],
+  dignityHighlights: Array<{ planet: string; sign: string; dignity: DignityType; score: number }>,
 ): string {
   const lines: string[] = [];
   lines.push(`Current transits: ${transits.summary}.`);
@@ -231,6 +241,21 @@ function buildAstroContext(
   }
   if (retrogradePlanets.length > 0) {
     lines.push(`Retrograde planets: ${retrogradePlanets.join(", ")}. Reflect their themes (review, revisit, reframe) rather than initiating new endeavors in those domains.`);
+  }
+  if (dignityHighlights.length > 0) {
+    const dignityStr = dignityHighlights
+      .map((d) => `${d.planet} in ${d.sign} is ${d.dignity} (score ${d.score > 0 ? "+" : ""}${d.score})`)
+      .join(", ");
+    lines.push(`Essential dignity highlights: ${dignityStr}.`);
+    // Add qualitative guidance for the LLM.
+    const strong = dignityHighlights.filter((d) => d.score > 0);
+    const weak = dignityHighlights.filter((d) => d.score < 0);
+    if (strong.length > 0) {
+      lines.push(`Strong planets today (${strong.map((d) => d.planet).join(", ")}): their energies flow freely and authentically — favor their domains.`);
+    }
+    if (weak.length > 0) {
+      lines.push(`Weak planets today (${weak.map((d) => d.planet).join(", ")}): their energies are diminished or blocked — expect friction or delays in their domains, and plan accordingly.`);
+    }
   }
   if (moonVoC.currentOrNext) {
     if (moonVoC.isVoC) {

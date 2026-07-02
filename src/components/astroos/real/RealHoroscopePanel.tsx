@@ -22,6 +22,12 @@ interface HoroscopeData {
   narrative: { en: string; ru: string; hi: string };
   locale: string;
   retrogradePlanets?: string[];
+  dignityHighlights?: Array<{
+    planet: string;
+    sign: string;
+    dignity: "Ruler" | "Exalted" | "Detriment" | "Fall" | "Neutral";
+    score: number;
+  }>;
   moonVoC?: {
     isVoC: boolean;
     nextVoCStart: string | null;
@@ -393,8 +399,8 @@ export function RealHoroscopePanel({ locale, sign: signProp, onAspectClick }: { 
                 </div>
               </div>
 
-              {/* Astrological context badges (retrograde + VoC) */}
-              {((data.retrogradePlanets && data.retrogradePlanets.length > 0) || data.moonVoC) && (
+              {/* Astrological context badges (retrograde + dignity + VoC) */}
+              {((data.retrogradePlanets && data.retrogradePlanets.length > 0) || (data.dignityHighlights && data.dignityHighlights.length > 0) || data.moonVoC) && (
                 <div className="mt-3 flex flex-wrap gap-1.5">
                   {data.retrogradePlanets?.map((p) => (
                     <span
@@ -406,6 +412,26 @@ export function RealHoroscopePanel({ locale, sign: signProp, onAspectClick }: { 
                       <span>{p}</span>
                     </span>
                   ))}
+                  {data.dignityHighlights?.map((d) => {
+                    const tone = d.dignity === "Ruler" ? "gold" : d.dignity === "Exalted" ? "jade" : "rose";
+                    const cls = tone === "gold"
+                      ? "border-[#E8B86D]/40 bg-[#E8B86D]/[0.08] text-[#E8B86D]"
+                      : tone === "jade"
+                        ? "border-[#5BB89C]/40 bg-[#5BB89C]/[0.08] text-[#5BB89C]"
+                        : "border-[#D98E7A]/40 bg-[#D98E7A]/[0.08] text-[#D98E7A]";
+                    const icon = d.dignity === "Ruler" ? "♔" : d.dignity === "Exalted" ? "↑" : d.dignity === "Fall" ? "⤓" : "↓";
+                    return (
+                      <span
+                        key={`dignity-${d.planet}`}
+                        className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${cls}`}
+                        title={`${d.planet} in ${d.sign} — ${d.dignity} (score ${d.score > 0 ? "+" : ""}${d.score})`}
+                      >
+                        <span>{icon}</span>
+                        <span>{d.planet}</span>
+                        <span className="opacity-70">{d.dignity}</span>
+                      </span>
+                    );
+                  })}
                   {data.moonVoC && (
                     <span
                       className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${

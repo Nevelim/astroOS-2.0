@@ -7,6 +7,7 @@ import { NextResponse } from "next/server";
 import { loadEngine } from "@/infrastructure/external-services/astronomy/AstronomyEngineChartCalculator";
 import {
   getPlanetEclipticLongitude,
+  isPlanetRetrograde,
   lonToZodiacSign,
   type AstronomyEngineLike,
 } from "@/lib/astroos/real/ecliptic";
@@ -29,10 +30,11 @@ export async function GET() {
     const transits = TRANSIT_PLANETS.map(({ key, symbol, color }) => {
       const lonDeg = getPlanetEclipticLongitude(Astro, key, now);
       if (lonDeg === null) {
-        return { planet: key, symbol, color, sign: "Unknown", deg: 0, min: 0, lonDeg: 0 };
+        return { planet: key, symbol, color, sign: "Unknown", deg: 0, min: 0, lonDeg: 0, retrograde: false };
       }
       const { sign, deg, min } = lonToZodiacSign(lonDeg);
-      return { planet: key, symbol, color, sign, deg, min, lonDeg: Math.round(lonDeg * 100) / 100 };
+      const retrograde = isPlanetRetrograde(Astro, key, now) ?? false;
+      return { planet: key, symbol, color, sign, deg, min, lonDeg: Math.round(lonDeg * 100) / 100, retrograde };
     });
 
     // Detect major aspects (conjunction 0°, trine 120°, square 90°, sextile 60°, opposition 180°)

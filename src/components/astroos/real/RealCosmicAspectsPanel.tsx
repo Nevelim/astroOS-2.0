@@ -30,6 +30,7 @@ interface TransitPlanet {
   deg: number;
   min: number;
   lonDeg: number;
+  retrograde?: boolean;
 }
 interface TransitAspect {
   a: string;
@@ -191,6 +192,56 @@ export function RealCosmicAspectsPanel({ locale }: { locale: "ru" | "en" | "hi" 
           </p>
         ) : data ? (
           <div className="mt-4 space-y-5">
+            {/* ── Retrograde alert banner ── */}
+            {(() => {
+              const rxPlanets = data.transits.filter((p) => p.retrograde);
+              if (rxPlanets.length === 0) return null;
+              const names = rxPlanets.map((p) => p.planet).join(", ");
+              const isMercuryRx = rxPlanets.some((p) => p.planet === "Mercury");
+              return (
+                <motion.div
+                  initial={{ opacity: 0, y: -4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className={`astro-rx-banner relative overflow-hidden rounded-lg border px-3 py-2.5 ${
+                    isMercuryRx
+                      ? "border-[#D98E7A]/50 bg-[#D98E7A]/[0.08]"
+                      : "border-[#E8B86D]/40 bg-[#E8B86D]/[0.06]"
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="astro-rx-glyph text-lg font-semibold" aria-hidden>
+                      ℞
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-[12px] font-medium text-[#F5F0E8]">
+                        {t(
+                          locale,
+                          `Retrograde now: ${names}`,
+                          `Сейчас ретроградны: ${names}`,
+                          `अब पश्चगामी: ${names}`,
+                        )}
+                      </div>
+                      <div className="text-[10px] text-[#9A9AA8]">
+                        {isMercuryRx
+                          ? t(
+                              locale,
+                              "Mercury Rx — revisit, reflect, re-read the fine print.",
+                              "Меркурий ℞ — пересматривай, переосмысливай, перечитывай мелкий шрифт.",
+                              "बुध ℞ — पुनर्विचार करें, परावर्तन करें।",
+                            )
+                          : t(
+                              locale,
+                              "Apparent backward motion — inward work favored.",
+                              "Видимое попятное движение — favoured внутренняя работа.",
+                              "पश्चगामी गति — आंतरिक कार्य।",
+                            )}
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })()}
+
             {/* ── Planet row ── */}
             <div>
               <div className="mb-2 text-[10px] uppercase tracking-[0.18em] text-[#6B6B78]">{planetsLabel}</div>
@@ -201,9 +252,20 @@ export function RealCosmicAspectsPanel({ locale }: { locale: "ru" | "en" | "hi" 
                     initial={{ opacity: 0, y: 6 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.35 }}
-                    className="group relative flex flex-col items-center rounded-xl border border-[#2A2A35] bg-[#121218]/70 px-2 py-2.5 text-center transition-all hover:-translate-y-0.5 hover:border-[color:var(--accent,#5BB89C)]/40"
+                    className={`group relative flex flex-col items-center rounded-xl border bg-[#121218]/70 px-2 py-2.5 text-center transition-all hover:-translate-y-0.5 hover:border-[color:var(--accent,#5BB89C)]/40 ${
+                      p.retrograde ? "border-[#D98E7A]/45 astro-rx-planet" : "border-[#2A2A35]"
+                    }`}
                     style={{ ["--accent" as string]: p.color }}
                   >
+                    {p.retrograde && (
+                      <span
+                        className="absolute right-1 top-1 inline-flex h-4 w-4 items-center justify-center rounded-full bg-[#D98E7A]/15 text-[10px] font-bold text-[#D98E7A] astro-rx-glyph"
+                        title={t(locale, "Retrograde", "Ретроград", "पश्चगामी")}
+                        aria-label={`${p.planet} retrograde`}
+                      >
+                        ℞
+                      </span>
+                    )}
                     <span
                       className="mb-1 inline-flex h-7 w-7 items-center justify-center rounded-full text-base"
                       style={{

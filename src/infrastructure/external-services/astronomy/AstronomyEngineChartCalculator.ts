@@ -8,6 +8,7 @@ import type { BaZi as _ } from "../../../domain/entities/BaZi";
 import type { BirthData } from "../../../domain/value-objects/BirthData";
 import { AstroLine } from "../../../domain/entities/AstroLine";
 import type { PlanetKey, LineType, AstroLinePoint } from "../../../domain/entities/AstroLine";
+import { getPlanetGeocentricEcliptic, type AstronomyEngineLike } from "@/lib/astroos/real/ecliptic";
 
 // Dynamic import — astronomy-engine тяжёлая библиотека, грузим лениво
 type AstronomyEngine = Record<string, unknown>;
@@ -42,43 +43,19 @@ export class AstronomyEngineChartCalculator implements ChartCalculator {
 
     const observer = new Astro.Observer(birth.coord.lat, birth.coord.lng, 0);
 
-    // Позиции планет (эклиптические координаты)
-    // astronomy-engine exports:
-    //   SunPosition(date) → EclipticCoordinates { lon, lat, dist } (geocentric ecliptic, degrees)
-    //   EclipticGeoMoon(date) → { lon, lat, dist } (geocentric ecliptic spherical, degrees)
-    //   EclipticLongitude(body: Body, date) → number (degrees) — for non-Sun planets
-    //   Body — string enum: Body.Sun === "Sun", etc.
-    const BodyEnum = (Astro as { Body?: Record<string, string> }).Body;
-    const EclipticLongitudeFn = (Astro as { EclipticLongitude?: (body: string, date: Date) => number }).EclipticLongitude;
-    const EclipticGeoMoonFn = (Astro as { EclipticGeoMoon?: (date: Date) => { lon: number; lat: number; dist: number } }).EclipticGeoMoon;
-    const SunPositionFn = (Astro as { SunPosition?: (date: Date) => { elon?: number; elat?: number; lon?: number; lat?: number } }).SunPosition;
-
+    // Позиции планет (геоцентрические эклиптические координаты)
+    // Uses the shared ecliptic.ts helper which computes GEOCENTRIC apparent
+    // ecliptic longitude+latitude. This is critical: astronomy-engine's
+    // EclipticLongitude() returns HELIOCENTRIC longitude (Sun-centered) which
+    // is wrong for astrology. The helper uses Equator(body, date, geocenter,
+    // ofdate=true, aberration=true) + obliquity conversion for planets,
+    // SunPosition() for the Sun, EclipticGeoMoon() for the Moon.
     const planetPositions = PLANETS.map(({ key, body }) => {
-      try {
-        if (key === "Moon" && EclipticGeoMoonFn) {
-          const moon = EclipticGeoMoonFn(date);
-          const lonDeg = ((moon.lon % 360) + 360) % 360;
-          const latDeg = moon.lat;
-          return { planet: key, eclipticLonDeg: lonDeg, eclipticLatDeg: latDeg };
-        }
-        if (key === "Sun" && SunPositionFn) {
-          const sun = SunPositionFn(date);
-          const sunLon = sun.elon ?? sun.lon ?? 0;
-          const sunLat = sun.elat ?? sun.lat ?? 0;
-          const lonDeg = ((sunLon % 360) + 360) % 360;
-          return { planet: key, eclipticLonDeg: lonDeg, eclipticLatDeg: sunLat };
-        }
-        if (EclipticLongitudeFn && BodyEnum) {
-          // Body is a string enum; access via Body[bodyName] to get the enum value
-          const bodyVal = BodyEnum[body];
-          if (!bodyVal) return { planet: key, eclipticLonDeg: 0, eclipticLatDeg: 0 };
-          const lonDeg = ((EclipticLongitudeFn(bodyVal, date) % 360) + 360) % 360;
-          return { planet: key, eclipticLonDeg: lonDeg, eclipticLatDeg: 0 };
-        }
-        return { planet: key, eclipticLonDeg: 0, eclipticLatDeg: 0 };
-      } catch {
-        return { planet: key, eclipticLonDeg: 0, eclipticLatDeg: 0 };
+      const ecl = getPlanetGeocentricEcliptic(Astro as AstronomyEngineLike, body, date);
+      if (ecl) {
+        return { planet: key, eclipticLonDeg: ecl.lonDeg, eclipticLatDeg: ecl.latDeg };
       }
+      return { planet: key, eclipticLonDeg: 0, eclipticLatDeg: 0 };
     });
 
     // Ascendant + MC

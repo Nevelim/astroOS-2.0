@@ -1257,5 +1257,47 @@ button:active:not(:disabled) {
   50%      { filter: brightness(1.25); }
 }
 
+/* ============ Retrograde — ℞ glyph pulse + banner shimmer ============ */
+/* The ℞ (prescription symbol, used in astrology for retrograde) gets a slow
+   rose-tinted pulse. The banner gets a diagonal shimmer sweep to draw the eye
+   without being alarming (retrograde is informational, not a warning). */
+@keyframes astro-rx-glyph-pulse {
+  0%, 100% { opacity: 0.75; text-shadow: 0 0 6px rgba(217,142,122,0.35); }
+  50%      { opacity: 1;    text-shadow: 0 0 12px rgba(217,142,122,0.65); }
+}
+.astro-rx-glyph {
+  color: #D98E7A;
+  animation: astro-rx-glyph-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes astro-rx-banner-shimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+.astro-rx-banner::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 40%; height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(217,142,122,0.12),
+    transparent
+  );
+  animation: astro-rx-banner-shimmer 4.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* Retrograde planet pill — subtle rose border breathing */
+@keyframes astro-rx-planet-border {
+  0%, 100% { border-color: rgba(217,142,122,0.30); box-shadow: 0 0 0 0 rgba(217,142,122,0); }
+  50%      { border-color: rgba(217,142,122,0.60); box-shadow: 0 0 14px -4px rgba(217,142,122,0.45); }
+}
+.astro-rx-planet {
+  animation: astro-rx-planet-border 3.2s ease-in-out infinite;
+}
+
+
 
 

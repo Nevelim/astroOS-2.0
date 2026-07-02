@@ -5,11 +5,13 @@
  * For each day, returns each planet's ecliptic longitude, sign, and any sign
  * changes (ingresses) during the period.
  *
- * Uses astronomy-engine: EclipticLongitude, EclipticGeoMoon, SunPosition.
- * No auth required (public endpoint).
+ * Uses geocentric apparent ecliptic longitudes (via the ecliptic.ts helper:
+ * Equator + obliquity conversion for planets, SunPosition for Sun,
+ * EclipticGeoMoon for Moon). No auth required (public endpoint).
  */
 import { NextResponse } from "next/server";
 import { loadEngine } from "@/infrastructure/external-services/astronomy/AstronomyEngineChartCalculator";
+import { getPlanetEclipticLongitude, type AstronomyEngineLike } from "@/lib/astroos/real/ecliptic";
 
 const ZODIAC_NAMES = ["Aries","Taurus","Gemini","Cancer","Leo","Virgo","Libra","Scorpio","Sagittarius","Capricorn","Aquarius","Pisces"];
 const ZODIAC_GLYPHS = ["♈","♉","♊","♋","♌","♍","♎","♏","♐","♑","♒","♓"];
@@ -72,18 +74,12 @@ interface DayForecast {
 
 export async function GET() {
   try {
-    const Astro = await loadEngine() as {
-      EclipticLongitude?: (body: string, date: Date) => number;
-      EclipticGeoMoon?: (date: Date) => { lon: number; lat: number; dist: number };
-      SunPosition?: (date: Date) => { elon?: number; lon?: number };
-      Body?: Record<string, string>;
-    };
+    const Astro = (await loadEngine()) as AstronomyEngineLike;
 
-    if (!Astro?.EclipticLongitude || !Astro?.EclipticGeoMoon || !Astro?.Body) {
+    if (!Astro?.SunPosition || !Astro?.EclipticGeoMoon || !Astro?.Body || !Astro?.Equator || !Astro?.Observer) {
       return NextResponse.json({ error: "astronomy-engine unavailable" }, { status: 500 });
     }
 
-    const BodyEnum = Astro.Body;
     const now = new Date();
 
     // Compute 7-day forecast
@@ -95,24 +91,8 @@ export async function GET() {
       const ingresses: DayForecast["ingresses"] = [];
 
       for (const planet of PLANETS) {
-        let lon: number;
-        try {
-          if (planet === "Moon") {
-            const moon = Astro.EclipticGeoMoon!(date);
-            lon = ((moon.lon % 360) + 360) % 360;
-          } else if (planet === "Sun") {
-            const sun = Astro.SunPosition!(date);
-            const rawLon = sun.elon ?? sun.lon ?? 0;
-            lon = ((rawLon % 360) + 360) % 360;
-          } else {
-            const bodyVal = BodyEnum[planet];
-            if (!bodyVal) continue;
-            const rawLon = Astro.EclipticLongitude!(bodyVal, date);
-            lon = ((rawLon % 360) + 360) % 360;
-          }
-        } catch {
-          continue;
-        }
+        const lon = getPlanetEclipticLongitude(Astro, planet, date);
+        if (lon === null) continue;
 
         const sign = lonToSign(lon);
         planets.push({
@@ -127,20 +107,9 @@ export async function GET() {
 
         // Check for sign ingress (if planet moves into next sign during this day)
         if (dayOffset === 0) {
-          // Compare with tomorrow
           const tomorrow = new Date(date.getTime() + 86400000);
-          try {
-            let tomorrowLon: number;
-            if (planet === "Moon") {
-              tomorrowLon = (((Astro.EclipticGeoMoon!(tomorrow).lon % 360) + 360) % 360);
-            } else if (planet === "Sun") {
-              const sun = Astro.SunPosition!(tomorrow);
-              tomorrowLon = (((sun.elon ?? sun.lon ?? 0) % 360) + 360) % 360;
-            } else {
-              const bodyVal = BodyEnum[planet];
-              if (!bodyVal) continue;
-              tomorrowLon = (((Astro.EclipticLongitude!(bodyVal, tomorrow) % 360) + 360) % 360);
-            }
+          const tomorrowLon = getPlanetEclipticLongitude(Astro, planet, tomorrow);
+          if (tomorrowLon !== null) {
             const todaySignIdx = Math.floor((((lon % 360) + 360) % 360) / 30);
             const tomorrowSignIdx = Math.floor((((tomorrowLon % 360) + 360) % 360) / 30);
             if (todaySignIdx !== tomorrowSignIdx) {
@@ -155,8 +124,6 @@ export async function GET() {
                 toGlyph: toSign.glyph,
               });
             }
-          } catch {
-            // skip
           }
         }
       }

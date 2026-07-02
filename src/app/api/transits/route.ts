@@ -11,6 +11,7 @@ import {
   lonToZodiacSign,
   type AstronomyEngineLike,
 } from "@/lib/astroos/real/ecliptic";
+import { getPlanetDignity } from "@/lib/astroos/real/planetary-dignity";
 
 const TRANSIT_PLANETS = [
   { key: "Sun", symbol: "☉", color: "#FBBF24" },
@@ -30,11 +31,12 @@ export async function GET() {
     const transits = TRANSIT_PLANETS.map(({ key, symbol, color }) => {
       const lonDeg = getPlanetEclipticLongitude(Astro, key, now);
       if (lonDeg === null) {
-        return { planet: key, symbol, color, sign: "Unknown", deg: 0, min: 0, lonDeg: 0, retrograde: false };
+        return { planet: key, symbol, color, sign: "Unknown", deg: 0, min: 0, lonDeg: 0, retrograde: false, dignity: "Neutral" as const, dignityScore: 0 };
       }
       const { sign, deg, min } = lonToZodiacSign(lonDeg);
       const retrograde = isPlanetRetrograde(Astro, key, now) ?? false;
-      return { planet: key, symbol, color, sign, deg, min, lonDeg: Math.round(lonDeg * 100) / 100, retrograde };
+      const { dignity, score } = getPlanetDignity(key, sign);
+      return { planet: key, symbol, color, sign, deg, min, lonDeg: Math.round(lonDeg * 100) / 100, retrograde, dignity, dignityScore: score };
     });
 
     // Detect major aspects (conjunction 0°, trine 120°, square 90°, sextile 60°, opposition 180°)

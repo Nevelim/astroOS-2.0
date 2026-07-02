@@ -16,6 +16,7 @@ import { RealMoonVoCPanel } from "../real/RealMoonVoCPanel";
 import { RealPlanetaryHoursPanel } from "../real/RealPlanetaryHoursPanel";
 import { RealTransitForecastPanel } from "../real/RealTransitForecastPanel";
 import { RealCosmicAspectsPanel } from "../real/RealCosmicAspectsPanel";
+import { RealPlanetaryDignityPanel } from "../real/RealPlanetaryDignityPanel";
 import { RealRetrogradeSchedulePanel } from "../real/RealRetrogradeSchedulePanel";
 import { RealStreakCalendar } from "../real/RealStreakCalendar";
 import { RealAffirmationPanel } from "../real/RealAffirmationPanel";
@@ -236,6 +237,9 @@ export function TodayScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => voi
 
       {/* Cosmic aspects — live planet positions + aspect grid (uses fixed /api/transits) */}
       <RealCosmicAspectsPanel locale={locale} />
+
+      {/* Planetary dignity — essential dignity (Ruler/Exalted/Detriment/Fall) of current transits */}
+      <RealPlanetaryDignityPanel locale={locale} />
 
       {/* Retrograde schedule — upcoming Rx/direct stations timeline */}
       <RealRetrogradeSchedulePanel locale={locale} />

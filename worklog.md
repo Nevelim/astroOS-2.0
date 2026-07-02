@@ -452,3 +452,54 @@ Recommended next steps:
 - Or wire the planetary dignity into the horoscope LLM prompt (like Task 6 did for retrograde/VoC) so the narrative can say "Saturn is in Fall today — expect delays and structural challenges."
 - Or add a "dignity calendar" showing when each planet enters/leaves its domicile/exaltation over the next month — a planning feature.
 - Or address the remaining P1 items: MemberRelation table for the family hub, or real notifications push via the existing chat-service WebSocket.
+
+---
+
+Task ID: 8
+Agent: Z.ai Code (cron webDevReview — job 246214, cycle 7)
+Task: Seventh autonomous cron-review cycle. Read worklog, QA app via agent-browser, prioritize fixes, add features + improve styling, update worklog.
+
+Work Log:
+- Read worklog Tasks 1-7. Task 7 added the Planetary Dignity panel. Recommended next steps: Mercury shadow period, dignity in LLM prompt, dignity calendar, or P1 MemberRelation/notifications.
+- Verified services alive (pids 2636/2637/2668), ports 3000/3003/3004 LISTENING, lint 0, HEAD 6170f8d, curl / = HTTP 200.
+- agent-browser QA: Today screen — all panels present (horoscope, moon phase, VoC, planetary hours, aspects, dignity, retrograde schedule, forecast), 0 errors.
+- Selected feature from Task 7 recommendations: **wire planetary dignity into the horoscope LLM prompt** (continuing the Task 6 pattern of enriching the AI narrative with real astrological context).
+
+- Extended `src/app/api/horoscope/route.ts`:
+  - `computeRealTransits()` now computes per-planet `dignity` + `dignityScore` via the `getPlanetDignity()` helper (from Task 7's planetary-dignity.ts module).
+  - GET handler builds `dignityHighlights[]` (non-neutral planets only) and passes it to `buildAstroContext()`.
+  - `buildAstroContext()` now accepts `dignityHighlights` and adds: (1) a dignity highlights line ("Saturn in Aries is Fall (score -2)"), (2) qualitative guidance for the LLM — strong planets (Ruler/Exalted) favor their domains; weak planets (Detriment/Fall) suggest caution/delays.
+  - LLM systemPrompt now instructs: "If a planet has a non-neutral dignity, reflect its strength: strong planets favor their domains; weak planets suggest caution or delays in their domains. Mention this qualitatively — don't just list the dignity label."
+  - Response now includes `dignityHighlights: [{planet, sign, dignity, score}]` field.
+
+- Extended `src/components/astroos/real/RealHoroscopePanel.tsx`:
+  - HoroscopeData interface now includes `dignityHighlights?`.
+  - Added dignity badges to the context badges row (between retrograde and VoC). Each non-neutral planet gets a tone-colored pill: gold ♔ for Ruler, jade ↑ for Exalted, rose ↓/⤓ for Detriment/Fall. Tooltip shows the dignity + score.
+
+- Verified via curl:
+  - `/api/horoscope?sign=Scorpio&locale=ru`: `dignityHighlights: [{planet: "Saturn", sign: "Aries", dignity: "Fall", score: -2}]`. Narrative was from STALE cache (X-Cache: HIT) — did not mention Fall.
+  - `/api/horoscope?sign=Aries&locale=ru` (fresh cache, MISS): narrative reads **"Сатурн в Овне, находящийся сейчас в ослабленном положении, может создавать задержки или препятствия"** — the LLM correctly used the Saturn Fall context and wove the weak-planet guidance ("ослабленном положении", "задержки или препятствия") into the advice. This confirms the new prompt works.
+
+- Note: the Scorpio cache (HIT) serves the old narrative without the dignity mention. It will expire after 6h TTL and the next fresh call will use the new prompt. This is expected behavior — the cache key is (sign, locale, day), not prompt-version-aware. A future improvement could bump a prompt version to invalidate caches on prompt changes.
+
+- `bun run lint` → 0 errors throughout.
+- agent-browser QA: Today screen horoscope panel shows ℞ Mercury badge + ⤓ Saturn Fall badge + ☾ clear VoC badge above the transit summary. 0 page errors. Screenshot saved to `/home/z/my-project/download/horoscope-dignity-badges.png`.
+- Git: commit `95456f8` pushed to `origin/main` (3 files changed, 57 insertions, 6 deletions).
+
+Stage Summary:
+- **Feature enhancement**: the daily horoscope AI narrative now uses essential dignity (Ruler/Exalted/Detriment/Fall) as LLM context. The narrative is materially richer — for Aries on 2026-07-02 it reads "Сатурн в Овне, находящийся сейчас в ослабленном положении, может создавать задержки или препятствия" — the LLM correctly interpreted the Saturn Fall context and advised on delays/obstacles (Saturn's domains) rather than just listing the sign.
+- **UI enhancement**: dignity badges in the horoscope panel (gold ♔ Ruler, jade ↑ Exalted, rose ↓/⤓ Detriment/Fall) give users an at-a-glance summary of which planets are strong/weak today, complementing the retrograde ℞ and VoC ☾ badges.
+- Lint 0 errors. Dev server stable. GitHub `origin/main` HEAD `95456f8`.
+
+Unresolved / Risks:
+- The horoscope LLM cache (6h TTL, in-memory) is not prompt-version-aware. When the prompt changes (like this task), existing cached narratives serve the old prompt's output until they expire. This is a known limitation documented in Task 6. For this task, the Scorpio cache still serves the old narrative; the Aries narrative (fresh) shows the new dignity-aware output. Acceptable — caches expire within 6h.
+- The dignity context adds ~7 getPlanetDignity calls per horoscope request (trivial — pure table lookups, no astronomy-engine). No performance impact.
+- Google OAuth still disabled (env empty) — unchanged.
+- Next.js 16 `middleware` deprecation warning — unchanged, non-blocking.
+- The handover's P1 list: real notifications push (WS/SSE), E2E tests, MemberRelation table for family hub. Mobile z-index investigated in Task 6 (non-issue).
+
+Recommended next steps:
+- Add a "Mercury Rx shadow period" indicator to the retrograde schedule panel (the ~5-day pre-shadow and post-shadow windows around each Rx station) — small extension using the existing cycle data.
+- Or add a "dignity calendar" showing when each planet enters/leaves its domicile/exaltation over the next month — a planning feature using the ecliptic helper + planetary-dignity module.
+- Or add ecliptic latitude display in the Cosmic Aspects panel (getPlanetGeocentricEcliptic returns latDeg, currently unused) — useful for declination-based insights.
+- Or address the remaining P1 items: MemberRelation table for the family hub, or real notifications push via the existing chat-service WebSocket.

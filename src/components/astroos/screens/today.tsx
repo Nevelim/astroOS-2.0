@@ -17,6 +17,7 @@ import { RealPlanetaryHoursPanel } from "../real/RealPlanetaryHoursPanel";
 import { RealTransitForecastPanel } from "../real/RealTransitForecastPanel";
 import { RealCosmicAspectsPanel } from "../real/RealCosmicAspectsPanel";
 import { RealPlanetaryDignityPanel } from "../real/RealPlanetaryDignityPanel";
+import { RealDignityCalendarPanel } from "../real/RealDignityCalendarPanel";
 import { RealRetrogradeSchedulePanel } from "../real/RealRetrogradeSchedulePanel";
 import { RealStreakCalendar } from "../real/RealStreakCalendar";
 import { RealAffirmationPanel } from "../real/RealAffirmationPanel";
@@ -240,6 +241,9 @@ export function TodayScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => voi
 
       {/* Planetary dignity — essential dignity (Ruler/Exalted/Detriment/Fall) of current transits */}
       <RealPlanetaryDignityPanel locale={locale} />
+
+      {/* Dignity calendar — upcoming dignity transitions over the next 30 days */}
+      <RealDignityCalendarPanel locale={locale} />
 
       {/* Retrograde schedule — upcoming Rx/direct stations timeline */}
       <RealRetrogradeSchedulePanel locale={locale} />

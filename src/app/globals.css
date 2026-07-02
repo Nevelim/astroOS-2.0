@@ -1217,4 +1217,45 @@ button:active:not(:disabled) {
   box-shadow: 0 12px 24px rgba(0,0,0,0.4), 0 0 20px rgba(232,184,109,0.1);
 }
 
+/* ============ Aspect tone rings — for Cosmic Aspects panel badges ============ */
+/* Each tone gets a pulsing colored ring + matching glyph glow on hover.
+   Gold = conjunction (fusion), Jade = trine/sextile (flow), Rose = square/opposite (tension). */
+@keyframes astro-aspect-pulse-gold {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(232,184,109,0.35), inset 0 0 6px rgba(232,184,109,0.12); }
+  50%      { box-shadow: 0 0 0 5px rgba(232,184,109,0),    inset 0 0 10px rgba(232,184,109,0.22); }
+}
+@keyframes astro-aspect-pulse-jade {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(91,184,156,0.35),  inset 0 0 6px rgba(91,184,156,0.12); }
+  50%      { box-shadow: 0 0 0 5px rgba(91,184,156,0),     inset 0 0 10px rgba(91,184,156,0.22); }
+}
+@keyframes astro-aspect-pulse-rose {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(217,142,122,0.35), inset 0 0 6px rgba(217,142,122,0.12); }
+  50%      { box-shadow: 0 0 0 5px rgba(217,142,122,0),    inset 0 0 10px rgba(217,142,122,0.22); }
+}
+.astro-aspect-gold {
+  border-color: rgba(232,184,109,0.55);
+  color: #E8B86D;
+  background: radial-gradient(circle at 50% 40%, rgba(232,184,109,0.14), transparent 72%);
+  animation: astro-aspect-pulse-gold 2.6s ease-in-out infinite;
+}
+.astro-aspect-jade {
+  border-color: rgba(91,184,156,0.55);
+  color: #5BB89C;
+  background: radial-gradient(circle at 50% 40%, rgba(91,184,156,0.14), transparent 72%);
+  animation: astro-aspect-pulse-jade 3s ease-in-out infinite;
+}
+.astro-aspect-rose {
+  border-color: rgba(217,142,122,0.55);
+  color: #D98E7A;
+  background: radial-gradient(circle at 50% 40%, rgba(217,142,122,0.14), transparent 72%);
+  animation: astro-aspect-pulse-rose 2.2s ease-in-out infinite;
+}
+
+/* ============ Transit planet pill — subtle breathing glow on the dot ============ */
+@keyframes astro-planet-dot-breath {
+  0%, 100% { filter: brightness(1); }
+  50%      { filter: brightness(1.25); }
+}
+
+
 

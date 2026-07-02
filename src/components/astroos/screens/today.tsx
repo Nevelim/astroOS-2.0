@@ -14,6 +14,7 @@ import { RealHoroscopePanel } from "../real/RealHoroscopePanel";
 import { RealMoonPhasePanel } from "../real/RealMoonPhasePanel";
 import { RealPlanetaryHoursPanel } from "../real/RealPlanetaryHoursPanel";
 import { RealTransitForecastPanel } from "../real/RealTransitForecastPanel";
+import { RealCosmicAspectsPanel } from "../real/RealCosmicAspectsPanel";
 import { RealStreakCalendar } from "../real/RealStreakCalendar";
 import { RealAffirmationPanel } from "../real/RealAffirmationPanel";
 import { TransitDetailDrawer } from "../real/TransitDetailDrawer";
@@ -227,6 +228,9 @@ export function TodayScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => voi
 
       {/* Transit timeline — 24h horizontal strip */}
       <TransitTimeline locale={locale} onAspectClick={handleAspectClick} />
+
+      {/* Cosmic aspects — live planet positions + aspect grid (uses fixed /api/transits) */}
+      <RealCosmicAspectsPanel locale={locale} />
 
       {/* Real 7-day transit forecast — planet positions + sign ingresses */}
       <FadeIn delay={0.048}>

@@ -19,6 +19,7 @@ import ZAI from "z-ai-web-dev-sdk";
 import { loadEngine } from "@/infrastructure/external-services/astronomy/AstronomyEngineChartCalculator";
 import { getOrComputeWithStatus, buildDailyKey, TTL } from "@/lib/astroos/real/llm-cache";
 import { getAffirmationFallback } from "@/lib/astroos/real/affirmation-fallbacks";
+import { getPlanetEclipticLongitude, type AstronomyEngineLike } from "@/lib/astroos/real/ecliptic";
 
 const VALID_SIGNS = ["Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo", "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces"];
 
@@ -106,10 +107,9 @@ async function computeAffirmation(
   // Get current moon sign for context (best-effort; non-fatal if it fails)
   let moonContext = "";
   try {
-    const Astro = await loadEngine();
-    const moonBody = (Astro as unknown as Record<string, unknown>)["Moon"] as { Equator: (d: Date) => { lon: number } } | undefined;
-    if (moonBody) {
-      const moonLon = ((moonBody.Equator(new Date()).lon * 180) / Math.PI + 360) % 360;
+    const Astro = (await loadEngine()) as AstronomyEngineLike;
+    const moonLon = getPlanetEclipticLongitude(Astro, "Moon", new Date());
+    if (moonLon !== null) {
       const moonSign = VALID_SIGNS[Math.floor(moonLon / 30)];
       moonContext = `The Moon is currently in ${moonSign}.`;
     }

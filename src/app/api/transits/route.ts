@@ -5,6 +5,11 @@
  */
 import { NextResponse } from "next/server";
 import { loadEngine } from "@/infrastructure/external-services/astronomy/AstronomyEngineChartCalculator";
+import {
+  getPlanetEclipticLongitude,
+  lonToZodiacSign,
+  type AstronomyEngineLike,
+} from "@/lib/astroos/real/ecliptic";
 
 const TRANSIT_PLANETS = [
   { key: "Sun", symbol: "☉", color: "#FBBF24" },
@@ -16,34 +21,18 @@ const TRANSIT_PLANETS = [
   { key: "Saturn", symbol: "♄", color: "#94A3B8" },
 ];
 
-const ZODIAC_SIGNS = [
-  "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
-  "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces",
-];
-
-function lonToZodiacSign(lonDeg: number): { sign: string; deg: number; min: number } {
-  const normalized = ((lonDeg % 360) + 360) % 360;
-  const signIdx = Math.floor(normalized / 30);
-  const inSign = normalized - signIdx * 30;
-  return { sign: ZODIAC_SIGNS[signIdx], deg: Math.floor(inSign), min: Math.floor((inSign % 1) * 60) };
-}
-
 export async function GET() {
   try {
-    const Astro = await loadEngine();
+    const Astro = (await loadEngine()) as AstronomyEngineLike;
     const now = new Date();
 
     const transits = TRANSIT_PLANETS.map(({ key, symbol, color }) => {
-      try {
-        const bodyObj = (Astro as unknown as Record<string, unknown>)[key] as { Equator: (d: Date) => { lon: number; lat: number } } | undefined;
-        if (!bodyObj) return { planet: key, symbol, color, sign: "Unknown", deg: 0, min: 0, lonDeg: 0 };
-        const equ = bodyObj.Equator(now);
-        const lonDeg = ((equ.lon * 180) / Math.PI + 360) % 360;
-        const { sign, deg, min } = lonToZodiacSign(lonDeg);
-        return { planet: key, symbol, color, sign, deg, min, lonDeg: Math.round(lonDeg * 100) / 100 };
-      } catch {
+      const lonDeg = getPlanetEclipticLongitude(Astro, key, now);
+      if (lonDeg === null) {
         return { planet: key, symbol, color, sign: "Unknown", deg: 0, min: 0, lonDeg: 0 };
       }
+      const { sign, deg, min } = lonToZodiacSign(lonDeg);
+      return { planet: key, symbol, color, sign, deg, min, lonDeg: Math.round(lonDeg * 100) / 100 };
     });
 
     // Detect major aspects (conjunction 0°, trine 120°, square 90°, sextile 60°, opposition 180°)

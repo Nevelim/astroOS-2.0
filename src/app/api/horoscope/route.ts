@@ -22,6 +22,7 @@ import { loadEngine } from "@/infrastructure/external-services/astronomy/Astrono
 import ZAI from "z-ai-web-dev-sdk";
 import { getOrComputeWithStatus, buildDailyKey, TTL } from "@/lib/astroos/real/llm-cache";
 import { getHoroscopeFallback } from "@/lib/astroos/real/horoscope-fallbacks";
+import { getPlanetEclipticLongitude, lonToSignName, type AstronomyEngineLike } from "@/lib/astroos/real/ecliptic";
 
 const ZODIAC_TRAITS: Record<string, { element: string; ruler: string; qualities: string }> = {
   Aries: { element: "Fire", ruler: "Mars", qualities: "courage, initiative, pioneering" },
@@ -137,20 +138,13 @@ Respond in JSON: {"en": "...", "ru": "...", "hi": "..."}`;
 }
 
 async function computeRealTransits() {
-  const Astro = await loadEngine();
+  const Astro = (await loadEngine()) as AstronomyEngineLike;
   const now = new Date();
   const planets = ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn"];
   const positions = planets.map((p) => {
-    try {
-      const bodyObj = (Astro as unknown as Record<string, unknown>)[p] as { Equator: (d: Date) => { lon: number } } | undefined;
-      if (!bodyObj) return { planet: p, lonDeg: 0, sign: "Unknown" };
-      const equ = bodyObj.Equator(now);
-      const lonDeg = ((equ.lon * 180) / Math.PI + 360) % 360;
-      const signIdx = Math.floor(lonDeg / 30);
-      return { planet: p, lonDeg: Math.round(lonDeg * 100) / 100, sign: ZODIAC_SIGNS[signIdx] };
-    } catch {
-      return { planet: p, lonDeg: 0, sign: "Unknown" };
-    }
+    const lonDeg = getPlanetEclipticLongitude(Astro, p, now);
+    if (lonDeg === null) return { planet: p, lonDeg: 0, sign: "Unknown" };
+    return { planet: p, lonDeg: Math.round(lonDeg * 100) / 100, sign: lonToSignName(lonDeg) };
   });
 
   const summary = positions.map((p) => `${p.planet} in ${p.sign}`).join(", ");

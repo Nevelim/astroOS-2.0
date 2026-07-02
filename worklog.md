@@ -279,3 +279,62 @@ Recommended next steps:
 - Or address the P1 mobile z-index conflict (bottom nav vs mobile sheet, both z-50) — pure CSS fix, no logic change.
 - Or add a "Mercury Rx shadow period" indicator (the ~5-day window before/after the stations where the effect is felt) — a small extension to the schedule panel.
 - Or add ecliptic latitude display in the Cosmic Aspects panel (getPlanetGeocentricEcliptic returns latDeg, currently unused) — useful for declination-based insights.
+
+---
+
+Task ID: 5
+Agent: Z.ai Code (cron webDevReview — job 246214, cycle 4)
+Task: Fourth autonomous cron-review cycle. Read worklog, QA app via agent-browser, prioritize fixes, add features + improve styling, update worklog.
+
+Work Log:
+- Read worklog Tasks 1-4. Task 4 added the retrograde schedule panel. Recommended next steps: cache for /api/retrograde-schedule, P1 mobile z-index, Mercury shadow period, ecliptic latitude.
+- Verified services alive (pids 2636/2637/2668), ports 3000/3003/3004 LISTENING, lint 0, HEAD cc18231, curl / = HTTP 200.
+- agent-browser QA across screens: World Map (react-leaflet, 44 lines, 0 errors), Connect (Cosmic Match + Synastry, 0 errors), Members (AuthGate + family hub preview, 0 errors). All screens stable. Investigated the "· schema" text on the Members add-member form — confirmed it is an intentional design label (Pill tone="gold">{t("members.add")} · schema</Pill>), not debug text.
+- Project is stable. Selected a new feature: **Moon Void of Course (VoC) indicator** — a classic astrological feature missing from the app. Moon VoC = when the Moon makes no major aspect before changing signs; traditionally considered unfavorable for new ventures. Also added the recommended 1-hour cache to /api/retrograde-schedule (performance fix).
+
+- Created `src/lib/astroos/real/moon-voc.ts`:
+  - `computeMoonVoC(Astro, now)` scans hourly from `now` to find the Moon's next sign ingress + the last major aspect (conjunction/sextile/square/trine/opposition to Sun/Mercury/Venus/Mars/Jupiter/Saturn) before that ingress.
+  - VoC period = [lastAspect, signIngress]. Returns isVoC, currentOrNext, following, current sign + longitude, last aspect details.
+  - 1.5° orb, 72-hour scan window.
+  - Strategy: scan forward hourly, track the last aspect (keep overwriting as we go), break at sign change. If lastAspect < signChange, VoC exists. For the following period, recurse from end+1h.
+  - Verified for 2026-07-02 07:45 UTC: Moon in Aquarius (306.14°, not VoC now), next VoC 2026-07-03 20:11 → 2026-07-04 07:11 (11h) after Moon opposition Venus (orb 1.28°), then Aquarius → Pisces ingress. This matches the test calculation and is a realistic VoC period.
+
+- Created API endpoint `src/app/api/moon-voc/route.ts`:
+  - `GET /api/moon-voc` → MoonVoCResult with 1-hour in-memory cache (Moon VoC status changes at most hourly). `X-Cache: HIT/MISS` header.
+  - `dynamic = "force-dynamic"`.
+  - curl-verified: returns isVoC=false, next VoC 2026-07-03 20:11 → 2026-07-04 07:11 (11h), lastAspect Moon opposition Venus.
+
+- Created UI component `src/components/astroos/real/RealMoonVoCPanel.tsx`:
+  - Status banner: jade "MOON IS CLEAR" with countdown to next VoC start, OR rose "MOON IS VOID OF COURSE" with countdown to VoC end. Switches GlassCard variant (jade/rose) + tone based on isVoC. Active VoC banner reuses the astro-rx-banner shimmer animation.
+  - VoC period details: 2×2 grid with start/end times, duration, sign ingress (Aquarius → Pisces with zodiac glyphs).
+  - Last aspect card: Moon ☾ + aspect glyph (☌/⚹/☐/△/☍) + aspect label + planet + orb.
+  - Following VoC preview (dashed border, collapsed).
+  - Live countdown ticks every 60s (useEffect interval). i18n EN/RU/HI for all labels including countdown formatting (1d 3h / 1д 3ч / 1दि 3घ) and date formatting.
+  - Traditionally-themed hints: "avoid starting new ventures" during VoC, "good window for new projects" when clear.
+  - Refresh button, loading skeleton, error state, live timestamp footer with Moon's current sign + longitude.
+  - Wired into `today.tsx` after RealMoonPhasePanel (logical grouping: Moon phase → Moon VoC).
+
+- Performance fix: added 1-hour in-memory cache to `/api/retrograde-schedule` (recommended in Task 4 worklog). Rx stations change at most daily, so the cache eliminates ~340 Equator calls per page load. `X-Cache: HIT/MISS` header added. Cache TTL 1 hour.
+
+- `bun run lint` → 0 errors throughout.
+- agent-browser QA: Today screen shows "Луна без курса" panel with "Следующий VoC через" countdown, 11h duration, Aquarius → Pisces, Moon ☍ Venus last aspect. 0 page errors. Screenshot saved to `/home/z/my-project/download/moon-voc-panel.png`.
+- Git: commit `0839fb3` pushed to `origin/main` (6 files changed, 612 insertions, 2 deletions).
+
+Stage Summary:
+- **New feature shipped**: Moon Void of Course indicator — a classic astrological planning tool that tells users when the Moon is "between aspects" and traditionally unfavorable for new starts. The panel shows live countdown to the next VoC period (or to its end if active), the last aspect that preceded it, the sign ingress, and the following VoC for planning.
+- **Performance fix**: 1-hour cache added to both /api/moon-voc and /api/retrograde-schedule, eliminating redundant astronomy-engine recomputation on every page load.
+- **Styling**: the VoC panel dynamically switches between jade (clear) and rose (VoC) GlassCard variants based on the Moon's status, with a shimmer animation on the active VoC banner. Live countdown ticks every minute.
+- Lint 0 errors. Dev server stable. GitHub `origin/main` HEAD `0839fb3`.
+
+Unresolved / Risks:
+- VoC station precision: the 1-hour scan step means aspect exact times can be off by up to ±1 hour. For a planning UI this is acceptable; astronomy-engine's `Search` function could refine it to the minute, but that's a larger refactor.
+- The Moon VoC helper does ~72 hourly Equator calls per request (Moon + 6 planets × 1 call each, but Moon is computed via EclipticGeoMoon and Sun via SunPosition, so it's ~72 × 5 = 360 Equator calls for the aspect planets). The 1-hour cache mitigates this; first load takes ~300-500ms.
+- Google OAuth still disabled (env empty) — unchanged.
+- Next.js 16 `middleware` deprecation warning — unchanged, non-blocking.
+- The handover's P1 list (real notifications push via WS/SSE, E2E tests, MemberRelation table, mobile responsive z-index) remains open.
+
+Recommended next steps:
+- Address the P1 mobile z-index conflict (bottom nav vs mobile sheet, both z-50) — pure CSS fix, no logic change. This is the last untouched P1 item.
+- Or add a "Mercury Rx shadow period" indicator (the ~5-day window before/after the stations) — small extension to the retrograde schedule panel.
+- Or add ecliptic latitude display in the Cosmic Aspects panel (getPlanetGeocentricEcliptic returns latDeg, currently unused).
+- Or wire the Moon VoC status into the daily horoscope LLM prompt so the narrative can mention "Moon is VoC this afternoon — defer new commitments."

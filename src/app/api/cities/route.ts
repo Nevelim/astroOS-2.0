@@ -27,12 +27,14 @@ export async function GET(req: NextRequest) {
           lat: number; lng: number; timezone: string; tzOffsetHours: number;
           population: number | null; qolIndex: number | null; costIndex: number | null;
           climate: string | null; iso2: string | null;
+          aliases: string | null;
           createdAt: string;
         }>>`
           SELECT * FROM City
           WHERE name LIKE ${pattern} COLLATE NOCASE
              OR country LIKE ${pattern} COLLATE NOCASE
              OR iso2 = ${q.toUpperCase()}
+             OR aliases LIKE ${pattern} COLLATE NOCASE
           ORDER BY name ASC
           LIMIT ${limit}
         `;
@@ -42,11 +44,13 @@ export async function GET(req: NextRequest) {
           lat: number; lng: number; timezone: string; tzOffsetHours: number;
           population: number | null; qolIndex: number | null; costIndex: number | null;
           climate: string | null; iso2: string | null;
+          aliases: string | null;
           createdAt: string;
         }>>`
           SELECT * FROM City
           WHERE name LIKE ${pattern} COLLATE NOCASE
              OR country LIKE ${pattern} COLLATE NOCASE
+             OR aliases LIKE ${pattern} COLLATE NOCASE
           ORDER BY name ASC
           LIMIT ${limit}
         `;

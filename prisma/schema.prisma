@@ -127,6 +127,7 @@ model City {
   costIndex     Int?
   climate       String?
   iso2          String?
+  aliases       String?
   createdAt     DateTime @default(now())
 
   @@index([name])

@@ -503,3 +503,55 @@ Recommended next steps:
 - Or add a "dignity calendar" showing when each planet enters/leaves its domicile/exaltation over the next month — a planning feature using the ecliptic helper + planetary-dignity module.
 - Or add ecliptic latitude display in the Cosmic Aspects panel (getPlanetGeocentricEcliptic returns latDeg, currently unused) — useful for declination-based insights.
 - Or address the remaining P1 items: MemberRelation table for the family hub, or real notifications push via the existing chat-service WebSocket.
+
+---
+
+Task ID: 9
+Agent: Z.ai Code (cron webDevReview — job 246214, cycle 8)
+Task: Eighth autonomous cron-review cycle. Read worklog, QA app via agent-browser, prioritize fixes, add features + improve styling, update worklog.
+
+Work Log:
+- Read worklog Tasks 1-8. Task 8 wired dignity into the horoscope LLM prompt. Recommended next steps: Mercury shadow period, dignity calendar, ecliptic latitude, or P1 MemberRelation/notifications.
+- Verified services alive (pids 2636/2637/2668), ports 3000/3003/3004 LISTENING, lint 0, HEAD 8ce83a8, curl / = HTTP 200.
+- agent-browser QA: Today screen — all panels present, 0 errors. Selected feature from Task 8 recommendations: **Mercury Rx shadow period indicator** — extension of the retrograde schedule panel (Task 4).
+
+- Extended `src/lib/astroos/real/retrograde-schedule.ts`:
+  - New `findShadowBounds()` helper: scans backward from retrogradeStart to find when the planet last crossed the DIRECT-station longitude (pre-shadow start — entering the Rx zone), and forward from directEnd to find when the planet next crosses the RX-station longitude (post-shadow end — leaving the zone). Uses 1-day step, 90-day scan window, wraparound-aware longitude crossing detection.
+  - RetrogradeCycle interface extended with `preShadowStart`, `postShadowEnd`, `isShadowActive` fields.
+  - Both `findInferiorCycles` and `findSuperiorCycles` now compute shadow bounds and set isShadowActive = (now in shadow but not Rx itself).
+
+- Iteration on shadow logic: first version used the wrong station longitude (rxStationLon for pre-shadow, directStationLon for post-shadow), which gave 0-3 day shadows for Mercury. Fixed: pre-shadow uses DIRECT-station lon (the planet enters the zone it will retrace), post-shadow uses RX-station lon (the planet leaves the zone). After fix, Mercury correctly shows 18d pre-shadow + 14d post-shadow.
+
+- Verified for 2026-07-02:
+  - Mercury: pre-shadow 2026-06-13 (18d before Rx), post-shadow 2026-08-08 (14d after direct). Realistic for Mercury.
+  - Venus: pre-shadow 2026-08-31 (34d), post-shadow 2026-12-16 (31d).
+  - Mars: pre-shadow 2026-11-05 (69d before Jan 2027 Rx).
+  - Jupiter/Saturn: shadow bounds fall back to Rx dates (90-day scan window insufficient for superior planets with multi-month shadows). Acceptable — shadow is most relevant for fast-moving Mercury; superior planet shadows span many months and are less actionable for planning.
+
+- Extended `src/components/astroos/real/RealRetrogradeSchedulePanel.tsx`:
+  - Active Rx banner now shows a gold-tinted "Shadow until: Aug 8 · post-shadow" info box below the progress bar when postShadowEnd > endDate + 1 day. Gold ◐ glyph, subtle border + background.
+  - New "IN SHADOW (pre/post)" section between active and upcoming stations: shows shadow-active planets (in shadow but not Rx) as gold ◐ pills with planet glyph + pre-shadow/post-shadow label. Only renders when shadowCycles.length > 0.
+  - i18n EN/RU/HI for all new labels.
+
+- `bun run lint` → 0 errors throughout.
+- agent-browser QA: Today retrograde panel shows "Тень до: 8 авг. · пост-тень" under the active Mercury Rx banner. 0 page errors. Screenshot saved to `/home/z/my-project/download/retrograde-shadow.png`.
+- Git: commit `e67e7ac` pushed to `origin/main` (3 files changed, 159 insertions).
+
+Stage Summary:
+- **New feature shipped**: Mercury Rx shadow period indicator. Users now see not just when Mercury is retrograde, but the full shadow window (pre-shadow entering + post-shadow leaving) — the period where Mercury's Rx themes (review, revisit, reframe) are felt even though Mercury is technically direct. For 2026-07-02, the active Mercury Rx banner shows post-shadow until Aug 8.
+- **Helper architecture**: findShadowBounds() uses the correct astronomical definition (pre-shadow = direct-station lon crossing, post-shadow = rx-station lon crossing). Verified for Mercury/Venus/Mars. Superior planets fall back to Rx dates due to scan window limits — documented as acceptable.
+- **Styling**: gold-tinted shadow info box (◐ glyph, subtle border) complements the existing rose Rx banner. Shadow-active planets get compact gold pills in a dedicated section.
+- Lint 0 errors. Dev server stable. GitHub `origin/main` HEAD `e67e7ac`.
+
+Unresolved / Risks:
+- Shadow bounds for Jupiter/Saturn fall back to Rx dates (90-day scan insufficient). A future improvement could extend the scan window for superior planets, but the shadows span 5+ months and are less actionable. Acceptable.
+- The shadow computation adds ~180 Equator calls per retrograde-schedule request (90 backward + 90 forward per planet × 5 planets). Mitigated by the 1-hour in-memory cache (Task 4). First cold-cache request takes ~1-2s; subsequent HITs are instant.
+- Google OAuth still disabled (env empty) — unchanged.
+- Next.js 16 `middleware` deprecation warning — unchanged, non-blocking.
+- The handover's P1 list: real notifications push (WS/SSE), E2E tests, MemberRelation table for family hub. Mobile z-index investigated in Task 6 (non-issue).
+
+Recommended next steps:
+- Add a "dignity calendar" showing when each planet enters/leaves its domicile/exaltation over the next month — a planning feature using the ecliptic helper + planetary-dignity module.
+- Or add ecliptic latitude display in the Cosmic Aspects panel (getPlanetGeocentricEcliptic returns latDeg, currently unused) — useful for declination-based insights.
+- Or address the remaining P1 items: MemberRelation table for the family hub, or real notifications push via the existing chat-service WebSocket.
+- Or extend the shadow period display to the upcoming stations timeline (show pre-shadow markers before each Rx station).

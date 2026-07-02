@@ -1,15 +1,35 @@
 "use client";
 
+import { useState } from "react";
 import {
   GlassCard, Pill, CosmicButton, SectionHeading, FadeIn, CosmicDivider,
 } from "../ui";
 import { useI18n } from "@/lib/astroos/i18n-context";
 import { MEMBERS } from "@/lib/astroos/data";
 import { RealMembersPanel } from "../real/RealMembersPanel";
+import { CityAutocomplete } from "../real/CityAutocomplete";
+import type { ResolvedBirthDTO } from "@/lib/astroos/real/api-client";
 import type { ScreenKey } from "@/lib/astroos/data";
 
 export function MembersScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => void } = {}) {
   const { t, locale } = useI18n();
+
+  // Add-member form state — keeps the form functional so the city autocomplete
+  // can drive the place + tz fields together.
+  const [memberName, setMemberName] = useState("");
+  const [memberBirth, setMemberBirth] = useState("");
+  const [memberPlace, setMemberPlace] = useState("");
+  const [memberTz, setMemberTz] = useState("");
+  const [memberGender, setMemberGender] = useState<"female" | "male">("female");
+  const [resolvedCity, setResolvedCity] = useState<ResolvedBirthDTO | null>(null);
+
+  const handleCityResolved = (result: ResolvedBirthDTO) => {
+    setResolvedCity(result);
+    setMemberPlace(result.city.displayName);
+    // Auto-fill the timezone offset from the resolved UTC offset (sign-prefixed).
+    const offset = result.birth.offsetHours;
+    setMemberTz(offset >= 0 ? `+${offset}` : `${offset}`);
+  };
 
   return (
     <div className="space-y-10">
@@ -91,25 +111,49 @@ export function MembersScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => v
           <div className="mt-4 grid gap-3 md:grid-cols-2">
             <div>
               <label className="text-[10px] uppercase tracking-wider text-[#9A9AA8]">{t("members.name")}</label>
-              <input className="mt-1 w-full rounded-lg border border-[#2A2A35] bg-[#0B0B0F]/60 px-3 py-2 text-[13px] text-[#F5F0E8] outline-none focus:border-[#E8B86D]/50" placeholder="e.g. Anna" />
+              <input
+                value={memberName}
+                onChange={(e) => setMemberName(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-[#2A2A35] bg-[#0B0B0F]/60 px-3 py-2 text-[13px] text-[#F5F0E8] outline-none focus:border-[#E8B86D]/50"
+                placeholder="e.g. Anna"
+              />
             </div>
             <div>
               <label className="text-[10px] uppercase tracking-wider text-[#9A9AA8]">{t("members.birth")}</label>
-              <input className="mt-1 w-full rounded-lg border border-[#2A2A35] bg-[#0B0B0F]/60 px-3 py-2 text-[13px] text-[#F5F0E8] outline-none focus:border-[#E8B86D]/50 font-mono" placeholder="1989-11-07T04:17" />
+              <input
+                value={memberBirth}
+                onChange={(e) => setMemberBirth(e.target.value)}
+                className="mt-1 w-full rounded-lg border border-[#2A2A35] bg-[#0B0B0F]/60 px-3 py-2 text-[13px] text-[#F5F0E8] outline-none focus:border-[#E8B86D]/50 font-mono"
+                placeholder="1989-11-07T04:17"
+              />
             </div>
             <div>
               <label className="text-[10px] uppercase tracking-wider text-[#9A9AA8]">{t("members.place")}</label>
-              <input className="mt-1 w-full rounded-lg border border-[#2A2A35] bg-[#0B0B0F]/60 px-3 py-2 text-[13px] text-[#F5F0E8] outline-none focus:border-[#E8B86D]/50" placeholder="Saint Petersburg, RU" />
+              <CityAutocomplete
+                initialValue={memberPlace}
+                birthDateTime={memberBirth}
+                onCityResolved={handleCityResolved}
+              />
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div>
                 <label className="text-[10px] uppercase tracking-wider text-[#9A9AA8]">{t("members.tz")}</label>
-                <input className="mt-1 w-full rounded-lg border border-[#2A2A35] bg-[#0B0B0F]/60 px-3 py-2 text-[13px] text-[#F5F0E8] outline-none focus:border-[#E8B86D]/50 font-mono" placeholder="+3" />
+                <input
+                  value={memberTz}
+                  onChange={(e) => setMemberTz(e.target.value)}
+                  className="mt-1 w-full rounded-lg border border-[#2A2A35] bg-[#0B0B0F]/60 px-3 py-2 text-[13px] text-[#F5F0E8] outline-none focus:border-[#E8B86D]/50 font-mono"
+                  placeholder="+3"
+                />
               </div>
               <div>
                 <label className="text-[10px] uppercase tracking-wider text-[#9A9AA8]">{t("members.gender")}</label>
-                <select className="mt-1 w-full rounded-lg border border-[#2A2A35] bg-[#0B0B0F]/60 px-3 py-2 text-[13px] text-[#F5F0E8] outline-none focus:border-[#E8B86D]/50">
-                  <option>Female</option><option>Male</option>
+                <select
+                  value={memberGender}
+                  onChange={(e) => setMemberGender(e.target.value as "female" | "male")}
+                  className="mt-1 w-full rounded-lg border border-[#2A2A35] bg-[#0B0B0F]/60 px-3 py-2 text-[13px] text-[#F5F0E8] outline-none focus:border-[#E8B86D]/50"
+                >
+                  <option value="female">Female</option>
+                  <option value="male">Male</option>
                 </select>
               </div>
             </div>
@@ -118,6 +162,11 @@ export function MembersScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => v
             <Pill tone="jade">✓ Auto timezone</Pill>
             <Pill tone="jade">✓ Duplicate check</Pill>
             <Pill tone="muted">True Solar Time via Python</Pill>
+            {resolvedCity && (
+              <Pill tone="gold">
+                {resolvedCity.birth.dstActive ? "☀ DST active" : "No DST"} · {resolvedCity.birth.offsetLabel}
+              </Pill>
+            )}
           </div>
           <div className="mt-3">
             <CosmicButton variant="primary" className="!py-2 !px-4 !text-[12px]">✦ {t("members.add")}</CosmicButton>

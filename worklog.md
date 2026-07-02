@@ -129,3 +129,78 @@ Recommended next steps:
 - If the next cycle is stable: consider adding a small "Mercury retrograde" indicator to the Cosmic Aspects panel (astronomy-engine supports the calculation via comparing ecliptic longitude deltas day-over-day). Low-risk additive feature.
 - Or address the P1 mobile z-index conflict (bottom nav vs mobile sheet, both z-50) — a pure CSS fix, no logic change.
 - Or wire the new ecliptic helper into transit-forecast for DRY consolidation (touching only already-correct code, low risk).
+
+---
+
+Task ID: 3
+Agent: Z.ai Code (cron webDevReview — job 246214, cycle 2)
+Task: Second autonomous cron-review cycle. Read worklog, QA app via agent-browser, prioritize bug fixes, add features + improve styling, update worklog.
+
+Work Log:
+- Read worklog Tasks 1-2. Project stable: 3 services alive, lint 0, HEAD 0ba6ae1. Task 2 fixed the "Unknown" transit signs and added the Cosmic Aspects panel. Recommended next steps: Mercury retrograde indicator, mobile z-index fix, or DRY consolidation.
+- Verified services (pids 2636/2637/2668), ports 3000/3003/3004 LISTENING, lint 0, curl / = HTTP 200.
+- agent-browser QA across screens: Self (natal chart, aspects, BaZi — 0 errors), Divine (I-Ching, Tarot — 0 errors), Mentor (chat — 0 errors). App stable.
+
+- Started implementing the recommended Mercury retrograde indicator. Added `isPlanetRetrograde()` to ecliptic.ts (compares geocentric lon now vs 24h ago). Initial test: ALL planets returned retrograde=false. Investigated.
+
+- ROOT CAUSE DISCOVERY (P0 bug, more severe than Task 2's "Unknown" bug): astronomy-engine's `EclipticLongitude(body, date)` returns HELIOCENTRIC ecliptic longitude (Sun-centered), NOT geocentric. This is documented in the astronomy-engine API but was missed by the original developer. Consequences:
+  1. ALL planet signs were wrong: Mercury showed at 260° (Sagittarius) while the Sun was at 100° (Cancer) — a 160° separation that is astronomically IMPOSSIBLE (Mercury's max elongation is 28° from the Sun).
+  2. Retrograde detection was impossible: heliocentric planets never go retrograde (they always orbit forward around the Sun). Retrograde is a GEOCENTRIC apparent-motion phenomenon.
+  3. The handover claimed the "Sun position = 0°" bug was fixed by switching to SunPosition/EclipticGeoMoon/EclipticLongitude — but only Sun and Moon were correct (they have dedicated geocentric functions). Mercury through Saturn used the heliocentric EclipticLongitude, so EVERY natal chart, transit, and forecast had wrong planet positions.
+  4. This was latent because the signs still "looked like" zodiac signs — just the WRONG zodiac signs. No runtime error, no crash, just silently incorrect astrology.
+
+- Verified the correct geocentric approach via `Equator(body, date, Observer(0,0,0), ofdate=true, aberration=true)` + spherical conversion with obliquity 23.439°. Cross-checked against astronomy-engine's own `Elongation()` function: Mercury 15.5° from Sun (valid, <28°), Venus 41° (valid, <47°). Heliocentric gave 160° and 110° respectively — both impossible.
+
+- FIX: rewrote `src/lib/astroos/real/ecliptic.ts`:
+  - `getPlanetEclipticLongitude()` now uses Equator+conversion for planets (was EclipticLongitude/heliocentric). Sun and Moon unchanged (already geocentric).
+  - Added `getPlanetGeocentricEcliptic()` returning {lonDeg, latDeg} for natal charts that need ecliptic latitude.
+  - `isPlanetRetrograde()` now works (geocentric longitudes DO go retrograde). Mercury correctly detected as retrograde on 2026-07-02 (matches the real Jun 29-Jul 23, 2026 Mercury Rx period in Cancer).
+
+- Applied the geocentric helper to ALL affected files (consistency fix — leaving any file heliocentric would create inconsistent data across endpoints):
+  - `src/app/api/transits/route.ts` — already used the helper (auto-fixed when ecliptic.ts was rewritten).
+  - `src/app/api/horoscope/route.ts` — already used the helper (auto-fixed).
+  - `src/app/api/affirmation/route.ts` — already used the helper (auto-fixed).
+  - `src/app/api/transit-forecast/route.ts` — rewrote to use the helper instead of inline EclipticLongitude calls (consolidated + fixed).
+  - `src/infrastructure/external-services/astronomy/AstronomyEngineChartCalculator.ts` — rewrote the planetPositions block to use `getPlanetGeocentricEcliptic()`. This fixes ALL natal charts (the core feature).
+
+- Verification:
+  - `/api/transits`: Sun Cancer 10°, Moon Aquarius 6°, Mercury Cancer 26° Rx=True, Venus Leo 21°, Mars Gemini 2°, Jupiter Leo 0°, Saturn Aries 14°. All elongations valid.
+  - `/api/transit-forecast`: same geocentric positions, 2 ingresses detected over 7 days.
+  - `/api/calculate` (natal chart for 1989-11-07 04:17 UTC+3 St Petersburg): Sun Scorpio 14°, Moon Aquarius 20°, Mercury Scorpio 12°, Venus Capricorn 1°, Mars Scorpio 1°, Jupiter Cancer 10°, Saturn Capricorn 9°, Uranus/Neptune/Pluto all in Capricorn/Scorpio. Historically correct for Nov 1989 (Jupiter was in Cancer, Saturn in Capricorn). The mockMember "Scorpio · Pisces · Aquarius" now matches: Sun Scorpio, Moon Aquarius.
+  - Horoscope narrative (LLM) now cites "Солнце и Меркурий в Раке" (Sun and Mercury in Cancer) — both geocentrically in Cancer, correct.
+
+- NEW FEATURE: retrograde indicator in RealCosmicAspectsPanel
+  - `/api/transits` response now includes `retrograde: boolean` per planet.
+  - Panel shows an ℞ badge (rose, pulsing) on retrograde planet pills + a rose border breathing animation on the pill itself.
+  - Retrograde alert banner at the top of the panel with a diagonal shimmer sweep animation. Lists all retrograde planets by name. Mercury Rx gets a special "revisit, reflect, re-read the fine print" message; other Rx planets get a generic "apparent backward motion — inward work favored" message. i18n EN/RU/HI.
+  - Currently shows "Сейчас ретроградны: Mercury" (Mercury is the only retrograde planet on 2026-07-02).
+
+- STYLING: 3 new CSS keyframe animations in globals.css:
+  - `astro-rx-glyph-pulse` (2.4s) — rose text-shadow breathing on the ℞ glyph.
+  - `astro-rx-banner-shimmer` (4.5s) — diagonal light sweep across the banner (via ::after pseudo-element).
+  - `astro-rx-planet-border` (3.2s) — rose border-color + box-shadow breathing on retrograde planet pills.
+  - Utility classes: `.astro-rx-glyph`, `.astro-rx-banner`, `.astro-rx-planet`.
+
+- `bun run lint` → 0 errors throughout.
+- agent-browser QA: Today screen shows retrograde banner "Сейчас ретроградны: Mercury" + ℞ badge on Mercury pill + correct geocentric signs in the transit summary. 0 page errors. Screenshot saved to `/home/z/my-project/download/retrograde-banner.png`.
+- Git: commit `d0a504c` pushed to `origin/main` (7 files changed, 264 insertions, 105 deletions).
+
+Stage Summary:
+- **P0 bug fixed (severe)**: the entire astrology engine was using heliocentric positions for Mercury-Saturn. This was worse than Task 2's "Unknown" bug — the signs rendered, but they were the WRONG signs. Every natal chart, transit, and forecast ever generated by the app was incorrect. Now all use geocentric apparent ecliptic longitude via the ecliptic.ts helper. Verified against astronomy-engine's Elongation function and historical ephemeris (1989 natal chart matches).
+- **New feature shipped**: retrograde detection + UI. Mercury correctly flagged as retrograde on 2026-07-02. ℞ badge on planet pills + alert banner with shimmer animation. This was impossible before the geocentric fix (heliocentric planets never go retrograde).
+- **Styling extended**: 3 new CSS keyframe animations for retrograde visualization, integrated into the Hades 2 cosmic dark theme.
+- Lint 0 errors. Dev server stable. GitHub `origin/main` HEAD `d0a504c`.
+
+Unresolved / Risks:
+- The geocentric fix changes ALL planet positions in the app. Any cached natal charts (CalculationCache in DB) generated before this fix contain heliocentric (wrong) longitudes. The cache key is based on birth data, not the engine version, so stale caches will serve wrong data until they expire or are cleared. Recommendation: clear the CalculationCache table (or bump a cache version) — NOT done here to avoid touching data without explicit user approval.
+- The AstronomyEngineChartCalculator change touches the "sacred" core calculator, but it was a clear correctness bug (heliocentric ≠ geocentric for astrology). The fix is surgical: only the planetPositions block changed; ascendant/MC/house cusps/great-circle lines are untouched.
+- `EclipticLongitude` is no longer used anywhere in the app. Could be removed from the AstronomyEngineLike type, but left for potential future heliocentric use cases (e.g. heliocentric transits for advanced features).
+- Google OAuth still disabled (env empty) — unchanged.
+- Next.js 16 `middleware` deprecation warning — unchanged, non-blocking.
+- The handover's P1 list (real notifications push via WS/SSE, E2E tests, MemberRelation table, mobile responsive z-index) remains open.
+
+Recommended next steps:
+- Clear the CalculationCache table so users get correct geocentric natal charts instead of stale heliocentric ones (one-line Prisma delete, but needs user awareness).
+- Consider adding a "retrograde schedule" mini-panel showing upcoming Rx stations (Mercury/Venus/Mars) using astronomy-engine's SearchRelativeLongitude function — a natural extension of the retrograde feature.
+- Or address the P1 mobile z-index conflict (bottom nav vs mobile sheet, both z-50) — pure CSS fix.
+- Or add ecliptic latitude display in the Cosmic Aspects panel (now that getPlanetGeocentricEcliptic returns latDeg) — useful for declination-based insights.

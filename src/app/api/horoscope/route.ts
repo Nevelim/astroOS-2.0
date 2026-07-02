@@ -22,7 +22,8 @@ import { loadEngine } from "@/infrastructure/external-services/astronomy/Astrono
 import ZAI from "z-ai-web-dev-sdk";
 import { getOrComputeWithStatus, buildDailyKey, TTL } from "@/lib/astroos/real/llm-cache";
 import { getHoroscopeFallback } from "@/lib/astroos/real/horoscope-fallbacks";
-import { getPlanetEclipticLongitude, lonToSignName, type AstronomyEngineLike } from "@/lib/astroos/real/ecliptic";
+import { getPlanetEclipticLongitude, isPlanetRetrograde, lonToSignName, type AstronomyEngineLike } from "@/lib/astroos/real/ecliptic";
+import { computeMoonVoC } from "@/lib/astroos/real/moon-voc";
 
 const ZODIAC_TRAITS: Record<string, { element: string; ruler: string; qualities: string }> = {
   Aries: { element: "Fire", ruler: "Mars", qualities: "courage, initiative, pioneering" },
@@ -64,6 +65,17 @@ export async function GET(req: NextRequest) {
     const transits = await computeRealTransits();
     const traits = ZODIAC_TRAITS[sign];
 
+    // Moon Void of Course + retrograde list — for richer LLM context.
+    const Astro = (await loadEngine()) as AstronomyEngineLike;
+    const now = new Date();
+    const moonVoC = computeMoonVoC(Astro, now);
+    const retrogradePlanets = transits.positions
+      .filter((p) => p.retrograde)
+      .map((p) => p.planet);
+
+    // Build a single rich context string for the LLM prompt.
+    const astroContext = buildAstroContext(transits, moonVoC, retrogradePlanets);
+
     // AI narrative via ZAI — cached per (sign, locale, day) with 6h TTL.
     // 429 / 5xx / network errors degrade gracefully: stale → hand-written.
     const cacheKey = buildDailyKey("horoscope", sign, locale);
@@ -74,7 +86,7 @@ export async function GET(req: NextRequest) {
       const result = await getOrComputeWithStatus<Narrative>(
         cacheKey,
         TTL.HOROSCOPE,
-        () => computeHoroscopeNarrative(sign, traits, transits)
+        () => computeHoroscopeNarrative(sign, traits, astroContext)
       );
       narrative = result.value;
       cacheStatus = result.status;
@@ -95,6 +107,15 @@ export async function GET(req: NextRequest) {
       transits: transits.summary,
       moonPhase: transits.moonPhase,
       keyAspects: transits.aspects.slice(0, 3),
+      retrogradePlanets,
+      moonVoC: {
+        isVoC: moonVoC.isVoC,
+        nextVoCStart: moonVoC.currentOrNext?.startTime ?? null,
+        nextVoCEnd: moonVoC.currentOrNext?.endTime ?? null,
+        durationHours: moonVoC.currentOrNext?.durationHours ?? null,
+        sign: moonVoC.currentOrNext?.sign ?? null,
+        nextSign: moonVoC.currentOrNext?.nextSign ?? null,
+      },
       narrative,
       locale,
     });
@@ -110,12 +131,21 @@ export async function GET(req: NextRequest) {
 async function computeHoroscopeNarrative(
   sign: string,
   traits: { element: string; ruler: string; qualities: string },
-  transits: { summary: string; moonPhase: string }
+  astroContext: string,
 ): Promise<Narrative> {
   const zai = await getZAI();
   const systemPrompt = `You are the AstroOS Mentor. Generate a daily horoscope for ${sign} (${traits.element}, ruled by ${traits.ruler}, qualities: ${traits.qualities}).
-Based on today's real transits: ${transits.summary}.
-Rules: No fear-mongering. No paywall traps. Cite real transits. End with a gentle, actionable reflection. 2-3 paragraphs max.
+
+Today's real astrological context:
+${astroContext}
+
+Rules:
+- No fear-mongering. No paywall traps.
+- Cite the REAL transits, retrogrades, and Moon phase above. If the Moon is Void of Course, mention it and advise deferring new commitments.
+- If a planet is retrograde (marked "in Sign (R)"), weave its theme (review, revisit, reframe) into the narrative.
+- End with a gentle, actionable reflection.
+- 2-3 paragraphs max.
+
 Respond in JSON: {"en": "...", "ru": "...", "hi": "..."}`;
 
   const completion = await zai.chat.completions.create({
@@ -143,23 +173,27 @@ async function computeRealTransits() {
   const planets = ["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn"];
   const positions = planets.map((p) => {
     const lonDeg = getPlanetEclipticLongitude(Astro, p, now);
-    if (lonDeg === null) return { planet: p, lonDeg: 0, sign: "Unknown" };
-    return { planet: p, lonDeg: Math.round(lonDeg * 100) / 100, sign: lonToSignName(lonDeg) };
+    if (lonDeg === null) return { planet: p, lonDeg: 0, sign: "Unknown", retrograde: false };
+    const retrograde = isPlanetRetrograde(Astro, p, now) ?? false;
+    return { planet: p, lonDeg: Math.round(lonDeg * 100) / 100, sign: lonToSignName(lonDeg), retrograde };
   });
 
-  const summary = positions.map((p) => `${p.planet} in ${p.sign}`).join(", ");
+  // Summary includes retrograde marker (℞) for retrograde planets.
+  const summary = positions
+    .map((p) => `${p.planet} in ${p.sign}${p.retrograde ? " (R)" : ""}`)
+    .join(", ");
 
-  // Simple aspects
-  const aspects: Array<{ a: string; b: string; type: string }> = [];
+  // Simple aspects — now include orb for richer LLM context.
+  const aspects: Array<{ a: string; b: string; type: string; orb: number }> = [];
   for (let i = 0; i < positions.length; i++) {
     for (let j = i + 1; j < positions.length; j++) {
       const diff = Math.abs(positions[i].lonDeg - positions[j].lonDeg);
       const norm = Math.min(diff, 360 - diff);
-      if (norm < 8) aspects.push({ a: positions[i].planet, b: positions[j].planet, type: "conjunct" });
-      else if (Math.abs(norm - 60) < 6) aspects.push({ a: positions[i].planet, b: positions[j].planet, type: "sextile" });
-      else if (Math.abs(norm - 90) < 8) aspects.push({ a: positions[i].planet, b: positions[j].planet, type: "square" });
-      else if (Math.abs(norm - 120) < 8) aspects.push({ a: positions[i].planet, b: positions[j].planet, type: "trine" });
-      else if (Math.abs(norm - 180) < 8) aspects.push({ a: positions[i].planet, b: positions[j].planet, type: "opposite" });
+      if (norm < 8) aspects.push({ a: positions[i].planet, b: positions[j].planet, type: "conjunct", orb: Math.round(norm * 10) / 10 });
+      else if (Math.abs(norm - 60) < 6) aspects.push({ a: positions[i].planet, b: positions[j].planet, type: "sextile", orb: Math.round(Math.abs(norm - 60) * 10) / 10 });
+      else if (Math.abs(norm - 90) < 8) aspects.push({ a: positions[i].planet, b: positions[j].planet, type: "square", orb: Math.round(Math.abs(norm - 90) * 10) / 10 });
+      else if (Math.abs(norm - 120) < 8) aspects.push({ a: positions[i].planet, b: positions[j].planet, type: "trine", orb: Math.round(Math.abs(norm - 120) * 10) / 10 });
+      else if (Math.abs(norm - 180) < 8) aspects.push({ a: positions[i].planet, b: positions[j].planet, type: "opposite", orb: Math.round(Math.abs(norm - 180) * 10) / 10 });
     }
   }
 
@@ -177,4 +211,35 @@ async function computeRealTransits() {
   } catch { void moonPhase; }
 
   return { positions, summary, aspects, moonPhase };
+}
+
+/** Build a rich astrological context string for the LLM prompt. */
+function buildAstroContext(
+  transits: { summary: string; aspects: Array<{ a: string; b: string; type: string; orb: number }>; moonPhase: string },
+  moonVoC: { isVoC: boolean; currentOrNext: { startTime: string; endTime: string; durationHours: number; sign: string; nextSign: string } | null },
+  retrogradePlanets: string[],
+): string {
+  const lines: string[] = [];
+  lines.push(`Current transits: ${transits.summary}.`);
+  lines.push(`Moon phase: ${transits.moonPhase}.`);
+  if (transits.aspects.length > 0) {
+    const aspectStr = transits.aspects
+      .slice(0, 5)
+      .map((a) => `${a.a} ${a.type} ${a.b} (orb ${a.orb}°)`)
+      .join(", ");
+    lines.push(`Major aspects: ${aspectStr}.`);
+  }
+  if (retrogradePlanets.length > 0) {
+    lines.push(`Retrograde planets: ${retrogradePlanets.join(", ")}. Reflect their themes (review, revisit, reframe) rather than initiating new endeavors in those domains.`);
+  }
+  if (moonVoC.currentOrNext) {
+    if (moonVoC.isVoC) {
+      const end = new Date(moonVoC.currentOrNext.endTime);
+      lines.push(`The Moon is currently Void of Course (until ${end.toISOString().slice(0, 16)} UTC, then enters ${moonVoC.currentOrNext.nextSign}). Traditionally a time to rest, reflect, and complete existing tasks rather than start new things.`);
+    } else {
+      const start = new Date(moonVoC.currentOrNext.startTime);
+      lines.push(`The Moon is NOT Void of Course now. Next VoC: ${start.toISOString().slice(0, 16)} UTC for ${moonVoC.currentOrNext.durationHours}h (Moon in ${moonVoC.currentOrNext.sign} → ${moonVoC.currentOrNext.nextSign}).`);
+    }
+  }
+  return lines.join("\n");
 }

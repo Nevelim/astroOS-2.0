@@ -21,6 +21,15 @@ interface HoroscopeData {
   keyAspects: Array<{ a: string; b: string; type: string }>;
   narrative: { en: string; ru: string; hi: string };
   locale: string;
+  retrogradePlanets?: string[];
+  moonVoC?: {
+    isVoC: boolean;
+    nextVoCStart: string | null;
+    nextVoCEnd: string | null;
+    durationHours: number | null;
+    sign: string | null;
+    nextSign: string | null;
+  } | null;
 }
 
 /** X-Cache response header values from /api/horoscope. */
@@ -383,6 +392,35 @@ export function RealHoroscopePanel({ locale, sign: signProp, onAspectClick }: { 
                   </p>
                 </div>
               </div>
+
+              {/* Astrological context badges (retrograde + VoC) */}
+              {((data.retrogradePlanets && data.retrogradePlanets.length > 0) || data.moonVoC) && (
+                <div className="mt-3 flex flex-wrap gap-1.5">
+                  {data.retrogradePlanets?.map((p) => (
+                    <span
+                      key={`rx-${p}`}
+                      className="astro-rx-glyph inline-flex items-center gap-1 rounded-full border border-[#D98E7A]/40 bg-[#D98E7A]/[0.08] px-2 py-0.5 text-[10px] font-medium text-[#D98E7A]"
+                      title={`${p} retrograde`}
+                    >
+                      <span>℞</span>
+                      <span>{p}</span>
+                    </span>
+                  ))}
+                  {data.moonVoC && (
+                    <span
+                      className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-medium ${
+                        data.moonVoC.isVoC
+                          ? "border-[#D98E7A]/40 bg-[#D98E7A]/[0.08] text-[#D98E7A]"
+                          : "border-[#5BB89C]/40 bg-[#5BB89C]/[0.08] text-[#5BB89C]"
+                      }`}
+                      title={data.moonVoC.isVoC ? "Moon Void of Course" : "Moon clear (not VoC)"}
+                    >
+                      <span>☾</span>
+                      <span>{data.moonVoC.isVoC ? "VoC" : "clear"}</span>
+                    </span>
+                  )}
+                </div>
+              )}
 
               {/* Transits summary */}
               <div className="mt-3 flex items-center gap-1.5 text-[10px]" style={{ color: "#F5F0E860" }}>

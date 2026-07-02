@@ -395,3 +395,60 @@ Recommended next steps:
 - Or add ecliptic latitude display in the Cosmic Aspects panel (getPlanetGeocentricEcliptic returns latDeg, currently unused) — useful for declination-based insights.
 - Or add a new "Planetary Dignities" panel showing essential dignity scores (domicile/exaltation/debility/fall) for each planet based on its current sign — a classic astrology feature that astronomy-engine + the ecliptic helper can support. This would complement the existing PlanetaryStrengthsPanel on the Self screen.
 - Or address the remaining P1 items: MemberRelation table for the family hub, or real notifications push via the existing chat-service WebSocket.
+
+---
+
+Task ID: 7
+Agent: Z.ai Code (cron webDevReview — job 246214, cycle 6)
+Task: Sixth autonomous cron-review cycle. Read worklog, QA app via agent-browser, prioritize fixes, add features + improve styling, update worklog.
+
+Work Log:
+- Read worklog Tasks 1-6. Task 6 wired Moon VoC + retrograde into the horoscope LLM prompt. Recommended next steps: Mercury shadow period, ecliptic latitude, Planetary Dignities panel, or P1 MemberRelation/notifications.
+- Verified services alive (pids 2636/2637/2668), ports 3000/3003/3004 LISTENING, lint 0, HEAD 1671020, curl / = HTTP 200.
+- agent-browser QA: Self screen (0 errors). Found that PlanetaryStrengthsPanel already computes essential dignity for NATAL positions. Selected the complementary feature: a **Planetary Dignity panel for TRANSIT positions** on the Today screen — shows the dignity of each planet's CURRENT sign, not the natal sign. This answers "how strong is Mercury today?" (Mercury in Cancer today = Neutral, but in Virgo it would be both Ruler and Exalted).
+
+- Created `src/lib/astroos/real/planetary-dignity.ts` — canonical dignity module:
+  - `getPlanetDignity(planet, sign)` returns `{ dignity, score, label }` where dignity is "Ruler" | "Exalted" | "Detriment" | "Fall" | "Neutral".
+  - Tables: RULERSHIPS (domicile, including modern rulers for Uranus/Neptune/Pluto), EXALTATIONS (traditional 7), DETRIMENTS (opposite of rulership), FALLS (opposite of exaltation).
+  - Scoring: Ruler +5, Exalted +4, Neutral 0, Fall -2, Detriment -3.
+  - `dignityTone()` maps to gold/jade/rose/neutral for UI rendering.
+  - `dignityDescription()` returns localized tooltip text explaining what each dignity means.
+  - This is the canonical module; the natal PlanetaryStrengthsPanel keeps its own inline copy (untouched per integrator scope — I did not refactor existing code).
+
+- Extended `/api/transits` to include `dignity` + `dignityScore` per planet (reuses the helper). Verified for 2026-07-02:
+  - Saturn in Aries = **Fall (-2)** ✓ (Saturn exalted in Libra, opposite = Aries)
+  - Mercury in Cancer = Neutral ✓ (Mercury rules Gemini/Virgo, exalted Virgo, detriment Sagittarius/Pisces, fall Pisces — Cancer is neutral)
+  - Jupiter in Leo = Neutral ✓ (rules Sagittarius/Pisces, exalted Cancer, detriment Gemini/Virgo, fall Capricorn — Leo is neutral)
+  - All others Neutral.
+
+- Created `src/components/astroos/real/RealPlanetaryDignityPanel.tsx`:
+  - Two zones: highlighted non-neutral planets (tone-colored cards with planet glyph, sign glyph + name, dignity label, dignity icon ♔/↑/↓/⤓, score) + neutral planets (compact pill row with all neutral planets listed).
+  - Net dignity score badge in the header (gold for positive, rose for negative, neutral for zero).
+  - Tone coding: Ruler=gold, Exalted=jade, Detriment/Fall=rose, Neutral=muted. Each card has hover lift + colored glow shadow.
+  - Retrograde planets show the ℞ badge (reuses astro-rx-glyph pulse).
+  - Scoring legend in footer (Ruler +5 · Exalted +4 · Neutral 0 · Fall −2 · Detriment −3).
+  - i18n EN/RU/HI for all labels + descriptions + tooltips. Refresh button, loading skeleton, live timestamp.
+  - Wired into `today.tsx` after RealCosmicAspectsPanel (logical grouping: aspects → dignity → retrograde schedule).
+
+- `bun run lint` → 0 errors throughout.
+- agent-browser QA: Today screen shows "Достоинство планет сегодня" panel with "СУММАРНЫЙ БАЛЛ ДОСТОИНСТВА", Saturn Fall highlighted, 6 neutral planets in compact row, scoring legend. 0 page errors. Screenshot saved to `/home/z/my-project/download/planetary-dignity-panel.png`.
+- Git: commit `a2871f9` pushed to `origin/main` (5 files changed, 512 insertions, 2 deletions).
+
+Stage Summary:
+- **New feature shipped**: Planetary Dignity panel for transit positions — users can now see at a glance whether each planet is strong or weak today based on the classical essential dignity system. Today (2026-07-02) Saturn is in Fall (weak in Aries), which complements the Cosmic Aspects panel's "Saturn in Aries" data with the qualitative "this is a debilitated position" insight.
+- **Helper architecture**: the planetary-dignity.ts module is the canonical source for dignity tables. The natal PlanetaryStrengthsPanel has its own copy (untouched); future work could consolidate, but that's out of integrator scope.
+- **Styling**: tone-coded dignity cards (gold/jade/rose) with hover glow, dignity icons (♔ for Ruler, ↑/↓/⤓), net score badge, compact neutral row — all integrated into the Hades 2 cosmic dark theme.
+- Lint 0 errors. Dev server stable. GitHub `origin/main` HEAD `a2871f9`.
+
+Unresolved / Risks:
+- The dignity tables use traditional rulerships for the 7 classical planets + modern rulerships for Uranus/Neptune/Pluto. Some astrologers dispute the modern assignments (e.g. Saturn vs Uranus for Aquarius). The helper includes both, so a planet in Aquarius will show Saturn as Ruler (traditional) — Uranus is also in the RULERSHIPS map. This is a known ambiguity in astrology, not a bug.
+- Exaltations for Uranus/Neptune/Pluto are not traditionally defined; the helper leaves them empty, so those planets can only be Ruler/Neutral (no Exalted/Fall). Acceptable.
+- Google OAuth still disabled (env empty) — unchanged.
+- Next.js 16 `middleware` deprecation warning — unchanged, non-blocking.
+- The handover's P1 list: real notifications push (WS/SSE), E2E tests, MemberRelation table for family hub. Mobile z-index investigated in Task 6 (non-issue).
+
+Recommended next steps:
+- Add a "Mercury Rx shadow period" indicator to the retrograde schedule panel (the ~5-day pre-shadow and post-shadow windows around each Rx station) — small extension using the existing cycle data.
+- Or wire the planetary dignity into the horoscope LLM prompt (like Task 6 did for retrograde/VoC) so the narrative can say "Saturn is in Fall today — expect delays and structural challenges."
+- Or add a "dignity calendar" showing when each planet enters/leaves its domicile/exaltation over the next month — a planning feature.
+- Or address the remaining P1 items: MemberRelation table for the family hub, or real notifications push via the existing chat-service WebSocket.

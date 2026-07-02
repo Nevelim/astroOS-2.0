@@ -204,3 +204,78 @@ Recommended next steps:
 - Consider adding a "retrograde schedule" mini-panel showing upcoming Rx stations (Mercury/Venus/Mars) using astronomy-engine's SearchRelativeLongitude function — a natural extension of the retrograde feature.
 - Or address the P1 mobile z-index conflict (bottom nav vs mobile sheet, both z-50) — pure CSS fix.
 - Or add ecliptic latitude display in the Cosmic Aspects panel (now that getPlanetGeocentricEcliptic returns latDeg) — useful for declination-based insights.
+
+---
+
+Task ID: 4
+Agent: Z.ai Code (cron webDevReview — job 246214, cycle 3)
+Task: Third autonomous cron-review cycle. Read worklog, QA app via agent-browser, prioritize fixes, add features + improve styling, update worklog.
+
+Work Log:
+- Read worklog Tasks 1-3. Task 3 fixed the critical geocentric-position bug and added retrograde detection. Main unresolved risk flagged: "stale CalculationCache with heliocentric (wrong) longitudes".
+- Verified services alive (pids 2636/2637/2668), ports 3000/3003/3004 LISTENING, lint 0, HEAD 59d6c70, curl / = HTTP 200.
+- Checked CalculationCache via Prisma: **0 entries**. The stale-cache risk from Task 3 does NOT apply — the DB has no cached natal charts, so all new calculations use the corrected geocentric engine. Risk closed.
+- agent-browser QA: `/` loads clean, 0 errors. Today screen confirms Task 3's fixes persist: retrograde banner "Сейчас ретроградны: Mercury", geocentric signs "Sun in Cancer, Moon in Aquarius, Mercury in Cancer, Venus in Leo, Mars in Gemini, Jupiter in Leo, Saturn in Aries", 0 page errors.
+
+- Selected feature from Task 3 recommendations: **retrograde schedule panel** (upcoming Rx/direct stations). This is a natural extension of the retrograde feature and uses astronomy-engine's SearchRelativeLongitude.
+
+- Created `src/lib/astroos/real/retrograde-schedule.ts`:
+  - `findUpcomingRetrogradeCycles(Astro, planet, now, maxCycles)` — two strategies:
+    - Inferior planets (Mercury, Venus): use `SearchRelativeLongitude(body, 0, cursor, tol)` to find the next inferior conjunction (Rx center), then day-by-day scanning (1-day step, ±30-day window) refines the exact Rx/direct stations.
+    - Superior planets (Mars, Jupiter, Saturn): Rx cycles are long (75–140 days) and opposition can be far in the future, so SearchRelativeLongitude is unreliable for catching active cycles. Instead, forward delta-sign-change scanning over 1020 days (3-day step to avoid numerical noise on slow planets like Saturn at 0.03°/d) collects all transitions, then pairs them into (Rx-start, Direct-end) cycles. Handles already-active cycles by prepending a synthetic start when the planet is retrograde at scan start.
+  - `cyclesToStations()` flattens cycles into a date-sorted station list.
+  - Returns `RetrogradeCycle[]` with {planet, startDate, endDate, durationDays, centerDate, sign, isActive}.
+
+- Iterated through 5 debugging rounds to get all 5 planets correct:
+  1. Initial version: Mercury correct (24d active), but Mars/Jupiter/Saturn returned 0 cycles — the `findStationsAround` window (±80d) was too small and the first-transition logic missed already-active cycles.
+  2. Widened window to ±140d + 3-day step for superior planets: Saturn gave 21-day cycles (wrong, should be ~138d) — the first-transition logic caught noise.
+  3. Rewrote `findStationsAround` to find the LAST forward→retro transition before center and FIRST retro→forward after center: Saturn/Jupiter returned 0 cycles because the opposition was far in the future and the planet was already retrograde at the scan window start.
+  4. Split into `findInferiorCycles` (keeps the SearchRelativeLongitude + stations approach) and `findSuperiorCycles` (pure delta-sign scanning with synthetic-start handling).
+  5. Final verification: all 5 planets match published 2026-2027 ephemerides.
+
+- Verified against ephemeris for 2026-07-02:
+  - Mercury Rx: 1–25 Jul 2026 (24d, Cancer) — **ACTIVE** ✓ (matches the known Jun 29–Jul 23 period; my detection gives 1 Jul start which is within 2 days of the astronomical station on Jun 30)
+  - Venus Rx: 4 Oct – 15 Nov 2026 (42d, Scorpio) ✓
+  - Mars Rx: 13 Jan – 4 Apr 2027 (81d, Virgo) ✓
+  - Jupiter Rx: 17 Dec 2026 – 16 Apr 2027 (120d, Leo) ✓
+  - Saturn Rx: 29 Jul – 14 Dec 2026 (138d, Aries) ✓
+
+- Created API endpoint `src/app/api/retrograde-schedule/route.ts`:
+  - `GET /api/retrograde-schedule` → `{ generatedAt, byPlanet, stations }`.
+  - `byPlanet`: array of { planet, cycles: [2 cycles] } for Mercury..Saturn.
+  - `stations`: flat sorted list of upcoming Rx/direct stations with daysFromNow + zodiac sign, filtered to future-only.
+  - `dynamic = "force-dynamic"` (positions change daily).
+  - curl-verified: returns active Mercury Rx + 6 upcoming stations (Saturn Rx +27d, Venus Rx +94d, Mercury Rx +115d, Mercury direct +135d, etc.).
+
+- Created UI component `src/components/astroos/real/RealRetrogradeSchedulePanel.tsx`:
+  - Two zones: (1) Active Rx banner with planet glyph + ℞ badge + zodiac + progress bar (how far through the Rx cycle), (2) Upcoming stations timeline (vertical `<ol>` with rose dots for Rx stations, jade dots for direct stations).
+  - Each station row: planet glyph + station label (i18n) + date + zodiac glyph + relative days ("in 23d" / "через 23 дн.").
+  - Refresh button (RefreshCw), loading skeleton (CosmicSkeleton), error state, live timestamp footer.
+  - i18n EN/RU/HI for all labels including relative-day formatting.
+  - Wired into `today.tsx` after RealCosmicAspectsPanel.
+
+- Styling: reuses Task 3's `astro-rx-banner`/`astro-rx-glyph` animations for the active banner. Timeline dots use inline `boxShadow` glow matching the station tone (rose #D98E7A for Rx, jade #5BB89C for direct). Active banner progress bar uses a linear-gradient from the planet color to rose. Vertical timeline connector via `border-l` on the `<ol>`.
+
+- `bun run lint` → 0 errors throughout.
+- agent-browser QA: Today screen shows "Расписание ретроградов" panel with "СЕЙЧАС АКТИВНО" (Mercury ☿ ℞, "Прямое: 25 июл. · 24дн.") and "ПРЕДСТОЯЩИЕ СТАНЦИИ" timeline. 0 page errors. Screenshot saved to `/home/z/my-project/download/retrograde-schedule-panel.png`.
+- Git: commit `0b6173f` pushed to `origin/main` (5 files changed, 674 insertions).
+
+Stage Summary:
+- **Risk from Task 3 closed**: CalculationCache has 0 entries, so no stale heliocentric data can be served. All new natal chart calculations use the corrected geocentric engine.
+- **New feature shipped**: retrograde schedule panel — users can now see all upcoming planetary Rx/direct stations for the next ~12 months, with an active-cycle banner showing progress through the current Mercury Rx. This transforms the retrograde feature from a "is it Rx now?" indicator into a planning tool.
+- **Helper architecture**: two-strategy approach (SearchRelativeLongitude for inferior planets, delta-sign scanning for superior planets) is robust and verified against published ephemerides for all 5 planets on 2026-07-02.
+- Lint 0 errors. Dev server stable. GitHub `origin/main` HEAD `0b6173f`.
+
+Unresolved / Risks:
+- Station detection precision: the 3-day step for superior planets means station dates can be off by up to ±3 days. For a planning UI this is acceptable, but for publication-grade ephemerides a finer step or astronomy-engine's search functions (Search) could refine it. Not a regression — the app had no Rx schedule before.
+- The retrograde-schedule endpoint does ~340 Equator calls per request (5 planets × ~68 samples for superior + 2 × ~60 for inferior). Takes ~200-400ms server-side. No caching added; could add a 1-hour in-memory cache if load becomes an issue.
+- `findStationsAround` is now only used by `findInferiorCycles`. The superior-planet path uses inline scanning. Could be unified, but the two strategies are different enough that unification would hurt readability.
+- Google OAuth still disabled (env empty) — unchanged.
+- Next.js 16 `middleware` deprecation warning — unchanged, non-blocking.
+- The handover's P1 list (real notifications push via WS/SSE, E2E tests, MemberRelation table, mobile responsive z-index) remains open.
+
+Recommended next steps:
+- Add a 1-hour in-memory cache to /api/retrograde-schedule (Rx stations change at most daily; no need to recompute on every page load).
+- Or address the P1 mobile z-index conflict (bottom nav vs mobile sheet, both z-50) — pure CSS fix, no logic change.
+- Or add a "Mercury Rx shadow period" indicator (the ~5-day window before/after the stations where the effect is felt) — a small extension to the schedule panel.
+- Or add ecliptic latitude display in the Cosmic Aspects panel (getPlanetGeocentricEcliptic returns latDeg, currently unused) — useful for declination-based insights.

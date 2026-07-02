@@ -666,3 +666,42 @@ Recommended next steps:
 - Or add more testimonials (6-9 cards) with a carousel for variety.
 - Or add a "featured in" press logos section to the landing (TechCrunch, Product Hunt, etc.) — another social proof element.
 - Or address the remaining P1 items: MemberRelation table for the family hub, or real notifications push via the existing chat-service WebSocket.
+
+---
+
+Task ID: 12
+Agent: Z.ai Code (user-reported bug fix)
+Task: User reported that when creating a member (Members screen add-member form), the city field does not provide autocomplete suggestions.
+
+Work Log:
+- Reproduced: inspected `src/components/astroos/screens/members.tsx` — the add-member form used a plain `<input>` for the birth city with placeholder "Saint Petersburg, RU" and no autocomplete. Users had to guess city names and manually figure out the timezone offset.
+- Confirmed the `CityAutocomplete` component already exists (`src/components/astroos/real/CityAutocomplete.tsx`) and is used on the Birth screen. It debounces a search against `/api/cities` (331 seeded cities) and on selection calls `/api/geo/resolve-birth` to get the DST-aware UTC offset.
+- Made the Members add-member form stateful (added useState for memberName, memberBirth, memberPlace, memberTz, memberGender, resolvedCity).
+- Replaced the static city `<input>` with `<CityAutocomplete initialValue={memberPlace} birthDateTime={memberBirth} onCityResolved={handleCityResolved} />`.
+- `handleCityResolved(result)` sets memberPlace = result.city.displayName and memberTz = sign-prefixed offsetHours. Also stores resolvedCity to show a DST badge.
+- Made all other form fields controlled (value + onChange) so the form is fully interactive.
+- Added a "No DST / ☀ DST active · UTC±N" pill that appears when a city is resolved, showing the DST context at a glance.
+- Updated the gender `<select>` to use value/onChange with "female"/"male" option values (was uncontrolled with just "Female"/"Male" labels).
+
+- `bun run lint` → 0 errors.
+- agent-browser QA:
+  - Navigated to Members screen, found the add-member form.
+  - Typed "Mosc" in the city field → dropdown appeared with "Moscow, RU · Europe/Moscow · UTC+3" suggestion.
+  - Clicked the suggestion → place field filled with "Moscow, RU", tz field auto-filled with "+3", and "No DST · UTC+3" pill appeared.
+  - 0 page errors.
+- Git: commit `d8f333c` pushed to `origin/main` (1 file changed, 55 insertions, 6 deletions).
+
+Stage Summary:
+- **Bug fixed**: Members screen add-member form now has city autocomplete with timezone auto-resolution. Users typing a city name see suggestions from the 331-city database, and selecting one auto-fills both the place and timezone fields with DST-aware UTC offset. Reuses the existing CityAutocomplete component (no new infrastructure).
+- **Form made functional**: the form was previously entirely static (uncontrolled inputs with no state). Now all 5 fields (name, birth, place, tz, gender) are controlled and the city selection drives the place + tz fields together.
+- Lint 0 errors. Dev server stable. GitHub `origin/main` HEAD `d8f333c`.
+
+Unresolved / Risks:
+- The add-member form still doesn't actually submit (the "✦ Добавить участника" button has no onClick). This is a pre-existing limitation — the handover notes the MemberRelation Prisma model is missing (P1). The form is a UI preview; backend persistence is a separate task.
+- Google OAuth still disabled (env empty) — unchanged.
+- Next.js 16 `middleware` deprecation warning — unchanged, non-blocking.
+
+Recommended next steps:
+- Implement the MemberRelation Prisma model + POST /api/members endpoint so the add-member form actually persists family members (addresses the P1 item from the handover).
+- Or apply the same CityAutocomplete pattern to any other screens with city inputs (e.g. profile editing).
+- Or add city autocomplete to the partner-link / cosmic-match flow on the Connect screen.

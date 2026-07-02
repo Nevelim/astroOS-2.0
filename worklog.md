@@ -555,3 +555,58 @@ Recommended next steps:
 - Or add ecliptic latitude display in the Cosmic Aspects panel (getPlanetGeocentricEcliptic returns latDeg, currently unused) — useful for declination-based insights.
 - Or address the remaining P1 items: MemberRelation table for the family hub, or real notifications push via the existing chat-service WebSocket.
 - Or extend the shadow period display to the upcoming stations timeline (show pre-shadow markers before each Rx station).
+
+---
+
+Task ID: 10
+Agent: Z.ai Code (cron webDevReview — job 246214, cycle 9)
+Task: Ninth autonomous cron-review cycle. Read worklog, QA app via agent-browser, prioritize fixes, add features + improve styling, update worklog.
+
+Work Log:
+- Read worklog Tasks 1-9. Task 9 added Mercury Rx shadow period indicator. Recommended next steps: dignity calendar, ecliptic latitude, P1 MemberRelation/notifications, or shadow markers on timeline.
+- Verified services alive (pids 2636/2637/2668), ports 3000/3003/3004 LISTENING, lint 0, HEAD 7819c79, curl / = HTTP 200.
+- agent-browser QA: Today screen — all panels present (13 headings), 0 errors. Selected feature from Task 9 recommendations: **dignity calendar** — a planning feature showing upcoming essential dignity transitions over the next 30 days.
+
+- Created `src/lib/astroos/real/dignity-calendar.ts`:
+  - `computeDignityCalendar(Astro, now, days=30)` scans forward day-by-day. For each day, computes each planet's geocentric ecliptic longitude + sign + dignity (via the planetary-dignity helper). Records a transition whenever dignity changes.
+  - Returns: `current[]` (today's dignities), `transitions[]` (chronological list with from→to + date + sign + daysFromNow), `monthSummary[]` (days each planet spends in each dignity over the window).
+  - 1-day step, 30-day window, 7 planets × 30 days = 210 Equator calls.
+
+- Verified for 2026-07-02 (10 transitions in 30 days):
+  - Moon: Neutral→Exalted (Taurus, +7d), Exalted→Neutral (Gemini, +9d), Neutral→Ruler (Cancer, +11d), Ruler→Neutral (Leo, +13d), Neutral→Fall (Scorpio, +20d) — Moon cycles through dignities fast (2.5d/sign). Correct: Moon exalted in Taurus, rules Cancer, falls in Scorpio.
+  - Sun: Neutral→Ruler (Leo, +21d) — Sun enters Leo on Jul 23 ✓ (Sun rules Leo).
+  - Venus: Neutral→Fall (Virgo, +8d) — Venus in Fall for 23 days (Venus exalted in Pisces, opposite = Virgo).
+  - Saturn: Fall for all 31 days (in Aries, slow-moving — Saturn takes ~2.5 years per sign).
+  - monthSummary: Sun ♔ 10d, Moon ♔ 2d ↑ 2d ⤓ 2d ↓ 2d, Venus ⤓ 23d, Saturn ⤓ 31d.
+
+- Created API endpoint `src/app/api/dignity-calendar/route.ts`:
+  - `GET /api/dignity-calendar` → DignityCalendarResult with 1-hour in-memory cache. `X-Cache: HIT/MISS` header. `dynamic = "force-dynamic"`.
+
+- Created UI component `src/components/astroos/real/RealDignityCalendarPanel.tsx`:
+  - Upcoming transitions timeline: vertical `<ol>` with tone-colored dots (gold Ruler, jade Exalted, rose Detriment/Fall, muted Neutral). Each row: planet glyph + from→to dignity + zodiac glyph + sign + date + +Nd badge.
+  - Month summary: 2-column grid showing days each planet spends in non-neutral dignities (e.g. "Sun: ♔ 10d", "Saturn: ⤓ 31d"). Only renders planets with non-neutral days.
+  - Scoring legend in footer. i18n EN/RU/HI. Refresh button, loading skeleton, live timestamp.
+  - Wired into `today.tsx` after RealPlanetaryDignityPanel (logical grouping: current dignity → upcoming dignity transitions).
+
+- `bun run lint` → 0 errors throughout.
+- agent-browser QA: Today screen shows "Календарь достоинств" panel with "ПРЕДСТОЯЩИЕ ПЕРЕХОДЫ (10)". 0 page errors. Screenshot saved to `/home/z/my-project/download/dignity-calendar-panel.png`.
+- Git: commit `e56de98` pushed to `origin/main` (5 files changed, 491 insertions).
+
+Stage Summary:
+- **New feature shipped**: Dignity Calendar — users can now plan around upcoming dignity transitions. For 2026-07-02, they see that Sun enters Ruler (Leo) on Jul 23 (a strong-Sun window), Venus enters Fall (Virgo) on Jul 10 (weak-Venus for 23 days — caution in relationships/aesthetics), and Moon cycles through Exalted/Ruler/Fall every few days.
+- **Helper architecture**: dignity-calendar.ts reuses the ecliptic helper (Task 3 geocentric fix) + planetary-dignity module (Task 7). Pure domain logic, no duplication.
+- **Styling**: tone-coded timeline dots matching the Planetary Dignity panel (gold/jade/rose), compact month-summary grid, consistent with the Hades 2 cosmic dark theme.
+- Lint 0 errors. Dev server stable. GitHub `origin/main` HEAD `e56de98`.
+
+Unresolved / Risks:
+- The dignity-calendar endpoint does 210 Equator calls (7 planets × 30 days) per request. Mitigated by the 1-hour in-memory cache. First cold-cache request takes ~1-2s; subsequent HITs are instant.
+- The 30-day window catches Moon's fast dignity cycling but may miss slower planets' transitions (e.g. Mercury Rx dignity changes). A 60-90 day window would catch more, but 30 keeps the UI focused. Acceptable.
+- Google OAuth still disabled (env empty) — unchanged.
+- Next.js 16 `middleware` deprecation warning — unchanged, non-blocking.
+- The handover's P1 list: real notifications push (WS/SSE), E2E tests, MemberRelation table for family hub. Mobile z-index investigated in Task 6 (non-issue).
+
+Recommended next steps:
+- Add ecliptic latitude display in the Cosmic Aspects panel (getPlanetGeocentricEcliptic returns latDeg, currently unused) — useful for declination-based insights.
+- Or address the remaining P1 items: MemberRelation table for the family hub, or real notifications push via the existing chat-service WebSocket.
+- Or extend the dignity calendar to 60 days + add Mercury Rx shadow markers.
+- Or add a "best days" summary that cross-references the dignity calendar + retrograde schedule + Moon VoC to recommend optimal days for specific activities (sign contracts, start projects, etc.) — a high-value planning feature.

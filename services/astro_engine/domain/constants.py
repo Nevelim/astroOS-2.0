@@ -1,55 +1,51 @@
-"""Astro domain: zodiac signs, planets, houses, aspects — Western astrology constants.
+"""Astro domain constants: zodiac signs, planets, house systems, aspects.
 
-Pure reference data with no I/O. The classical tropical zodiac (0° = vernal
-equinox). Sign boundaries at exact 30° increments from Aries 0°.
+Pure reference data — no time, no I/O, no ephemeris. Other domain modules
+import these tables to classify ecliptic longitudes into signs, aspects, etc.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass
 from enum import Enum
 
 
 # --------------------------------------------------------------------------- #
-# Zodiac signs (тропический зодиак)
+# Zodiac signs (тропический, 0° = Овен = весеннее равноденствие)
 # --------------------------------------------------------------------------- #
 class Sign(str, Enum):
-    ARIES = "aries"            # Овен ♈   0–30°
-    TAURUS = "taurus"          # Телец ♉  30–60°
-    GEMINI = "gemini"          # Близнецы ♊
-    CANCER = "cancer"          # Рак ♋
-    LEO = "leo"                # Лев ♌
-    VIRGO = "virgo"            # Дева ♍
-    LIBRA = "libra"            # Весы ♎
-    SCORPIO = "scorpio"        # Скорпион ♏
-    SAGITTARIUS = "sagittarius"# Стрелец ♐
-    CAPRICORN = "capricorn"    # Козерог ♑
-    AQUARIUS = "aquarius"      # Водолей ♒
-    PISCES = "pisces"          # Рыбы ♓
+    ARIES = "aries"           # Овен  ♈
+    TAURUS = "taurus"         # Телец ♉
+    GEMINI = "gemini"         # Близнецы ♊
+    CANCER = "cancer"         # Рак ♋
+    LEO = "leo"               # Лев ♌
+    VIRGO = "virgo"           # Дева ♍
+    LIBRA = "libra"           # Весы ♎
+    SCORPIO = "scorpio"       # Скорпион ♏
+    SAGITTARIUS = "sagittarius" # Стрелец ♐
+    CAPRICORN = "capricorn"   # Козерог ♑
+    AQUARIUS = "aquarius"     # Водолей ♒
+    PISCES = "pisces"         # Рыбы ♓
 
 
-SIGNS: tuple[Sign, ...] = (
-    Sign.ARIES, Sign.TAURUS, Sign.GEMINI, Sign.CANCER, Sign.LEO, Sign.VIRGO,
-    Sign.LIBRA, Sign.SCORPIO, Sign.SAGITTARIUS, Sign.CAPRICORN, Sign.AQUARIUS, Sign.PISCES,
-)
-
-SIGN_GLYPH: dict[Sign, str] = {
+SIGNS: tuple[Sign, ...] = tuple(Sign)
+SIGN_HANZI: dict[Sign, str] = {}  # not used, kept for symmetry with BaZi
+SIGN_SYMBOL: dict[Sign, str] = {
     Sign.ARIES: "♈", Sign.TAURUS: "♉", Sign.GEMINI: "♊", Sign.CANCER: "♋",
     Sign.LEO: "♌", Sign.VIRGO: "♍", Sign.LIBRA: "♎", Sign.SCORPIO: "♏",
     Sign.SAGITTARIUS: "♐", Sign.CAPRICORN: "♑", Sign.AQUARIUS: "♒", Sign.PISCES: "♓",
 }
+SIGN_NAME_RU: dict[Sign, str] = {
+    Sign.ARIES: "Овен", Sign.TAURUS: "Телец", Sign.GEMINI: "Близнецы",
+    Sign.CANCER: "Рак", Sign.LEO: "Лев", Sign.VIRGO: "Дева",
+    Sign.LIBRA: "Весы", Sign.SCORPIO: "Скорпион", Sign.SAGITTARIUS: "Стрелец",
+    Sign.CAPRICORN: "Козерог", Sign.AQUARIUS: "Водолей", Sign.PISCES: "Рыбы",
+}
 
-# Element + polarity for each sign
+
 class Element(str, Enum):
     FIRE = "fire"
     EARTH = "earth"
     AIR = "air"
     WATER = "water"
-
-
-class Modality(str, Enum):
-    CARDINAL = "cardinal"
-    FIXED = "fixed"
-    MUTABLE = "mutable"
 
 
 SIGN_ELEMENT: dict[Sign, Element] = {
@@ -58,6 +54,13 @@ SIGN_ELEMENT: dict[Sign, Element] = {
     Sign.GEMINI: Element.AIR, Sign.LIBRA: Element.AIR, Sign.AQUARIUS: Element.AIR,
     Sign.CANCER: Element.WATER, Sign.SCORPIO: Element.WATER, Sign.PISCES: Element.WATER,
 }
+
+
+class Modality(str, Enum):
+    CARDINAL = "cardinal"
+    FIXED = "fixed"
+    MUTABLE = "mutable"
+
 
 SIGN_MODALITY: dict[Sign, Modality] = {
     Sign.ARIES: Modality.CARDINAL, Sign.CANCER: Modality.CARDINAL,
@@ -69,23 +72,8 @@ SIGN_MODALITY: dict[Sign, Modality] = {
 }
 
 
-def sign_from_longitude(longitude_deg: float) -> Sign:
-    """Return the tropical zodiac sign for an ecliptic longitude in degrees.
-
-    0° = Aries 0°. 360° maps to 12 signs of 30° each.
-    """
-    if not (0.0 <= longitude_deg < 360.0):
-        longitude_deg = longitude_deg % 360.0
-    return SIGNS[int(longitude_deg // 30)]
-
-
-def degree_in_sign(longitude_deg: float) -> float:
-    """The degree within the current sign (0.0–29.999)."""
-    return longitude_deg % 30.0
-
-
 # --------------------------------------------------------------------------- #
-# Planets / celestial bodies
+# Planets / bodies (astrology "10" + nodes + Chiron)
 # --------------------------------------------------------------------------- #
 class Planet(str, Enum):
     SUN = "sun"
@@ -98,76 +86,23 @@ class Planet(str, Enum):
     URANUS = "uranus"
     NEPTUNE = "neptune"
     PLUTO = "pluto"
-    NORTH_NODE = "north_node"   # Rahu
-    CHIRON = "chiron"
 
 
-PLANETS: tuple[Planet, ...] = (
-    Planet.SUN, Planet.MOON, Planet.MERCURY, Planet.VENUS, Planet.MARS,
-    Planet.JUPITER, Planet.SATURN, Planet.URANUS, Planet.NEPTUNE, Planet.PLUTO,
-)
-
-PLANET_GLYPH: dict[Planet, str] = {
+PLANETS: tuple[Planet, ...] = tuple(Planet)
+PLANET_SYMBOL: dict[Planet, str] = {
     Planet.SUN: "☉", Planet.MOON: "☽", Planet.MERCURY: "☿", Planet.VENUS: "♀",
     Planet.MARS: "♂", Planet.JUPITER: "♃", Planet.SATURN: "♄",
     Planet.URANUS: "♅", Planet.NEPTUNE: "♆", Planet.PLUTO: "♇",
-    Planet.NORTH_NODE: "☊", Planet.CHIRON: "⚷",
+}
+PLANET_NAME_RU: dict[Planet, str] = {
+    Planet.SUN: "Солнце", Planet.MOON: "Луна", Planet.MERCURY: "Меркурий",
+    Planet.VENUS: "Венера", Planet.MARS: "Марс", Planet.JUPITER: "Юпитер",
+    Planet.SATURN: "Сатурн", Planet.URANUS: "Уран", Planet.NEPTUNE: "Нептун",
+    Planet.PLUTO: "Плутон",
 }
 
-
-# --------------------------------------------------------------------------- #
-# Aspects ( major Ptolemaic)
-# --------------------------------------------------------------------------- #
-class AspectType(str, Enum):
-    CONJUNCTION = "conjunction"   # 0°   ☌
-    OPPOSITION = "opposition"     # 180° ☍
-    TRINE = "trine"               # 120° △
-    SQUARE = "square"             # 90°  □
-    SEXTILE = "sextile"           # 60°  ⚹
-
-
-@dataclass(frozen=True)
-class AspectSpec:
-    type: AspectType
-    angle: float
-    orb: float          # max orb in degrees for a "tight" aspect
-    harmonious: bool
-
-
-ASPECTS: tuple[AspectSpec, ...] = (
-    AspectSpec(AspectType.CONJUNCTION, 0.0, 8.0, True),
-    AspectSpec(AspectType.OPPOSITION, 180.0, 8.0, False),
-    AspectSpec(AspectType.TRINE, 120.0, 7.0, True),
-    AspectSpec(AspectType.SQUARE, 90.0, 7.0, False),
-    AspectSpec(AspectType.SEXTILE, 60.0, 6.0, True),
-)
-
-
-def angular_distance(a_deg: float, b_deg: float) -> float:
-    """Smallest angular distance between two ecliptic longitudes, 0–180°."""
-    d = abs(a_deg - b_deg) % 360.0
-    return min(d, 360.0 - d)
-
-
-def find_aspect(a_deg: float, b_deg: float) -> "Aspect | None":
-    """Return the strongest aspect between two longitudes, or None."""
-    from services.astro_engine.domain.chart import Aspect  # avoid cycle
-    dist = angular_distance(a_deg, b_deg)
-    best: AspectSpec | None = None
-    best_diff = 999.0
-    for spec in ASPECTS:
-        diff = abs(dist - spec.angle)
-        if diff <= spec.orb and diff < best_diff:
-            best = spec
-            best_diff = diff
-    if best is None:
-        return None
-    return Aspect(
-        type=best.type,
-        angle=best.angle,
-        orb=round(best_diff, 2),
-        harmonious=best.harmonious,
-    )
+# Bodies whose ecliptic longitude never goes retrograde in longitude sign
+# (used by interpretation; all modern planets CAN be retrograde — flag set by adapter).
 
 
 # --------------------------------------------------------------------------- #
@@ -176,3 +111,63 @@ def find_aspect(a_deg: float, b_deg: float) -> "Aspect | None":
 class HouseSystem(str, Enum):
     PLACIDUS = "placidus"
     WHOLE_SIGN = "whole_sign"
+
+
+# --------------------------------------------------------------------------- #
+# Aspects
+# --------------------------------------------------------------------------- #
+class AspectType(str, Enum):
+    CONJUNCTION = "conjunction"
+    OPPOSITION = "opposition"
+    TRINE = "trine"
+    SQUARE = "square"
+    SEXTILE = "sextile"
+    QUINCUNX = "quincunx"   # minor
+
+
+# (angle_degrees, default_orb_degrees)
+ASPECT_SPECS: dict[AspectType, tuple[float, float]] = {
+    AspectType.CONJUNCTION: (0.0, 9.0),
+    AspectType.OPPOSITION: (180.0, 9.0),
+    AspectType.TRINE: (120.0, 8.0),
+    AspectType.SQUARE: (90.0, 8.0),
+    AspectType.SEXTILE: (60.0, 6.0),
+    AspectType.QUINCUNX: (150.0, 3.0),
+}
+
+# Sun/Moon get a wider orb by tradition.
+LUMINARY_EXTRA_ORB: float = 2.0
+
+
+# --------------------------------------------------------------------------- #
+# Pure helpers
+# --------------------------------------------------------------------------- #
+def sign_of(ecliptic_longitude_deg: float) -> Sign:
+    """Sign for a tropical ecliptic longitude in degrees [0, 360)."""
+    lng = ecliptic_longitude_deg % 360.0
+    return SIGNS[int(lng // 30)]
+
+
+def degree_in_sign(ecliptic_longitude_deg: float) -> float:
+    """Position within the current sign, in degrees [0, 30)."""
+    return ecliptic_longitude_deg % 30.0
+
+
+def angular_separation(a_deg: float, b_deg: float) -> float:
+    """Shortest arc between two ecliptic longitudes, in degrees [0, 180]."""
+    d = abs(a_deg - b_deg) % 360.0
+    return min(d, 360.0 - d)
+
+
+def find_aspect(a_deg: float, b_deg: float, is_luminary: bool = False):
+    """Return (AspectType, orb_applied, exact_separation) or None.
+
+    Pure function: classify whether two longitudes form a major aspect.
+    """
+    sep = angular_separation(a_deg, b_deg)
+    for aspect_type, (angle, orb) in ASPECT_SPECS.items():
+        eff_orb = orb + (LUMINARY_EXTRA_ORB if is_luminary else 0.0)
+        delta = abs(sep - angle)
+        if delta <= eff_orb:
+            return aspect_type, delta, sep  # delta = "orb used" (deviation from exact)
+    return None

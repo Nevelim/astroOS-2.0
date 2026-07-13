@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "astroos-birth-time"
+version = "1.0.0"
+description = "AstroOS Birth-Time Resolution service — UTC/LMT/TST + DST-aware historical resolution for BaZi/astrology."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "Proprietary" }
+authors = [{ name = "AstroOS" }]
+dependencies = [
+    "fastapi>=0.110",
+    "uvicorn[standard]>=0.27",
+    "tzdata>=2024.1",
+    "pydantic>=2.5",
+    "httpx>=0.25,<0.28",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "pytest-cov>=4.1",
+    "pytest-asyncio>=0.23",
+]
+
+[tool.setuptools.packages.find]
+include = ["services*"]
+
+[tool.pytest.ini_options]
+testpaths = ["services/birth_time/tests"]
+addopts = "-ra --strict-markers"
+markers = [
+    "unit: pure domain logic, no I/O",
+    "integration: adapter + API boundaries",
+    "golden: deterministic domain math (frozen reference values)",
+]
+
+[tool.coverage.run]
+branch = true
+source = ["services"]
+
+[tool.coverage.report]
+exclude_lines = ["pragma: no cover", "\\.\\.\\.", "if __name__"]

@@ -9,3 +9,10 @@ htmlcov/
 dist/
 build/
 .DS_Store
+
+# Ephemeris data (download separately)
+*.bsp
+*.tpc
+*.se1
+ephemeris/
+assets/ephemeris/

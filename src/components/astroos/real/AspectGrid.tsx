@@ -207,7 +207,7 @@ export function AspectGrid({ planetPositions, locale = "en" }: AspectGridProps) 
           })()}
 
           {/* Legend */}
-          <div className="mt-4 flex flex-wrap gap-3 text-[10px] text-[#6B6B78]">
+          <div className="mt-4 flex flex-wrap gap-3 text-[10px] text-[#8A8A96]">
             {ASPECT_DEFS.map(ad => (
               <span key={ad.name} className="flex items-center gap-1">
                 <span className="w-2.5 h-2.5 rounded-sm" style={{ background:ad.color }} />

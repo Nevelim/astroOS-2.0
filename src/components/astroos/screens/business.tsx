@@ -66,7 +66,7 @@ export function BusinessScreen() {
                   <div className="mt-2">
                     <Pill tone={e.tone}>{e.dayMaster}</Pill>
                   </div>
-                  <div className="mt-2 text-[10px] text-[#6B6B78]">role fit</div>
+                  <div className="mt-2 text-[10px] text-[#8A8A96]">role fit</div>
                   <div className="font-display text-xl font-semibold text-[#E8B86D]">{e.fit}%</div>
                 </GlassCard>
               </FadeIn>
@@ -80,7 +80,7 @@ export function BusinessScreen() {
         <GlassCard>
           <div className="flex items-center justify-between">
             <Pill tone="jade">Team compatibility heatmap · pairwise BaZi</Pill>
-            <span className="text-[11px] text-[#6B6B78]">10 × 10 matrix</span>
+            <span className="text-[11px] text-[#8A8A96]">10 × 10 matrix</span>
           </div>
           <div className="mt-4 overflow-x-auto scrollbar-astro">
             <div className="inline-block">

@@ -74,14 +74,20 @@ export function WorldScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => voi
       return { city: c, fit, ...r, rank: 0 };
     });
     const sorted = [...computed].sort((a, b) => b.index - a.index);
-    let rank = 0;
-    return sorted.map((r) => {
-      if (!r.demoted) {
-        rank += 1;
-        return { ...r, rank };
-      }
-      return r;
-    });
+    // Assign ranks via reduce to avoid variable reassignment inside useMemo.
+    const { result } = sorted.reduce(
+      (acc, r) => {
+        if (!r.demoted) {
+          acc.rank += 1;
+          acc.result.push({ ...r, rank: acc.rank });
+        } else {
+          acc.result.push(r);
+        }
+        return acc;
+      },
+      { rank: 0, result: [] as typeof sorted },
+    );
+    return result;
   }, []);
 
   const rankByCity = useMemo(() => {
@@ -257,7 +263,7 @@ export function WorldScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => voi
         {isFree && (
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <Pill tone="muted">⌬ {freePlanLabel}</Pill>
-            <span className="text-[11px] text-[#6B6B78]">·</span>
+            <span className="text-[11px] text-[#8A8A96]">·</span>
             <SocialProof count={12847} action={topProofAction} tone="jade" live />
           </div>
         )}
@@ -267,7 +273,7 @@ export function WorldScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => voi
       <FadeIn delay={0.05}>
         <GlassCard>
           <div className="flex flex-wrap items-center gap-3">
-            <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-[#6B6B78]">
+            <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-[#8A8A96]">
               Orbis zones
               <InfoTip label={locale === "ru" ? "Orbis zones (орбисы)" : locale === "hi" ? "Orbis zones" : "Orbis zones"} tone="jade" side="bottom">
                 {locale === "ru"
@@ -281,10 +287,10 @@ export function WorldScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => voi
               <div key={z.key} className="flex items-center gap-1.5">
                 <span className="h-2.5 w-2.5 rounded-full" style={{ background: z.color }} />
                 <span className="text-[11px] text-[#9A9AA8]">≤{z.maxKm}km</span>
-                <span className="text-[10px] text-[#6B6B78]">×{z.factor}</span>
+                <span className="text-[10px] text-[#8A8A96]">×{z.factor}</span>
               </div>
             ))}
-            <span className="flex items-center gap-1.5 text-[10px] text-[#6B6B78]">
+            <span className="flex items-center gap-1.5 text-[10px] text-[#8A8A96]">
               · Paran bonus +50% (max, ≤111km)
               <InfoTip label={locale === "ru" ? "Paran (парана)" : locale === "hi" ? "Paran" : "Paran"} tone="gold" side="bottom">
                 {locale === "ru"
@@ -303,7 +309,7 @@ export function WorldScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => voi
         <GlassCard>
           <div className="flex items-center justify-between">
             <Pill tone="gold">{t("world.filter")}</Pill>
-            <span className="text-[11px] text-[#6B6B78]">{activeSpheres.length} {t("world.active")} · {CITIES.length} {t("world.cities.ranked")}</span>
+            <span className="text-[11px] text-[#8A8A96]">{activeSpheres.length} {t("world.active")} · {CITIES.length} {t("world.cities.ranked")}</span>
           </div>
           <div className="mt-4 flex flex-wrap gap-2">
             {SPHERES.map((s) => {
@@ -396,7 +402,7 @@ export function WorldScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => voi
               </div>
             </div>
             <div className="mt-3 flex items-center justify-between">
-              <span className="text-[11px] text-[#6B6B78]">{t("world.buffer")}</span>
+              <span className="text-[11px] text-[#8A8A96]">{t("world.buffer")}</span>
               <CosmicButton variant="outline" className="!py-1.5 !px-3 !text-[12px]" onClick={handleTravelMode}>
                 {t("world.travelmode")} {isFree ? "🔒" : "☾"}
               </CosmicButton>
@@ -410,14 +416,14 @@ export function WorldScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => voi
             {/* Search + sort bar */}
             <div className="flex gap-2">
               <div className="relative flex-1">
-                <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#6B6B78]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#8A8A96]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
                 </svg>
                 <input
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={locale === "ru" ? "Поиск города или страны..." : locale === "hi" ? "शहर या देश खोजें..." : "Search city or country..."}
-                  className="w-full rounded-lg border border-[#2A2A35] bg-[#0B0B0F]/60 py-2 pl-9 pr-3 text-[12px] text-[#F5F0E8] placeholder:text-[#6B6B78] outline-none focus:border-[#E8B86D]/50 transition-colors"
+                  className="w-full rounded-lg border border-[#2A2A35] bg-[#0B0B0F]/60 py-2 pl-9 pr-3 text-[12px] text-[#F5F0E8] placeholder:text-[#8A8A96] outline-none focus:border-[#E8B86D]/50 transition-colors"
                 />
               </div>
               <select
@@ -474,9 +480,9 @@ export function WorldScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => voi
                             {favorites.has(c.name) && <span className="text-[#E8B86D] text-[10px]">★</span>}
                             {c.name}
                           </div>
-                          <div className="text-[11px] text-[#6B6B78]">{c.country} · {t(`sphere.${c.sphere}`)} · QoL {c.qol}</div>
+                          <div className="text-[11px] text-[#8A8A96]">{c.country} · {t(`sphere.${c.sphere}`)} · QoL {c.qol}</div>
                           {/* CityIndex breakdown — analyst tooltip row */}
-                          <div className="mt-1 font-mono text-[10px] text-[#6B6B78]">
+                          <div className="mt-1 font-mono text-[10px] text-[#8A8A96]">
                             CityIndex <span className="text-[#E8B86D]">{r.index.toFixed(3)}</span>
                             <span className="mx-1.5">·</span>
                             M <span className="text-[#9A9AA8]">{r.M.toFixed(2)}</span>
@@ -488,7 +494,7 @@ export function WorldScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => voi
                         </div>
                         <div className="text-right">
                           <div className="font-display text-xl font-semibold" style={{ color: c.tone === "gold" ? "#E8B86D" : c.tone === "jade" ? "#5BB89C" : "#D98E7A" }}>{c.score}</div>
-                          <div className="text-[10px] text-[#6B6B78]">{t("world.relocation")}</div>
+                          <div className="text-[10px] text-[#8A8A96]">{t("world.relocation")}</div>
                         </div>
                       </button>
                       <button
@@ -496,7 +502,7 @@ export function WorldScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => voi
                         className="ml-2 shrink-0 p-1.5 rounded transition-colors hover:bg-[#1C1C26]"
                         aria-label="Toggle favorite"
                       >
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill={favorites.has(c.name) ? "#E8B86D" : "none"} stroke={favorites.has(c.name) ? "#E8B86D" : "#6B6B78"} strokeWidth="2" className="transition-colors">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill={favorites.has(c.name) ? "#E8B86D" : "none"} stroke={favorites.has(c.name) ? "#E8B86D" : "#8A8A96"} strokeWidth="2" className="transition-colors">
                           <path d="M12 2l2.9 6.3 6.9.6-5.2 4.6 1.6 6.8L12 17.3 5.8 20.9l1.6-6.8L2.2 8.9l6.9-.6L12 2z" />
                         </svg>
                       </button>
@@ -518,7 +524,7 @@ export function WorldScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => voi
                 );
               })}
               {filteredMain.length === 0 && (
-                <div className="py-8 text-center text-[12px] text-[#6B6B78]">{noResultsLabel}</div>
+                <div className="py-8 text-center text-[12px] text-[#8A8A96]">{noResultsLabel}</div>
               )}
             </div>
 
@@ -527,7 +533,7 @@ export function WorldScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => voi
               <div className="mt-2 rounded-lg border border-[#5BB89C]/20 bg-[#5BB89C]/5 p-3">
                 <div className="flex flex-wrap items-center gap-2">
                   <Pill tone="jade">⚠ {worthLabel}</Pill>
-                  <span className="text-[10px] text-[#6B6B78]">{cautionLabel}</span>
+                  <span className="text-[10px] text-[#8A8A96]">{cautionLabel}</span>
                 </div>
                 <div className="mt-2 space-y-1.5">
                   {filteredDemoted.map((r) => {
@@ -543,7 +549,7 @@ export function WorldScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => voi
                       >
                         <div>
                           <div className="text-[12px] font-medium text-[#F5F0E8]">{c.name}</div>
-                          <div className="text-[10px] text-[#6B6B78]">{c.country} · score {c.score} · K_irr {r.K_irr.toFixed(2)}</div>
+                          <div className="text-[10px] text-[#8A8A96]">{c.country} · score {c.score} · K_irr {r.K_irr.toFixed(2)}</div>
                         </div>
                         <div className="font-mono text-[10px] text-[#9A9AA8]">{r.index.toFixed(3)}</div>
                       </button>
@@ -568,7 +574,7 @@ export function WorldScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => voi
                       </div>
                       <div className="text-right">
                         <div className="font-display text-3xl font-semibold text-[#E8B86D]">{selectedCity.score}</div>
-                        <div className="text-[10px] text-[#6B6B78]">/ 100</div>
+                        <div className="text-[10px] text-[#8A8A96]">/ 100</div>
                       </div>
                     </div>
 
@@ -578,9 +584,9 @@ export function WorldScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => voi
                       if (!r) return null;
                       return (
                         <div className="mt-2 inline-flex flex-wrap items-center gap-2 rounded-full border border-[#E8B86D]/25 bg-[#E8B86D]/8 px-2.5 py-0.5 text-[10px]">
-                          <span className="text-[#6B6B78]">CityIndex</span>
+                          <span className="text-[#8A8A96]">CityIndex</span>
                           <span className="font-mono text-[#E8B86D]">{r.index.toFixed(3)}</span>
-                          <span className="text-[#6B6B78]">· M {r.M.toFixed(2)} · V {r.V.toFixed(2)} · K_irr {r.K_irr.toFixed(2)}</span>
+                          <span className="text-[#8A8A96]">· M {r.M.toFixed(2)} · V {r.V.toFixed(2)} · K_irr {r.K_irr.toFixed(2)}</span>
                           {r.demoted && <Pill tone="jade">demoted</Pill>}
                         </div>
                       );
@@ -589,16 +595,16 @@ export function WorldScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => voi
                     {/* City stats */}
                     <div className="mt-3 grid grid-cols-4 gap-2 text-[10px]">
                       <div className="rounded bg-[#0B0B0F]/50 p-1.5 text-center">
-                        <div className="text-[#6B6B78]">QoL</div><div className="font-mono text-[#E8B86D]">{selectedCity.qol}</div>
+                        <div className="text-[#8A8A96]">QoL</div><div className="font-mono text-[#E8B86D]">{selectedCity.qol}</div>
                       </div>
                       <div className="rounded bg-[#0B0B0F]/50 p-1.5 text-center">
-                        <div className="text-[#6B6B78]">Pop</div><div className="font-mono text-[#9A9AA8]">{(selectedCity.population / 1000).toFixed(0)}K</div>
+                        <div className="text-[#8A8A96]">Pop</div><div className="font-mono text-[#9A9AA8]">{(selectedCity.population / 1000).toFixed(0)}K</div>
                       </div>
                       <div className="rounded bg-[#0B0B0F]/50 p-1.5 text-center">
-                        <div className="text-[#6B6B78]">Income</div><div className="font-mono text-[#5BB89C]">${selectedCity.income}</div>
+                        <div className="text-[#8A8A96]">Income</div><div className="font-mono text-[#5BB89C]">${selectedCity.income}</div>
                       </div>
                       <div className="rounded bg-[#0B0B0F]/50 p-1.5 text-center">
-                        <div className="text-[#6B6B78]">Housing</div><div className="font-mono text-[#D98E7A]">${selectedCity.housing}</div>
+                        <div className="text-[#8A8A96]">Housing</div><div className="font-mono text-[#D98E7A]">${selectedCity.housing}</div>
                       </div>
                     </div>
 
@@ -660,7 +666,7 @@ export function WorldScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => voi
                       </CosmicButton>
                       {selectedCity.travelMode && <Pill tone="jade">{t("world.travel.ready")}</Pill>}
                       {isFree && (
-                        <span className="text-[10px] text-[#6B6B78]">{freeNote}</span>
+                        <span className="text-[10px] text-[#8A8A96]">{freeNote}</span>
                       )}
                     </div>
                   </GlassCard>
@@ -765,7 +771,7 @@ export function WorldScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => voi
                     <div className="mt-1 font-display text-lg text-[#E8B86D]">{USER.powerCities.join(" · ")}</div>
                   </div>
                   <div className="mt-5 flex items-center justify-between">
-                    <div className="text-[10px] text-[#6B6B78]">/r/{USER.name.toLowerCase()}-card</div>
+                    <div className="text-[10px] text-[#8A8A96]">/r/{USER.name.toLowerCase()}-card</div>
                     <div className="h-12 w-12 rounded bg-[#F5F0E8] p-1">
                       <div className="grid h-full w-full grid-cols-5 gap-px">
                         {Array.from({ length: 25 }).map((_, i) => (

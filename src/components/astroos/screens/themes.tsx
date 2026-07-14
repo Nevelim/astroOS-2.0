@@ -183,7 +183,7 @@ export function ThemesScreen({ onNavigate }: ThemesProps = {}) {
                   <div className="mt-1.5 font-display text-[13px] font-semibold leading-tight text-[#F5F0E8]">
                     {th.name[locale === "ru" ? "ru" : locale === "hi" ? "hi" : "en"]}
                   </div>
-                  <div className="mt-0.5 text-[9px] uppercase tracking-wider text-[#6B6B78]">{th.monthLabel}</div>
+                  <div className="mt-0.5 text-[9px] uppercase tracking-wider text-[#8A8A96]">{th.monthLabel}</div>
                 </div>
               </motion.button>
             );
@@ -294,7 +294,7 @@ export function ThemesScreen({ onNavigate }: ThemesProps = {}) {
                         {locked && (
                           <Pill tone="muted" className="shrink-0">🔒 {L("Pro", "Pro", "Pro", locale)}</Pill>
                         )}
-                        <span className={`shrink-0 text-[#6B6B78] transition-transform ${open ? "rotate-90" : ""}`}>›</span>
+                        <span className={`shrink-0 text-[#8A8A96] transition-transform ${open ? "rotate-90" : ""}`}>›</span>
                       </button>
                       <AnimatePresence>
                         {open && (
@@ -306,7 +306,7 @@ export function ThemesScreen({ onNavigate }: ThemesProps = {}) {
                             className="overflow-hidden"
                           >
                             <div className="border-t border-[#2A2A35] px-4 py-3">
-                              <div className="text-[10px] uppercase tracking-wider text-[#6B6B78]">
+                              <div className="text-[10px] uppercase tracking-wider text-[#8A8A96]">
                                 {L("This week's prompt", "Промпт этой недели", "इस सप्ताह का प्रॉम्प्ट", locale)}
                               </div>
                               <div
@@ -395,7 +395,7 @@ export function ThemesScreen({ onNavigate }: ThemesProps = {}) {
                           done ? "bg-[#5BB89C] shadow-[0_0_8px_rgba(91,184,156,0.4)]" : "bg-[#2A2A35]"
                         }`}
                       />
-                      <div className={`mt-1 text-center text-[9px] ${done ? "text-[#5BB89C]" : "text-[#6B6B78]"}`}>
+                      <div className={`mt-1 text-center text-[9px] ${done ? "text-[#5BB89C]" : "text-[#8A8A96]"}`}>
                         {done ? "✓" : L("Week", "Нед.", "सप्ताह", locale)} {w}
                       </div>
                     </div>
@@ -419,7 +419,7 @@ export function ThemesScreen({ onNavigate }: ThemesProps = {}) {
               {completedCount > 0 && (
                 <button
                   onClick={resetThemeProgress}
-                  className="mt-3 text-[10px] text-[#6B6B78] transition hover:text-[#D98E7A]"
+                  className="mt-3 text-[10px] text-[#8A8A96] transition hover:text-[#D98E7A]"
                 >
                   ↺ {L("Reset this theme's progress", "Сбросить прогресс этой темы", "इस थीम की प्रगति रीसेट करें", locale)}
                 </button>
@@ -510,11 +510,11 @@ export function ThemesScreen({ onNavigate }: ThemesProps = {}) {
                 className="group relative overflow-hidden rounded-xl border border-[#2A2A35] bg-[#12121A]/60 p-3 text-left transition hover:border-[#9A9AA8]/40"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-xl text-[#6B6B78]">{p.icon}</span>
-                  <span className="text-[9px] uppercase tracking-wider text-[#6B6B78]">{p.month}</span>
+                  <span className="text-xl text-[#8A8A96]">{p.icon}</span>
+                  <span className="text-[9px] uppercase tracking-wider text-[#8A8A96]">{p.month}</span>
                 </div>
                 <div className="mt-1.5 font-display text-[13px] font-semibold text-[#9A9AA8]">{p.name}</div>
-                <div className="mt-1 text-[10px] italic text-[#6B6B78]">{p.insight}</div>
+                <div className="mt-1 text-[10px] italic text-[#8A8A96]">{p.insight}</div>
                 {/* Completion bar */}
                 <div className="mt-2 flex items-center gap-1.5">
                   <div className="h-1 flex-1 overflow-hidden rounded-full bg-[#2A2A35]">
@@ -534,7 +534,7 @@ export function ThemesScreen({ onNavigate }: ThemesProps = {}) {
               </motion.button>
             ))}
           </div>
-          <p className="mt-2 text-center text-[10px] text-[#6B6B78]">
+          <p className="mt-2 text-center text-[10px] text-[#8A8A96]">
             {L("Your insights from each completed theme feed your mentor's memory.", "Ваши инсайты из каждой завершённой темы питают память наставника.", "प्रत्येक पूर्ण थीम से आपकी अंतर्दृष्टि आपके गुरु की स्मृति में जाती है।", locale)}
           </p>
         </div>
@@ -576,7 +576,7 @@ export function ThemesScreen({ onNavigate }: ThemesProps = {}) {
       {/* Footer note */}
       <FadeIn delay={0.2}>
         <CosmicDivider />
-        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 py-3 text-[11px] text-[#6B6B78]">
+        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 py-3 text-[11px] text-[#8A8A96]">
           <span>{L("Themes rotate monthly", "Темы меняются ежемесячно", "थीम मासिक बदलती हैं", locale)}</span>
           <span className="text-[#2A2A35]">·</span>
           <span>{L("Aligned to your natal signature", "Выровнены с вашей натальной сигнатурой", "आपके नेटल हस्ताक्षर से संरेखित", locale)}</span>

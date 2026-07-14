@@ -139,7 +139,7 @@ export function WelcomeScreen({ onNavigate }: WelcomeProps = {}) {
                 {L("Explore demo first", "Сначала демо", "पहले डेमो देखें", locale)}
               </CosmicButton>
             </div>
-            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] text-[#6B6B78]">
+            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] text-[#8A8A96]">
               <span>✓ {L("No password friction", "Без парольной боли", "पासवर्ड बाधा नहीं", locale)}</span>
               <span>✓ {L("Google · Apple · Email", "Google · Apple · Email", "Google · Apple · Email", locale)}</span>
               <span>✓ {L("Delete everything in 1 tap", "Удалить всё в 1 тап", "1 टैप में सब हटाएं", locale)}</span>
@@ -257,7 +257,7 @@ export function WelcomeScreen({ onNavigate }: WelcomeProps = {}) {
 
       {/* Returning user? */}
       <FadeIn delay={0.4}>
-        <div className="text-center text-[12px] text-[#6B6B78]">
+        <div className="text-center text-[12px] text-[#8A8A96]">
           {L("Already have an account?", "Уже есть аккаунт?", "पहले से खाता है?", locale)}{" "}
           <button onClick={() => onNavigate?.("auth")} className="font-medium text-[#E8B86D] hover:underline">
             {L("Sign in", "Войти", "लॉगिन", locale)}

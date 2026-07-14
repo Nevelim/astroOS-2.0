@@ -430,7 +430,7 @@ export function SynastryChartOverlay({ locale }: { locale: "ru" | "en" | "hi" })
                           <span style={{ color }} className="font-bold">{asp.aspectSymbol}</span>
                           <span style={{ color: "#5BB89C", fontFamily: "serif" }} className="text-sm">{PLANET_GLYPHS[asp.planetB]}</span>
                           <span className="text-[#9A9AA8] flex-1 truncate">{asp.planetA} — {asp.planetB}</span>
-                          <span className="text-[10px] text-[#6B6B78]">{asp.exactAngle}°</span>
+                          <span className="text-[10px] text-[#8A8A96]">{asp.exactAngle}°</span>
                           <span className="text-[10px] font-mono" style={{ color }}>{asp.orb.toFixed(1)}°</span>
                         </div>
                       );
@@ -495,7 +495,7 @@ export function SynastryChartOverlay({ locale }: { locale: "ru" | "en" | "hi" })
               <p className="mt-2 text-sm font-serif italic" style={{ color: "#F5F0E8" }}>
                 {t("Две натальные карты. Один резонанс.", "Two charts. One resonance.", "दो चार्ट। एक गुंजयमान।")}
               </p>
-              <p className="mt-1 text-[11px] text-[#6B6B78]">
+              <p className="mt-1 text-[11px] text-[#8A8A96]">
                 {t("Введите данные обоих — мы построим bi-wheel и кросс-аспекты", "Enter both birth data — we'll build a bi-wheel and cross-aspects", "दोनों जन्म डेटा दर्ज करें — हम bi-wheel और क्रॉस-पहलू बनाएंगे")}
               </p>
             </div>

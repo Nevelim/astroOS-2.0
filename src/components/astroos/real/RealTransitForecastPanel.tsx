@@ -166,7 +166,7 @@ export function RealTransitForecastPanel({ locale }: { locale: Locale }) {
                       : "border-[#2A2A35] bg-[#0B0B0F]/60 hover:border-[#9A9AA8]/40"
                   }`}
                 >
-                  <div className="text-[9px] uppercase tracking-wider" style={{ color: active ? "#E8B86D" : "#6B6B78" }}>
+                  <div className="text-[9px] uppercase tracking-wider" style={{ color: active ? "#E8B86D" : "#8A8A96" }}>
                     {i === 0 ? t(locale, "Сегодня", "Today", "आज") : i === 1 ? t(locale, "Завтра", "Tomorrow", "कल") : day.dateLabel.split(" ")[0]}
                   </div>
                   <div className="text-[10px] font-medium" style={{ color: active ? "#F5F0E8" : "#9A9AA8" }}>
@@ -192,8 +192,8 @@ export function RealTransitForecastPanel({ locale }: { locale: Locale }) {
               </div>
             </div>
             <div className="text-right">
-              <div className="text-[10px] text-[#6B6B78]">{Math.round(currentDay.moonPhaseAngle)}°</div>
-              <div className="text-[9px] text-[#6B6B78]">phase angle</div>
+              <div className="text-[10px] text-[#8A8A96]">{Math.round(currentDay.moonPhaseAngle)}°</div>
+              <div className="text-[9px] text-[#8A8A96]">phase angle</div>
             </div>
           </div>
 
@@ -229,7 +229,7 @@ export function RealTransitForecastPanel({ locale }: { locale: Locale }) {
                       </span>
                     )}
                     {isToday && (
-                      <span className="ml-auto text-[9px] text-[#6B6B78]">
+                      <span className="ml-auto text-[9px] text-[#8A8A96]">
                         {t(locale, "сегодня", "today", "आज")}
                       </span>
                     )}
@@ -263,7 +263,7 @@ export function RealTransitForecastPanel({ locale }: { locale: Locale }) {
                     <span className="text-[11px] font-medium" style={{ color: "#D98E7A" }}>
                       {ing.toGlyph} {ing.toSign}
                     </span>
-                    <span className="ml-auto text-[9px] text-[#6B6B78]">{ing.dateLabel}</span>
+                    <span className="ml-auto text-[9px] text-[#8A8A96]">{ing.dateLabel}</span>
                   </motion.div>
                 ))}
               </div>
@@ -271,13 +271,13 @@ export function RealTransitForecastPanel({ locale }: { locale: Locale }) {
           )}
 
           {data.upcomingIngresses.length === 0 && (
-            <div className="text-center py-3 text-[11px] text-[#6B6B78]">
+            <div className="text-center py-3 text-[11px] text-[#8A8A96]">
               {t(locale, "На этой неделе планеты не меняют знак", "No sign ingresses this week", "इस सप्ताह कोई प्रवेश नहीं")}
             </div>
           )}
 
           {/* Footer note */}
-          <div className="mt-3 text-center text-[10px] text-[#6B6B78] italic">
+          <div className="mt-3 text-center text-[10px] text-[#8A8A96] italic">
             {t(locale,
               "Реальные позиции через astronomy-engine. Обновляется каждый запрос.",
               "Real positions via astronomy-engine. Refreshes on each request.",

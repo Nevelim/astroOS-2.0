@@ -114,19 +114,19 @@ function Shell() {
           </div>
 
           <nav className="flex-1 overflow-y-auto scrollbar-astro px-3 py-4 space-y-1">
-            <div className="px-2 pb-1 text-[10px] uppercase tracking-[0.2em] text-[#6B6B78]">
+            <div className="px-2 pb-1 text-[10px] uppercase tracking-[0.2em] text-[#8A8A96]">
               {t("nav.group.journey")}
             </div>
             {journeyItems.map((n) => (
               <NavButton key={n.key} item={n} active={screen === n.key} onClick={() => navigate(n.key)} t={t} />
             ))}
-            <div className="px-2 pt-4 pb-1 text-[10px] uppercase tracking-[0.2em] text-[#6B6B78]">
+            <div className="px-2 pt-4 pb-1 text-[10px] uppercase tracking-[0.2em] text-[#8A8A96]">
               {t("nav.group.account")}
             </div>
             {accountItems.map((n) => (
               <NavButton key={n.key} item={n} active={screen === n.key} onClick={() => navigate(n.key)} t={t} />
             ))}
-            <div className="px-2 pt-4 pb-1 text-[10px] uppercase tracking-[0.2em] text-[#6B6B78]">
+            <div className="px-2 pt-4 pb-1 text-[10px] uppercase tracking-[0.2em] text-[#8A8A96]">
               {t("nav.group.growth")}
             </div>
             {growthItems.map((n) => (
@@ -223,7 +223,7 @@ function Shell() {
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <div className="font-display text-lg astro-text-rainbow">AstroOS</div>
-                  <div className="text-[11px] text-[#6B6B78]">
+                  <div className="text-[11px] text-[#8A8A96]">
                     {t("brand.tagline")} · v3.2 Product Designer prototype
                   </div>
                 </div>
@@ -237,7 +237,7 @@ function Shell() {
                   <button className="hover:text-[#E8B86D]">{t("common.privacy")}</button>
                 </div>
               </div>
-              <div className="mt-4 text-[10px] text-[#6B6B78]">
+              <div className="mt-4 text-[10px] text-[#8A8A96]">
                 Full proposal: <span className="font-mono">/home/z/my-project/docs/product-designer-proposal.md</span> ·
                 Handover: <span className="font-mono">/home/z/my-project/worklog.md</span>
               </div>
@@ -262,7 +262,7 @@ function Shell() {
                   aria-current={active ? "page" : undefined}
                   aria-label={t(item.label)}
                   className={`relative flex flex-1 flex-col items-center gap-0.5 rounded-lg px-2 py-1.5 transition ${
-                    active ? "text-[#E8B86D] cosmic-nav-underline" : "text-[#6B6B78]"
+                    active ? "text-[#E8B86D] cosmic-nav-underline" : "text-[#8A8A96]"
                   }`}
                 >
                   <span className="text-lg" aria-hidden>{item.icon}</span>
@@ -300,15 +300,15 @@ function Shell() {
                 <div className="font-display text-2xl font-semibold astro-text-rainbow">AstroOS</div>
                 <button onClick={() => setMobileNavOpen(false)} className="text-[#9A9AA8]" aria-label="Close menu">✕</button>
               </div>
-              <div className="text-[10px] uppercase tracking-[0.2em] text-[#6B6B78] mb-2">{t("nav.group.journey")}</div>
+              <div className="text-[10px] uppercase tracking-[0.2em] text-[#8A8A96] mb-2">{t("nav.group.journey")}</div>
               {journeyItems.map((n) => (
                 <NavButton key={n.key} item={n} active={screen === n.key} onClick={() => navigate(n.key)} t={t} />
               ))}
-              <div className="text-[10px] uppercase tracking-[0.2em] text-[#6B6B78] mt-4 mb-2">{t("nav.group.account")}</div>
+              <div className="text-[10px] uppercase tracking-[0.2em] text-[#8A8A96] mt-4 mb-2">{t("nav.group.account")}</div>
               {accountItems.map((n) => (
                 <NavButton key={n.key} item={n} active={screen === n.key} onClick={() => navigate(n.key)} t={t} />
               ))}
-              <div className="text-[10px] uppercase tracking-[0.2em] text-[#6B6B78] mt-4 mb-2">{t("nav.group.growth")}</div>
+              <div className="text-[10px] uppercase tracking-[0.2em] text-[#8A8A96] mt-4 mb-2">{t("nav.group.growth")}</div>
               {growthItems.map((n) => (
                 <NavButton key={n.key} item={n} active={screen === n.key} onClick={() => navigate(n.key)} t={t} />
               ))}

@@ -215,7 +215,7 @@ export function PlanetaryStrengthsPanel({ locale }: { locale: "ru" | "en" | "hi"
   const getBarColor = (score: number) => {
     if (score >= 4) return "#E8B86D"; // gold — very strong
     if (score >= 1) return "#5BB89C"; // jade — positive
-    if (score === 0) return "#6B6B78"; // gray — neutral
+    if (score === 0) return "#8A8A96"; // gray — neutral
     if (score >= -2) return "#D98E7A"; // rose — weak
     return "#D98E7A"; // rose — very weak
   };
@@ -226,7 +226,7 @@ export function PlanetaryStrengthsPanel({ locale }: { locale: "ru" | "en" | "hi"
       case "Exalted": return "#5BB89C";
       case "Detriment": return "#D98E7A";
       case "Fall": return "#D98E7A";
-      default: return "#6B6B78";
+      default: return "#8A8A96";
     }
   };
 
@@ -334,7 +334,7 @@ export function PlanetaryStrengthsPanel({ locale }: { locale: "ru" | "en" | "hi"
           </div>
 
           {/* Legend */}
-          <div className="mt-4 flex flex-wrap gap-3 text-[10px] text-[#6B6B78]">
+          <div className="mt-4 flex flex-wrap gap-3 text-[10px] text-[#8A8A96]">
             <span className="flex items-center gap-1">
               <span className="w-2.5 h-2.5 rounded-full" style={{ background: "#E8B86D" }} />
               {t("Управитель (+5)", "Ruler (+5)", "स्वामी (+5)")}
@@ -348,7 +348,7 @@ export function PlanetaryStrengthsPanel({ locale }: { locale: "ru" | "en" | "hi"
               {t("Изгнание/Падение (−3/−2)", "Detriment/Fall (−3/−2)", "नीच/पतन (−3/−2)")}
             </span>
             <span className="flex items-center gap-1">
-              <span className="w-2.5 h-2.5 rounded-full" style={{ background: "#6B6B78" }} />
+              <span className="w-2.5 h-2.5 rounded-full" style={{ background: "#8A8A96" }} />
               {t("Нейтрально", "Neutral", "तटस्थ")}
             </span>
             <span className="flex items-center gap-1">

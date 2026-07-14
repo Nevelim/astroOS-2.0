@@ -338,7 +338,7 @@ export function ConnectScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => v
                 <div className="mt-3 overflow-x-auto scrollbar-astro">
                   <table className="w-full text-[11px]">
                     <thead>
-                      <tr className="text-[9px] uppercase tracking-wider text-[#6B6B78] border-b border-[#2A2A35]">
+                      <tr className="text-[9px] uppercase tracking-wider text-[#8A8A96] border-b border-[#2A2A35]">
                         <th className="py-1 pr-2 text-left">P1</th><th className="py-1 pr-2 text-left">P2</th>
                         <th className="py-1 pr-2 text-left">Aspect</th><th className="py-1 pr-2 text-right">Orb</th>
                         <th className="py-1 text-right">Type</th>
@@ -445,7 +445,7 @@ export function ConnectScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => v
             </div>
             {/* Social share — direct deep links, open in new tab */}
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <span className="text-[10px] uppercase tracking-wider text-[#6B6B78]">
+              <span className="text-[10px] uppercase tracking-wider text-[#8A8A96]">
                 {locale === "ru" ? "Поделиться:" : locale === "hi" ? "साझा करें:" : "Share:"}
               </span>
               {[
@@ -489,7 +489,7 @@ export function ConnectScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => v
             </div>
             <div className="mt-3 flex items-center justify-between">
               <SocialProof count={2300} action="partner links shared today" tone="jade" live />
-              <span className="text-[10px] text-[#6B6B78]">k contribution 0.15–0.25 · queer-inclusive</span>
+              <span className="text-[10px] text-[#8A8A96]">k contribution 0.15–0.25 · queer-inclusive</span>
             </div>
             {/* QR code — scan with phone camera to open partner link on mobile */}
             <div className="mt-3 flex items-center gap-3 rounded-lg border border-[#2A2A35] bg-[#0B0B0F]/40 p-3">
@@ -505,7 +505,7 @@ export function ConnectScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => v
                 <div className="text-[12px] font-medium text-[#F5F0E8]">
                   {locale === "ru" ? "QR-код для сканирования" : locale === "hi" ? "स्कैन करने के लिए QR कोड" : "QR code to scan"}
                 </div>
-                <div className="text-[10px] text-[#6B6B78]">
+                <div className="text-[10px] text-[#8A8A96]">
                   {locale === "ru" ? "Наведите камеру телефона — партнёр откроет ссылку" : locale === "hi" ? "फोन कैमरा से स्कैन करें" : "Point your phone camera — your partner opens the link"}
                 </div>
               </div>
@@ -557,11 +557,11 @@ export function ConnectScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => v
             <div className="mt-3 grid grid-cols-5 gap-2">
               {Array.from({ length: 5 }).map((_, i) => (
                 <div key={i} className={`flex aspect-square items-center justify-center rounded-lg border ${i < 4 ? "border-[#5BB89C]/40 bg-[#5BB89C]/8" : "border-dashed border-[#2A2A35]"}`}>
-                  {i < 4 ? <span className="text-[10px] text-[#5BB89C]">✓</span> : <span className="text-[14px] text-[#6B6B78]">+</span>}
+                  {i < 4 ? <span className="text-[10px] text-[#5BB89C]">✓</span> : <span className="text-[14px] text-[#8A8A96]">+</span>}
                 </div>
               ))}
             </div>
-            <div className="mt-2 text-[10px] text-[#6B6B78]">4 of 5 profiles · Pro feature</div>
+            <div className="mt-2 text-[10px] text-[#8A8A96]">4 of 5 profiles · Pro feature</div>
           </GlassCard>
         </div>
       </FadeIn>

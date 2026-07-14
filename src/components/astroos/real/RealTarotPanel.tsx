@@ -259,7 +259,7 @@ export function RealTarotPanel({ locale }: { locale: Locale }) {
                   <div className="text-[11px] font-medium" style={{ color: active ? "#D98E7A" : "#F5F0E8" }}>
                     {t(locale, s.label.ru, s.label.en, s.label.hi)}
                   </div>
-                  <div className="text-[9px] text-[#6B6B78] mt-0.5">
+                  <div className="text-[9px] text-[#8A8A96] mt-0.5">
                     {s.count} {t(locale, "карт", "cards", "कार्ड")} · {t(locale, s.desc.ru, s.desc.en, s.desc.hi)}
                   </div>
                 </button>
@@ -379,7 +379,7 @@ export function RealTarotPanel({ locale }: { locale: Locale }) {
                             <div className="font-serif text-[12px] font-medium leading-tight" style={{ color }}>
                               {t(locale, drawn.card.nameRu, drawn.card.name, drawn.card.name)}
                             </div>
-                            <div className="text-[9px] mt-0.5" style={{ color: drawn.reversed ? "#D98E7A" : "#6B6B78" }}>
+                            <div className="text-[9px] mt-0.5" style={{ color: drawn.reversed ? "#D98E7A" : "#8A8A96" }}>
                               {drawn.reversed ? t(locale, "Перевёрнута", "Reversed", "उलटा") : t(locale, "Прямая", "Upright", "सीधा")}
                               {" · "}{drawn.card.arcana === "major" ? t(locale, "Старший аркан", "Major arcana", "प्रमुख अर्कना") : drawn.card.suit}
                             </div>
@@ -395,7 +395,7 @@ export function RealTarotPanel({ locale }: { locale: Locale }) {
                         )}
 
                         {!isRevealed && (
-                          <div className="mt-2 text-[9px] text-[#6B6B78] flex items-center gap-1">
+                          <div className="mt-2 text-[9px] text-[#8A8A96] flex items-center gap-1">
                             <EyeOff className="w-2.5 h-2.5" />
                             {t(locale, "Нажмите чтобы открыть", "Click to reveal", "खोलने के लिए क्लिक करें")}
                           </div>
@@ -433,7 +433,7 @@ export function RealTarotPanel({ locale }: { locale: Locale }) {
                       )}
                     </p>
                     {result.question && (
-                      <div className="mt-2 text-[11px] italic text-[#6B6B78]">
+                      <div className="mt-2 text-[11px] italic text-[#8A8A96]">
                         {t(locale, "Ваш вопрос:", "Your question:", "आपका प्रश्न:")} «{result.question}»
                       </div>
                     )}
@@ -441,7 +441,7 @@ export function RealTarotPanel({ locale }: { locale: Locale }) {
                 )}
 
                 {/* Deck info */}
-                <div className="mt-3 text-center text-[10px] text-[#6B6B78]">
+                <div className="mt-3 text-center text-[10px] text-[#8A8A96]">
                   {t(locale, "Колода Райдера-Уэйта-Смита · 78 карт", "Rider-Waite-Smith deck · 78 cards", "राइडर-वेट-स्मिथ डेक · 78 कार्ड")}
                   {" · "}
                   {result.cards.filter(c => c.reversed).length} {t(locale, "перевёрнутых", "reversed", "उलटा")}
@@ -462,7 +462,7 @@ export function RealTarotPanel({ locale }: { locale: Locale }) {
               <p className="mt-3 text-sm font-serif italic" style={{ color: "#F5F0E8" }}>
                 {t(locale, "Колода тасуется честным crypto-random.", "Deck shuffled with honest crypto-random.", "डेक ईमानदार क्रिप्टो-यादृच्छिक से फेंटा.")}
               </p>
-              <p className="mt-1 text-[11px] text-[#6B6B78]">
+              <p className="mt-1 text-[11px] text-[#8A8A96]">
                 {t(locale, "Выберите расклад и задайте вопрос", "Choose a spread and ask your question", "एक स्प्रेड चुनें और अपना प्रश्न पूछें")}
               </p>
             </div>

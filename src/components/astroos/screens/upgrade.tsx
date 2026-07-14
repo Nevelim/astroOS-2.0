@@ -334,7 +334,7 @@ export function UpgradeScreen({ onNavigate }: UpgradeProps = {}) {
 
                   {/* Decoy hint — only on Pro Monthly */}
                   {isProMonthly && (
-                    <p className="mt-2 text-[11px] italic text-[#6B6B78]">
+                    <p className="mt-2 text-[11px] italic text-[#8A8A96]">
                       {locale === "ru"
                         ? "Те же функции, оплата помесячно. С Annual большинство экономит 37%."
                         : locale === "hi"
@@ -455,7 +455,7 @@ export function UpgradeScreen({ onNavigate }: UpgradeProps = {}) {
                           ? "कार्ड से भुगतान · Stripe"
                           : "Pay with card · Stripe"}
                       </button>
-                      <p className="text-center text-[10px] text-[#6B6B78]">
+                      <p className="text-center text-[10px] text-[#8A8A96]">
                         {locale === "ru"
                           ? "Шифрование Stripe · Apple/Google IAP"
                           : locale === "hi"
@@ -467,7 +467,7 @@ export function UpgradeScreen({ onNavigate }: UpgradeProps = {}) {
 
                   {/* Free tier reassurance */}
                   {isFree && (
-                    <p className="mt-2 text-center text-[10px] text-[#6B6B78]">
+                    <p className="mt-2 text-center text-[10px] text-[#8A8A96]">
                       {locale === "ru"
                         ? "Без карты. Навсегда."
                         : locale === "hi"
@@ -535,7 +535,7 @@ export function UpgradeScreen({ onNavigate }: UpgradeProps = {}) {
         <section>
           <div className="mb-4 flex items-center gap-2">
             <Pill tone="jade">FAQ · checkout anxiety</Pill>
-            <span className="text-[12px] text-[#6B6B78]">
+            <span className="text-[12px] text-[#8A8A96]">
               {locale === "ru"
                 ? "Прозрачно. Без подвоха."
                 : locale === "hi"
@@ -596,7 +596,7 @@ export function UpgradeScreen({ onNavigate }: UpgradeProps = {}) {
         <section>
           <div className="mb-4 flex items-center gap-2">
             <Pill tone="jade">Purchasing Power Parity · mandatory</Pill>
-            <span className="text-[12px] text-[#6B6B78]">
+            <span className="text-[12px] text-[#8A8A96]">
               {locale === "ru"
                 ? "без PPP мы теряем индийский рынок с CAGR 49%"
                 : locale === "hi"

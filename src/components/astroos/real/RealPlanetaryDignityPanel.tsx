@@ -196,7 +196,7 @@ export function RealPlanetaryDignityPanel({ locale }: { locale: "ru" | "en" | "h
                 }`}
                 title={netScoreLabel}
               >
-                <span className="text-[9px] uppercase tracking-wider text-[#6B6B78]">{netScoreLabel}</span>
+                <span className="text-[9px] uppercase tracking-wider text-[#8A8A96]">{netScoreLabel}</span>
                 <span className={`font-display text-lg font-semibold tabular-nums ${
                   netTone === "gold" ? "text-[#E8B86D]" : netTone === "rose" ? "text-[#D98E7A]" : "text-[#9A9AA8]"
                 }`}>
@@ -240,7 +240,7 @@ export function RealPlanetaryDignityPanel({ locale }: { locale: "ru" | "en" | "h
             {/* ── Highlighted (non-neutral) planets ── */}
             {highlighted.length > 0 && (
               <div>
-                <div className="mb-2 text-[10px] uppercase tracking-[0.18em] text-[#6B6B78]">
+                <div className="mb-2 text-[10px] uppercase tracking-[0.18em] text-[#8A8A96]">
                   {highlightedLabel}
                   <span className="ml-2 text-[#9A9AA8]">({highlighted.length})</span>
                 </div>
@@ -274,7 +274,7 @@ export function RealPlanetaryDignityPanel({ locale }: { locale: "ru" | "en" | "h
                             {p.retrograde && (
                               <span className="astro-rx-glyph text-[10px]" title="Retrograde">℞</span>
                             )}
-                            <span className="text-[#6B6B78]">·</span>
+                            <span className="text-[#8A8A96]">·</span>
                             <span className="text-[#E8B86D]">{ZODIAC_GLYPHS[p.sign] ?? "·"}</span>
                             <span className="text-[11px] text-[#9A9AA8]">{p.sign}</span>
                           </div>
@@ -283,7 +283,7 @@ export function RealPlanetaryDignityPanel({ locale }: { locale: "ru" | "en" | "h
                             <span className={`text-[11px] font-medium ${cls.text}`}>
                               {dignityLabel(locale, p.dignity ?? "Neutral")}
                             </span>
-                            <span className="ml-auto text-[10px] tabular-nums text-[#6B6B78]">
+                            <span className="ml-auto text-[10px] tabular-nums text-[#8A8A96]">
                               {p.dignityScore && p.dignityScore > 0 ? "+" : ""}{p.dignityScore}
                             </span>
                           </div>
@@ -298,7 +298,7 @@ export function RealPlanetaryDignityPanel({ locale }: { locale: "ru" | "en" | "h
             {/* ── Neutral planets (compact row) ── */}
             {neutrals.length > 0 && (
               <div>
-                <div className="mb-2 text-[10px] uppercase tracking-[0.18em] text-[#6B6B78]">
+                <div className="mb-2 text-[10px] uppercase tracking-[0.18em] text-[#8A8A96]">
                   {neutralLabel}
                   <span className="ml-2 text-[#9A9AA8]">({neutrals.length})</span>
                 </div>
@@ -311,7 +311,7 @@ export function RealPlanetaryDignityPanel({ locale }: { locale: "ru" | "en" | "h
                     >
                       <span style={{ color: p.color }}>{p.symbol}</span>
                       <span className="text-[#F5F0E8]">{p.planet}</span>
-                      <span className="text-[#6B6B78]">·</span>
+                      <span className="text-[#8A8A96]">·</span>
                       <span className="text-[#E8B86D]">{ZODIAC_GLYPHS[p.sign] ?? "·"}</span>
                       <span>{p.sign}</span>
                       {p.retrograde && <span className="astro-rx-glyph text-[9px]">℞</span>}
@@ -322,15 +322,15 @@ export function RealPlanetaryDignityPanel({ locale }: { locale: "ru" | "en" | "h
             )}
 
             {/* footer */}
-            <div className="flex items-center justify-between border-t border-[#2A2A35] pt-2 text-[10px] text-[#6B6B78]">
+            <div className="flex items-center justify-between border-t border-[#2A2A35] pt-2 text-[10px] text-[#8A8A96]">
               <span>
                 {t(locale, "Scoring", "Оценка", "स्कोरिंग")}:{" "}
                 <span className="text-[#E8B86D]">Ruler +5</span>
-                <span className="text-[#6B6B78]"> · </span>
+                <span className="text-[#8A8A96]"> · </span>
                 <span className="text-[#5BB89C]">Exalted +4</span>
-                <span className="text-[#6B6B78]"> · </span>
+                <span className="text-[#8A8A96]"> · </span>
                 <span className="text-[#9A9AA8]">Neutral 0</span>
-                <span className="text-[#6B6B78]"> · </span>
+                <span className="text-[#8A8A96]"> · </span>
                 <span className="text-[#D98E7A]">Fall −2 · Detriment −3</span>
               </span>
               <span className="flex items-center gap-1.5">

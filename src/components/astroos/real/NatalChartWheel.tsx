@@ -349,7 +349,7 @@ export function NatalChartWheel({
 
       {/* ─── Aspect legend ─── */}
       {showAspects && aspects.length > 0 && (
-        <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[10px] text-[#6B6B78]">
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[10px] text-[#8A8A96]">
           {ASPECT_DEFS.map(ad => (
             <span key={ad.name} className="flex items-center gap-1">
               <svg width="16" height="4" className="shrink-0">
@@ -385,8 +385,8 @@ export function NatalChartWheel({
               <span style={{ color, fontFamily:"serif" }} className="text-xl">{PLANET_GLYPHS[p.planet]}</span>
               <span style={{ color }} className="font-medium text-sm">{p.planet}</span>
               <span className="text-[#F5F0E8] text-sm">{sign.deg}° {sign.name}</span>
-              <span className="text-[10px] text-[#6B6B78] ml-auto">{sign.glyph}</span>
-              <button onClick={() => setSelectedPlanet(null)} className="text-[#6B6B78] hover:text-[#F5F0E8] text-xs ml-2">✕</button>
+              <span className="text-[10px] text-[#8A8A96] ml-auto">{sign.glyph}</span>
+              <button onClick={() => setSelectedPlanet(null)} className="text-[#8A8A96] hover:text-[#F5F0E8] text-xs ml-2">✕</button>
             </div>
             {planetAspects.length > 0 && (
               <div className="space-y-1">
@@ -397,7 +397,7 @@ export function NatalChartWheel({
                     <div key={`${a.p1}-${a.p2}`} className="flex items-center gap-1.5 text-[11px]">
                       <span style={{ color:otherColor, fontFamily:"serif" }}>{PLANET_GLYPHS[otherPlanet]}</span>
                       <span style={{ color:a.color }} className="font-medium">{a.symbol} {a.name}</span>
-                      <span className="text-[#6B6B78]">{a.exactAngle}° orb {a.orb.toFixed(1)}°</span>
+                      <span className="text-[#8A8A96]">{a.exactAngle}° orb {a.orb.toFixed(1)}°</span>
                     </div>
                   );
                 })}

@@ -210,7 +210,7 @@ export function TodayScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => voi
           <GlassCard variant="gold" className="!p-4">
             <div className="text-[11px] uppercase tracking-wider text-[#9A9AA8]">{t("today.streak")}</div>
             <RitualStarRow filled={streakFilled} className="mt-1.5" />
-            <div className="mt-1.5 text-[11px] text-[#6B6B78]">{streakFilled} of 7 · {t("today.streak.sub")}</div>
+            <div className="mt-1.5 text-[11px] text-[#8A8A96]">{streakFilled} of 7 · {t("today.streak.sub")}</div>
           </GlassCard>
         </div>
       </FadeIn>
@@ -327,11 +327,11 @@ export function TodayScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => voi
           <GlassCard variant="jade" className="h-full">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <Pill tone="jade">❋ {powerCityEyebrow}</Pill>
-              <span className="font-mono text-[10px] text-[#6B6B78]">{powerCityLine} · {powerCity}</span>
+              <span className="font-mono text-[10px] text-[#8A8A96]">{powerCityLine} · {powerCity}</span>
             </div>
             <div className="mt-3 flex items-baseline gap-3">
               <span className="font-display text-3xl font-semibold text-[#5BB89C]">{powerCity}</span>
-              <span className="text-[11px] text-[#6B6B78]">{powerCityCountry} · {powerCityLat}°{topCity?.city?.lat != null && topCity.city.lat >= 0 ? "N" : "S"}</span>
+              <span className="text-[11px] text-[#8A8A96]">{powerCityCountry} · {powerCityLat}°{topCity?.city?.lat != null && topCity.city.lat >= 0 ? "N" : "S"}</span>
             </div>
             <p className="mt-3 text-[14px] leading-relaxed text-[#F5F0E8]/90">{powerCityCopy}</p>
             <div className="mt-4">
@@ -377,7 +377,7 @@ export function TodayScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => voi
                     {inf && (
                       <div className="mt-1 flex items-center gap-1 text-[10px]">
                         <span style={{ color:toneColor }}>{inf.planet} {inf.type}</span>
-                        <span className="text-[#6B6B78]">· {Math.round(inf.distKm)}km</span>
+                        <span className="text-[#8A8A96]">· {Math.round(inf.distKm)}km</span>
                       </div>
                     )}
                     <div className="mt-1.5 h-1 rounded-full overflow-hidden bg-[#1C1C26]">
@@ -406,7 +406,7 @@ export function TodayScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => voi
             <GlassCard variant="jade" className="h-full">
               <div className="flex items-center justify-between">
                 <Pill tone="jade">☾ {t("today.affirmation")}</Pill>
-                <span className="font-mono text-[10px] text-[#6B6B78]">~40 words</span>
+                <span className="font-mono text-[10px] text-[#8A8A96]">~40 words</span>
               </div>
               <p className="mt-4 font-display text-lg italic leading-relaxed text-[#5BB89C]">{localized(locale, TODAY.affirmation)}</p>
               <div className="mt-4"><Pill tone="muted">paired with ☽ square Chiron</Pill></div>
@@ -414,7 +414,7 @@ export function TodayScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => voi
             <GlassCard variant="rose" className="h-full">
               <div className="flex items-center justify-between">
                 <Pill tone="rose">♥ {t("today.compliment")}</Pill>
-                <span className="font-mono text-[10px] text-[#6B6B78]">Day Master 壬</span>
+                <span className="font-mono text-[10px] text-[#8A8A96]">Day Master 壬</span>
               </div>
               <p className="mt-4 text-[14px] leading-relaxed text-[#F5F0E8]/90">{localized(locale, TODAY.compliment)}</p>
               <div className="mt-4"><Pill tone="muted">rotation · depth</Pill></div>
@@ -437,7 +437,7 @@ export function TodayScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => voi
                 <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#1C1C26]">
                   <div className="h-full rounded-full" style={{ width: `${s.val}%`, background: s.tone === "gold" ? "#E8B86D" : s.tone === "jade" ? "#5BB89C" : "#D98E7A" }} />
                 </div>
-                <p className="mt-2 text-[10px] leading-snug text-[#6B6B78]">{localized(locale, s.note)}</p>
+                <p className="mt-2 text-[10px] leading-snug text-[#8A8A96]">{localized(locale, s.note)}</p>
               </div>
             ))}
           </div>
@@ -464,7 +464,7 @@ export function TodayScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => voi
             {/* Gentle streak — reflects today's cast, capped at 7. No shame, no red. */}
             <div className="mt-5 flex items-center gap-3">
               <RitualStarRow filled={streakFilled} />
-              <span className="text-[12px] text-[#6B6B78]">{streakFilled} / 7 this week</span>
+              <span className="text-[12px] text-[#8A8A96]">{streakFilled} / 7 this week</span>
             </div>
             {/* Encouragement, not shame — only shows when below gold (7). */}
             {streakFilled < 7 && (
@@ -472,13 +472,13 @@ export function TodayScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => voi
             )}
             <div className="mt-5 grid grid-cols-3 gap-3">
               <div className="rounded-lg bg-[#0B0B0F]/60 p-3 text-center">
-                <div className="font-display text-2xl text-[#E8B86D]">18%</div><div className="text-[10px] text-[#6B6B78] mt-0.5">Month 6</div>
+                <div className="font-display text-2xl text-[#E8B86D]">18%</div><div className="text-[10px] text-[#8A8A96] mt-0.5">Month 6</div>
               </div>
               <div className="rounded-lg bg-[#0B0B0F]/60 p-3 text-center">
-                <div className="font-display text-2xl text-[#5BB89C]">25%</div><div className="text-[10px] text-[#6B6B78] mt-0.5">Month 12</div>
+                <div className="font-display text-2xl text-[#5BB89C]">25%</div><div className="text-[10px] text-[#8A8A96] mt-0.5">Month 12</div>
               </div>
               <div className="rounded-lg bg-[#0B0B0F]/60 p-3 text-center">
-                <div className="font-display text-2xl text-[#D98E7A]">42%</div><div className="text-[10px] text-[#6B6B78] mt-0.5">Year 5</div>
+                <div className="font-display text-2xl text-[#D98E7A]">42%</div><div className="text-[10px] text-[#8A8A96] mt-0.5">Year 5</div>
               </div>
             </div>
           </GlassCard>
@@ -495,7 +495,7 @@ export function TodayScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => voi
               <li>7. RitualStar fills — gentle, no shame</li>
               <li className="text-[#5BB89C]">↻ Loop closes; push next morning</li>
             </ol>
-            <p className="mt-3 text-[11px] text-[#6B6B78]">Total: 90 seconds. Fits coffee · commute · bedtime.</p>
+            <p className="mt-3 text-[11px] text-[#8A8A96]">Total: 90 seconds. Fits coffee · commute · bedtime.</p>
           </GlassCard>
         </section>
       </FadeIn>

@@ -166,9 +166,9 @@ export function RealRetrogradeSchedulePanel({ locale }: { locale: "ru" | "en" | 
           <div className="mt-4 space-y-4">
             {/* ── Active Rx banner ── */}
             <div>
-              <div className="mb-2 text-[10px] uppercase tracking-[0.18em] text-[#6B6B78]">{activeLabel}</div>
+              <div className="mb-2 text-[10px] uppercase tracking-[0.18em] text-[#8A8A96]">{activeLabel}</div>
               {activeCycles.length === 0 ? (
-                <div className="flex items-center gap-2 rounded-lg border border-dashed border-[#2A2A35] px-3 py-3 text-xs text-[#6B6B78]">
+                <div className="flex items-center gap-2 rounded-lg border border-dashed border-[#2A2A35] px-3 py-3 text-xs text-[#8A8A96]">
                   <span className="text-base">✓</span>
                   {noActive}
                 </div>
@@ -203,7 +203,7 @@ export function RealRetrogradeSchedulePanel({ locale }: { locale: "ru" | "en" | 
                             </div>
                             <div className="mt-0.5 text-[10px] text-[#9A9AA8]">
                               {t(locale, "Direct", "Прямое", "प्रत्यक्ष")}: {new Date(c.endDate).toLocaleDateString(locale === "ru" ? "ru-RU" : "en-US", { month: "short", day: "numeric" })}
-                              <span className="ml-1.5 text-[#6B6B78]">· {c.durationDays}{durationLabel}</span>
+                              <span className="ml-1.5 text-[#8A8A96]">· {c.durationDays}{durationLabel}</span>
                             </div>
                             {/* progress bar */}
                             <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-[#0B0B0F]/80">
@@ -225,7 +225,7 @@ export function RealRetrogradeSchedulePanel({ locale }: { locale: "ru" | "en" | 
                                     {new Date(c.postShadowEnd).toLocaleDateString(locale === "ru" ? "ru-RU" : "en-US", { month: "short", day: "numeric" })}
                                   </span>
                                 </span>
-                                <span className="ml-auto text-[#6B6B78]" title={t(locale, "Post-shadow: Rx effects may linger", "Пост-тень: эффекты ℞ могут сохраняться", "पश्च-छाया")}>
+                                <span className="ml-auto text-[#8A8A96]" title={t(locale, "Post-shadow: Rx effects may linger", "Пост-тень: эффекты ℞ могут сохраняться", "पश्च-छाया")}>
                                   {t(locale, "post-shadow", "пост-тень", "पश्च-छाया")}
                                 </span>
                               </div>
@@ -261,7 +261,7 @@ export function RealRetrogradeSchedulePanel({ locale }: { locale: "ru" | "en" | 
                         <span style={{ color }}>◐</span>
                         <span style={{ color }}>{PLANET_GLYPHS[c.planet] ?? "·"}</span>
                         <span>{c.planet}</span>
-                        <span className="text-[#6B6B78]">·</span>
+                        <span className="text-[#8A8A96]">·</span>
                         <span className="text-[10px]">
                           {isPre
                             ? t(locale, "pre-shadow", "пре-тень", "पूर्व")
@@ -276,9 +276,9 @@ export function RealRetrogradeSchedulePanel({ locale }: { locale: "ru" | "en" | 
 
             {/* ── Upcoming stations timeline ── */}
             <div>
-              <div className="mb-2 text-[10px] uppercase tracking-[0.18em] text-[#6B6B78]">{upcomingLabel}</div>
+              <div className="mb-2 text-[10px] uppercase tracking-[0.18em] text-[#8A8A96]">{upcomingLabel}</div>
               {upcomingStations.length === 0 ? (
-                <p className="rounded-lg border border-dashed border-[#2A2A35] px-3 py-4 text-center text-xs text-[#6B6B78]">
+                <p className="rounded-lg border border-dashed border-[#2A2A35] px-3 py-4 text-center text-xs text-[#8A8A96]">
                   {t(locale, "No upcoming stations in range", "Нет предстоящих станций", "कोई आगामी स्टेशन नहीं")}.
                 </p>
               ) : (
@@ -318,7 +318,7 @@ export function RealRetrogradeSchedulePanel({ locale }: { locale: "ru" | "en" | 
                                 {stationLabel(locale, s.type)}
                               </span>
                             </div>
-                            <div className="mt-0.5 flex items-center gap-2 text-[10px] text-[#6B6B78]">
+                            <div className="mt-0.5 flex items-center gap-2 text-[10px] text-[#8A8A96]">
                               <span className="tabular-nums">
                                 {new Date(s.date).toLocaleDateString(locale === "ru" ? "ru-RU" : "en-US", { month: "short", day: "numeric" })}
                               </span>
@@ -339,7 +339,7 @@ export function RealRetrogradeSchedulePanel({ locale }: { locale: "ru" | "en" | 
             </div>
 
             {/* footer */}
-            <div className="flex items-center justify-between border-t border-[#2A2A35] pt-2 text-[10px] text-[#6B6B78]">
+            <div className="flex items-center justify-between border-t border-[#2A2A35] pt-2 text-[10px] text-[#8A8A96]">
               <span>{t(locale, "℞ retrograde · → direct", "℞ ретроград · → прямое", "℞ पश्चगामी · → प्रत्यक्ष")}</span>
               <span className="flex items-center gap-1.5">
                 <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-[#D98E7A]" />

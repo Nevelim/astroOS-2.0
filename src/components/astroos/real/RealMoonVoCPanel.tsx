@@ -255,7 +255,7 @@ export function RealMoonVoCPanel({ locale }: { locale: "ru" | "en" | "hi" }) {
             {/* ── VoC period details ── */}
             <div className="grid gap-2 sm:grid-cols-2">
               <div className="rounded-lg border border-[#2A2A35] bg-[#121218]/70 px-3 py-2.5">
-                <div className="text-[10px] uppercase tracking-wider text-[#6B6B78]">
+                <div className="text-[10px] uppercase tracking-wider text-[#8A8A96]">
                   {t(locale, "VoC start", "Начало VoC", "VoC शुरू")}
                 </div>
                 <div className="mt-0.5 text-[12px] tabular-nums text-[#F5F0E8]">
@@ -263,7 +263,7 @@ export function RealMoonVoCPanel({ locale }: { locale: "ru" | "en" | "hi" }) {
                 </div>
               </div>
               <div className="rounded-lg border border-[#2A2A35] bg-[#121218]/70 px-3 py-2.5">
-                <div className="text-[10px] uppercase tracking-wider text-[#6B6B78]">
+                <div className="text-[10px] uppercase tracking-wider text-[#8A8A96]">
                   {t(locale, "VoC end", "Конец VoC", "VoC समाप्त")}
                 </div>
                 <div className="mt-0.5 text-[12px] tabular-nums text-[#F5F0E8]">
@@ -271,7 +271,7 @@ export function RealMoonVoCPanel({ locale }: { locale: "ru" | "en" | "hi" }) {
                 </div>
               </div>
               <div className="rounded-lg border border-[#2A2A35] bg-[#121218]/70 px-3 py-2.5">
-                <div className="text-[10px] uppercase tracking-wider text-[#6B6B78]">
+                <div className="text-[10px] uppercase tracking-wider text-[#8A8A96]">
                   {durationLabel}
                 </div>
                 <div className="mt-0.5 text-[12px] tabular-nums text-[#F5F0E8]">
@@ -279,13 +279,13 @@ export function RealMoonVoCPanel({ locale }: { locale: "ru" | "en" | "hi" }) {
                 </div>
               </div>
               <div className="rounded-lg border border-[#2A2A35] bg-[#121218]/70 px-3 py-2.5">
-                <div className="text-[10px] uppercase tracking-wider text-[#6B6B78]">
+                <div className="text-[10px] uppercase tracking-wider text-[#8A8A96]">
                   {t(locale, "Sign ingress", "Вход в знак", "राशि प्रवेश")}
                 </div>
                 <div className="mt-0.5 flex items-center gap-1 text-[12px] text-[#F5F0E8]">
                   <span className="text-[#E8B86D]">{ZODIAC_GLYPHS[current.sign] ?? "·"}</span>
                   <span className="text-[#9A9AA8]">{current.sign}</span>
-                  <span className="text-[#6B6B78]">→</span>
+                  <span className="text-[#8A8A96]">→</span>
                   <span className="text-[#E8B86D]">{ZODIAC_GLYPHS[current.nextSign] ?? "·"}</span>
                   <span className="text-[#9A9AA8]">{entersLabel} {current.nextSign}</span>
                 </div>
@@ -295,10 +295,10 @@ export function RealMoonVoCPanel({ locale }: { locale: "ru" | "en" | "hi" }) {
             {/* ── Last aspect ── */}
             <div className="rounded-lg border border-[#2A2A35] bg-[#16161D]/80 px-3 py-2.5">
               <div className="flex items-center justify-between">
-                <div className="text-[10px] uppercase tracking-wider text-[#6B6B78]">
+                <div className="text-[10px] uppercase tracking-wider text-[#8A8A96]">
                   {lastAspectLabel}
                 </div>
-                <span className="text-[10px] tabular-nums text-[#6B6B78]">
+                <span className="text-[10px] tabular-nums text-[#8A8A96]">
                   {fmtDate(locale, current.lastAspect.time)}
                 </span>
               </div>
@@ -306,9 +306,9 @@ export function RealMoonVoCPanel({ locale }: { locale: "ru" | "en" | "hi" }) {
                 <span className="text-[#C4D3E0]">☾</span>
                 <span className="text-[#E8B86D]">{ASPECT_GLYPHS[current.lastAspect.aspect] ?? "·"}</span>
                 <span className="text-[#9A9AA8]">{aspectLabel(locale, current.lastAspect.aspect)}</span>
-                <span className="text-[#6B6B78]">·</span>
+                <span className="text-[#8A8A96]">·</span>
                 <span className="text-[#C4D3E0]">{current.lastAspect.planet}</span>
-                <span className="ml-auto text-[10px] tabular-nums text-[#6B6B78]">
+                <span className="ml-auto text-[10px] tabular-nums text-[#8A8A96]">
                   {t(locale, "orb", "орб", "अरब")} {current.lastAspect.orb.toFixed(2)}°
                 </span>
               </div>
@@ -317,20 +317,20 @@ export function RealMoonVoCPanel({ locale }: { locale: "ru" | "en" | "hi" }) {
             {/* ── Following VoC ── */}
             {following && (
               <div className="rounded-lg border border-dashed border-[#2A2A35] bg-[#0B0B0F]/40 px-3 py-2.5">
-                <div className="text-[10px] uppercase tracking-wider text-[#6B6B78]">
+                <div className="text-[10px] uppercase tracking-wider text-[#8A8A96]">
                   {followingLabel}
                 </div>
                 <div className="mt-1 flex items-center gap-2 text-[11px] text-[#9A9AA8]">
                   <span className="tabular-nums">{fmtDate(locale, following.startTime)}</span>
-                  <span className="text-[#6B6B78]">→</span>
+                  <span className="text-[#8A8A96]">→</span>
                   <span className="tabular-nums">{fmtDate(locale, following.endTime)}</span>
-                  <span className="ml-auto text-[#6B6B78]">{following.durationHours}h</span>
+                  <span className="ml-auto text-[#8A8A96]">{following.durationHours}h</span>
                 </div>
               </div>
             )}
 
             {/* footer */}
-            <div className="flex items-center justify-between border-t border-[#2A2A35] pt-2 text-[10px] text-[#6B6B78]">
+            <div className="flex items-center justify-between border-t border-[#2A2A35] pt-2 text-[10px] text-[#8A8A96]">
               <span>
                 {t(locale, "Moon in", "Луна в", "चंद्रमा")}:{" "}
                 <span className="text-[#E8B86D]">{ZODIAC_GLYPHS[data.currentSign] ?? "·"}</span>{" "}

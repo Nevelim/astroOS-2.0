@@ -309,7 +309,7 @@ export function RealAspectsPanel({ locale }: { locale: "ru" | "en" | "hi" }) {
                     <div className="text-[10px] text-[#9A9AA8] mt-0.5">
                       {asp.exactAngle}° · orb {asp.orb.toFixed(1)}°
                       {!asp.isApplying && (
-                        <span className="ml-1 text-[#6B6B78]">({t("разделяющий", "separating", "अलग होने वाला")})</span>
+                        <span className="ml-1 text-[#8A8A96]">({t("разделяющий", "separating", "अलग होने वाला")})</span>
                       )}
                     </div>
                     {meaning && (
@@ -324,7 +324,7 @@ export function RealAspectsPanel({ locale }: { locale: "ru" | "en" | "hi" }) {
           </div>
 
           {/* Legend */}
-          <div className="mt-3 flex flex-wrap gap-3 text-[10px] text-[#6B6B78]">
+          <div className="mt-3 flex flex-wrap gap-3 text-[10px] text-[#8A8A96]">
             <span className="flex items-center gap-1">
               <span className="w-4 h-0.5 rounded" style={{ background: "#E8B86D" }} /> {t("Соединение", "Conjunct", "युक्त")}
             </span>
@@ -335,7 +335,7 @@ export function RealAspectsPanel({ locale }: { locale: "ru" | "en" | "hi" }) {
               <span className="w-4 h-0.5 rounded" style={{ background: "#D98E7A" }} /> {t("Квадрат / Оппозиция", "Square / Opposite", "वर्ग / विपरीत")}
             </span>
             <span className="flex items-center gap-1">
-              <span className="w-4 h-0.5 rounded border-t border-dashed" style={{ borderColor: "#6B6B78" }} /> {t("Разделяющий", "Separating", "अलग होने वाला")}
+              <span className="w-4 h-0.5 rounded border-t border-dashed" style={{ borderColor: "#8A8A96" }} /> {t("Разделяющий", "Separating", "अलग होने वाला")}
             </span>
           </div>
         </div>

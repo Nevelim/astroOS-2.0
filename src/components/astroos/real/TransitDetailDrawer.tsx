@@ -242,7 +242,7 @@ export function TransitDetailDrawer({ open, onClose, aspect, locale }: TransitDe
                     transition={{ duration: 0.6, ease: "easeOut" }}
                   />
                 </div>
-                <div className="flex justify-between mt-1 text-[9px]" style={{ color: "#6B6B78" }}>
+                <div className="flex justify-between mt-1 text-[9px]" style={{ color: "#8A8A96" }}>
                   <span>{t(locale, "Exact", "Точный", "सटीक")}</span>
                   <span>{t(locale, "Max orb", "Макс орб", "अधिकतम ऑर्ब")}</span>
                 </div>

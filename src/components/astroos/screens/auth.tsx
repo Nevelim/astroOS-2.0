@@ -116,7 +116,7 @@ export function AuthScreen({ onNavigate }: AuthProps = {}) {
 
             <div className="my-4 flex items-center gap-3">
               <CosmicDivider className="flex-1" />
-              <span className="text-[10px] uppercase tracking-wider text-[#6B6B78]">{locale === "ru" ? "или" : "or"}</span>
+              <span className="text-[10px] uppercase tracking-wider text-[#8A8A96]">{locale === "ru" ? "или" : "or"}</span>
               <CosmicDivider className="flex-1" />
             </div>
 
@@ -194,7 +194,7 @@ export function AuthScreen({ onNavigate }: AuthProps = {}) {
                         <span className="font-display text-sm font-semibold text-[#F5F0E8]">{tier.name}</span>
                         {tier.highlight && <Pill tone="gold">popular</Pill>}
                       </div>
-                      <div className="text-[10px] text-[#6B6B78]">{tier.tagline}</div>
+                      <div className="text-[10px] text-[#8A8A96]">{tier.tagline}</div>
                     </div>
                     <div className="text-right">
                       <span

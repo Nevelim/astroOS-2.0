@@ -224,7 +224,7 @@ export function BirthDataScreen({ onNavigate }: BirthProps = {}) {
                       </button>
                     ))}
                   </div>
-                  <p className="mt-1 text-[10px] text-[#6B6B78]">
+                  <p className="mt-1 text-[10px] text-[#8A8A96]">
                     {L("Affects BaZi Luck Pillars direction", "Влияет на направление BaZi Luck Pillars", "BaZi Luck Pillars दिशा को प्रभावित करता है", locale)}
                   </p>
                 </div>
@@ -247,7 +247,7 @@ export function BirthDataScreen({ onNavigate }: BirthProps = {}) {
                     <StepIndicator step={4} />
                     {L("Mentor voice", "Голос наставника", "गुरु स्वर", locale)}
                   </label>
-                  <p className="mt-0.5 text-[11px] text-[#6B6B78]">
+                  <p className="mt-0.5 text-[11px] text-[#8A8A96]">
                     {L("You can change this later. Stable persona — never switches on you.", "Можно изменить позже. Стабильная персона — не переключается.", "बाद में बदल सकते हैं। स्थिर व्यक्तित्व — कभी नहीं बदलता।", locale)}
                   </p>
                   <div className="mt-2 grid grid-cols-2 gap-2">
@@ -268,7 +268,7 @@ export function BirthDataScreen({ onNavigate }: BirthProps = {}) {
                             <span className={`block text-[12px] font-medium ${active ? "text-[#E8B86D]" : "text-[#F5F0E8]"}`}>
                               {v.label[locale === "ru" ? "ru" : locale === "hi" ? "hi" : "en"]}
                             </span>
-                            <span className="block text-[10px] leading-snug text-[#6B6B78]">
+                            <span className="block text-[10px] leading-snug text-[#8A8A96]">
                               {v.desc[locale === "ru" ? "ru" : locale === "hi" ? "hi" : "en"]}
                             </span>
                           </span>
@@ -298,7 +298,7 @@ export function BirthDataScreen({ onNavigate }: BirthProps = {}) {
                       : L("✦ Calculate my chart", "✦ Построить мою карту", "✦ मेरी चार्ट बनाएं", locale)}
                   </CosmicButton>
                 </motion.div>
-                <p className="text-center text-[11px] text-[#6B6B78]">
+                <p className="text-center text-[11px] text-[#8A8A96]">
                   {L("Takes ~1.5 seconds. Cached forever (your chart never changes).", "~1.5 секунды. Кэшируется навсегда (ваша карта не меняется).", "~1.5 सेकंड। हमेशा कैश (आपकी चार्ट कभी नहीं बदलती)।", locale)}
                 </p>
 
@@ -473,7 +473,7 @@ export function BirthDataScreen({ onNavigate }: BirthProps = {}) {
           <button onClick={() => onNavigate?.("auth")} className="text-[#9A9AA8] transition hover:text-[#F5F0E8]">
             ← {L("Back to account", "Назад к аккаунту", "खाते पर वापस", locale)}
           </button>
-          <button onClick={() => onNavigate?.("reveal")} className="text-[#6B6B78] transition hover:text-[#E8B86D]">
+          <button onClick={() => onNavigate?.("reveal")} className="text-[#8A8A96] transition hover:text-[#E8B86D]">
             {L("Skip with demo data →", "Пропустить с демо-данными →", "डेमो डेटा से छोड़ें →", locale)}
           </button>
         </div>

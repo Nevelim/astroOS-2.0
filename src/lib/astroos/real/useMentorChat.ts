@@ -30,53 +30,7 @@ export function useMentorChat(options: UseMentorChatOptions) {
   const [error, setError] = useState<string | null>(null);
   const socketRef = useRef<ReturnType<typeof import("socket.io-client")["io"]> | null>(null);
 
-  const sendMessage = useCallback(async (text: string) => {
-    if (!text.trim() || loading) return;
-    setLoading(true);
-    setError(null);
-
-    const userMsg: MentorMessage = {
-      id: crypto.randomUUID(),
-      role: "user",
-      content: text,
-      createdAt: new Date(),
-    };
-    const assistantMsg: MentorMessage = {
-      id: crypto.randomUUID(),
-      role: "assistant",
-      content: "",
-      createdAt: new Date(),
-      voice: options.voice,
-      streaming: true,
-    };
-    setMessages((prev) => [...prev, userMsg, assistantMsg]);
-
-    try {
-      // Сначала пробуем WebSocket streaming через chat-service (:3003)
-      await sendViaSocket(text, assistantMsg.id);
-    } catch (wsError) {
-      // Fallback на REST API
-      try {
-        const response = await api.mentorChat({
-          message: text,
-          voice: options.voice,
-          twoAmCompanion: options.twoAmCompanion,
-        });
-        setMessages((prev) => prev.map((m) =>
-          m.id === assistantMsg.id
-            ? { ...m, content: response.message.content, streaming: false, citedTransits: response.message.citedTransits }
-            : m
-        ));
-        setQuota(response.quota);
-      } catch (restError) {
-        setError((restError as Error).message);
-        setMessages((prev) => prev.filter((m) => m.id !== assistantMsg.id));
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [loading, options.voice, options.twoAmCompanion]);
-
+  // Declared BEFORE sendMessage to avoid use-before-declare / stale-closure bug.
   const sendViaSocket = useCallback((text: string, assistantId: string) => {
     return new Promise<void>(async (resolve, reject) => {
       try {
@@ -124,6 +78,53 @@ export function useMentorChat(options: UseMentorChatOptions) {
       }
     });
   }, [options.voice, options.twoAmCompanion, options.locale, options.memberId]);
+
+  const sendMessage = useCallback(async (text: string) => {
+    if (!text.trim() || loading) return;
+    setLoading(true);
+    setError(null);
+
+    const userMsg: MentorMessage = {
+      id: crypto.randomUUID(),
+      role: "user",
+      content: text,
+      createdAt: new Date(),
+    };
+    const assistantMsg: MentorMessage = {
+      id: crypto.randomUUID(),
+      role: "assistant",
+      content: "",
+      createdAt: new Date(),
+      voice: options.voice,
+      streaming: true,
+    };
+    setMessages((prev) => [...prev, userMsg, assistantMsg]);
+
+    try {
+      // Сначала пробуем WebSocket streaming через chat-service (:3003)
+      await sendViaSocket(text, assistantMsg.id);
+    } catch (wsError) {
+      // Fallback на REST API
+      try {
+        const response = await api.mentorChat({
+          message: text,
+          voice: options.voice,
+          twoAmCompanion: options.twoAmCompanion,
+        });
+        setMessages((prev) => prev.map((m) =>
+          m.id === assistantMsg.id
+            ? { ...m, content: response.message.content, streaming: false, citedTransits: response.message.citedTransits }
+            : m
+        ));
+        setQuota(response.quota);
+      } catch (restError) {
+        setError((restError as Error).message);
+        setMessages((prev) => prev.filter((m) => m.id !== assistantMsg.id));
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [loading, options.voice, options.twoAmCompanion, sendViaSocket]);
 
   useEffect(() => {
     return () => {

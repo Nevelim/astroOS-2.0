@@ -244,7 +244,7 @@ export function RealCosmicAspectsPanel({ locale }: { locale: "ru" | "en" | "hi" 
 
             {/* ── Planet row ── */}
             <div>
-              <div className="mb-2 text-[10px] uppercase tracking-[0.18em] text-[#6B6B78]">{planetsLabel}</div>
+              <div className="mb-2 text-[10px] uppercase tracking-[0.18em] text-[#8A8A96]">{planetsLabel}</div>
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-7">
                 {data.transits.map((p) => (
                   <motion.div
@@ -281,7 +281,7 @@ export function RealCosmicAspectsPanel({ locale }: { locale: "ru" | "en" | "hi" 
                       <span className="text-[#E8B86D]">{ZODIAC_GLYPHS[p.sign] ?? "·"}</span>
                       <span>{p.sign}</span>
                     </span>
-                    <span className="mt-0.5 text-[10px] tabular-nums text-[#6B6B78]">
+                    <span className="mt-0.5 text-[10px] tabular-nums text-[#8A8A96]">
                       {p.deg}°{p.min.toString().padStart(2, "0")}′
                     </span>
                   </motion.div>
@@ -291,12 +291,12 @@ export function RealCosmicAspectsPanel({ locale }: { locale: "ru" | "en" | "hi" 
 
             {/* ── Aspect grid ── */}
             <div>
-              <div className="mb-2 text-[10px] uppercase tracking-[0.18em] text-[#6B6B78]">
+              <div className="mb-2 text-[10px] uppercase tracking-[0.18em] text-[#8A8A96]">
                 {aspectsLabel}
                 <span className="ml-2 text-[#9A9AA8]">({data.aspects.length})</span>
               </div>
               {data.aspects.length === 0 ? (
-                <p className="rounded-lg border border-dashed border-[#2A2A35] px-3 py-4 text-center text-xs text-[#6B6B78]">
+                <p className="rounded-lg border border-dashed border-[#2A2A35] px-3 py-4 text-center text-xs text-[#8A8A96]">
                   {t(locale, "No major aspects within orb today", "Сегодня нет крупных аспектов в орбе", "आज कोई प्रमुख पहलू नहीं")}.
                 </p>
               ) : (
@@ -324,7 +324,7 @@ export function RealCosmicAspectsPanel({ locale }: { locale: "ru" | "en" | "hi" 
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-1.5 text-sm font-medium text-[#F5F0E8]">
                             <span style={{ color: planetA?.color ?? "#E8B86D" }}>{planetA?.symbol ?? asp.a}</span>
-                            <span className="text-[#6B6B78]">·</span>
+                            <span className="text-[#8A8A96]">·</span>
                             <span style={{ color: planetB?.color ?? "#E8B86D" }}>{planetB?.symbol ?? asp.b}</span>
                             <span className="ml-1 truncate text-[11px] text-[#9A9AA8]">{asp.a}–{asp.b}</span>
                           </div>
@@ -332,7 +332,7 @@ export function RealCosmicAspectsPanel({ locale }: { locale: "ru" | "en" | "hi" 
                             <span className={`text-[11px] font-medium ${TONE_TEXT[tone]}`}>
                               {ASPECT_LABELS(locale, asp.type)}
                             </span>
-                            <span className="text-[10px] tabular-nums text-[#6B6B78]">
+                            <span className="text-[10px] tabular-nums text-[#8A8A96]">
                               {orbLabel} {asp.orb.toFixed(1)}°
                             </span>
                           </div>
@@ -345,7 +345,7 @@ export function RealCosmicAspectsPanel({ locale }: { locale: "ru" | "en" | "hi" 
             </div>
 
             {/* timestamp footer */}
-            <div className="flex items-center justify-between border-t border-[#2A2A35] pt-2 text-[10px] text-[#6B6B78]">
+            <div className="flex items-center justify-between border-t border-[#2A2A35] pt-2 text-[10px] text-[#8A8A96]">
               <span>
                 {t(locale, "Snapshot", "Снимок", "स्नैपशॉट")}:{" "}
                 <span className="tabular-nums">{new Date(data.timestamp).toLocaleTimeString(locale === "ru" ? "ru-RU" : locale === "hi" ? "hi-IN" : "en-US")}</span>

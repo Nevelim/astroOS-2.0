@@ -199,7 +199,7 @@ export function CityAutocomplete({
               setError(null);
               inputRef.current?.focus();
             }}
-            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#6B6B78] transition hover:text-[#D98E7A]"
+            className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#8A8A96] transition hover:text-[#D98E7A]"
           >
             ✕
           </button>
@@ -247,7 +247,7 @@ export function CityAutocomplete({
             initial={{ opacity: 0, y: -4 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
-            className="absolute z-30 mt-1 w-full rounded-lg border border-[#2A2A35] bg-[#12121A] px-3 py-3 text-[12px] text-[#6B6B78]"
+            className="absolute z-30 mt-1 w-full rounded-lg border border-[#2A2A35] bg-[#12121A] px-3 py-3 text-[12px] text-[#8A8A96]"
           >
             {L("No cities found. Try a different search.", "Города не найдены. Попробуйте другой запрос.", "कोई शहर नहीं मिला। अलग खोज आज़माएं।", locale)}
           </motion.div>

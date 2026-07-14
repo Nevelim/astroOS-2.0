@@ -111,7 +111,7 @@ export function DivineScreen() {
         <section>
           <div className="flex items-center gap-2 mb-4">
             <Pill tone="gold">Free · daily</Pill>
-            <span className="text-[12px] text-[#6B6B78]">pre-generated 02:00 UTC · 11 languages · cache 6h</span>
+            <span className="text-[12px] text-[#8A8A96]">pre-generated 02:00 UTC · 11 languages · cache 6h</span>
           </div>
           <h3 className="font-display text-2xl font-semibold mb-4">{t("divine.horoscope.spheres")}</h3>
           <div className="grid gap-3 md:grid-cols-5">
@@ -122,7 +122,7 @@ export function DivineScreen() {
                 <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[#1C1C26]">
                   <div className="h-full rounded-full" style={{ width: `${s.val}%`, background: s.tone === "gold" ? "#E8B86D" : s.tone === "jade" ? "#5BB89C" : "#D98E7A" }} />
                 </div>
-                <p className="mt-2 text-[10px] leading-snug text-[#6B6B78]">{localized(locale, s.note)}</p>
+                <p className="mt-2 text-[10px] leading-snug text-[#8A8A96]">{localized(locale, s.note)}</p>
               </GlassCard>
             ))}
           </div>
@@ -168,7 +168,7 @@ export function DivineScreen() {
                 <div key={i} className={`w-8 ${l === 6 || l === 9 ? "opacity-100" : "opacity-50"}`} style={{ borderBottom: l === 7 || l === 9 ? "3px solid #5BB89C" : "none", borderTop: l === 6 || l === 8 ? "3px solid #5BB89C" : "none", height: l === 7 || l === 9 ? "0" : "6px", margin: l === 7 || l === 9 ? "3px 0" : "0" }} />
               ))}
             </div>
-            <div className="mt-1 flex items-center gap-1 text-[9px] text-[#6B6B78]">
+            <div className="mt-1 flex items-center gap-1 text-[9px] text-[#8A8A96]">
               <span>lines 3, 5 changing →</span>
               <InfoTip
                 label={locale === "ru" ? "Changing lines (变爻)" : locale === "hi" ? "Changing lines" : "Changing lines (变爻)"}

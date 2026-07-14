@@ -525,7 +525,7 @@ export function RealMoonPhasePanel({ locale }: { locale: "ru" | "en" | "hi" }) {
                   {/* Phase angle technical readout */}
                   <div
                     className="flex items-center justify-between text-[10px] font-mono"
-                    style={{ color: "#6B6B78" }}
+                    style={{ color: "#8A8A96" }}
                   >
                     <span>
                       ☾ {data.moonLongitude.toFixed(1)}° · ☉ {data.sunLongitude.toFixed(1)}°

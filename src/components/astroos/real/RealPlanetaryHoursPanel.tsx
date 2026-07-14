@@ -188,7 +188,7 @@ export function RealPlanetaryHoursPanel({ locale }: { locale: "ru" | "en" | "hi"
 
             {/* Progress bar */}
             <div className="mt-3">
-              <div className="flex items-center justify-between text-[10px] text-[#6B6B78] mb-1">
+              <div className="flex items-center justify-between text-[10px] text-[#8A8A96] mb-1">
                 <span>{t("Осталось", "Remaining", "शेष")} {remainingMin}m</span>
                 <span>{Math.round(elapsedPct)}%</span>
               </div>
@@ -209,15 +209,15 @@ export function RealPlanetaryHoursPanel({ locale }: { locale: "ru" | "en" | "hi"
             <div className="flex items-center gap-3 p-2.5 rounded-lg mb-4" style={{
               background: "rgba(11,11,15,0.4)", border: "1px solid rgba(42,42,53,0.6)",
             }}>
-              <div className="text-[10px] uppercase tracking-wider text-[#6B6B78] shrink-0">
+              <div className="text-[10px] uppercase tracking-wider text-[#8A8A96] shrink-0">
                 {t("Далее", "Next", "अगला")}
               </div>
               <span className="text-lg" style={{ color: next.color, fontFamily: "serif" }}>{next.glyph}</span>
               <div className="flex-1 min-w-0">
                 <div className="text-[12px] font-medium" style={{ color: next.color }}>{next.planet}</div>
-                <div className="text-[10px] text-[#6B6B78] font-mono">{next.startTime} — {next.endTime}</div>
+                <div className="text-[10px] text-[#8A8A96] font-mono">{next.startTime} — {next.endTime}</div>
               </div>
-              <span className="text-[10px] text-[#6B6B78]">
+              <span className="text-[10px] text-[#8A8A96]">
                 {(() => {
                   const ms = new Date(next.startISO).getTime() - now.getTime();
                   const min = Math.floor(ms / 60000);
@@ -249,11 +249,11 @@ export function RealPlanetaryHoursPanel({ locale }: { locale: "ru" | "en" | "hi"
                       opacity: isPast ? 0.5 : 1,
                     }}
                   >
-                    <div className="text-[9px] text-[#6B6B78] mb-0.5">{h.hour}</div>
+                    <div className="text-[9px] text-[#8A8A96] mb-0.5">{h.hour}</div>
                     <div className="text-base" style={{ color: h.color, fontFamily: "serif" }}>
                       {h.glyph}
                     </div>
-                    <div className="text-[8px] font-mono text-[#6B6B78] mt-0.5">{h.startTime}</div>
+                    <div className="text-[8px] font-mono text-[#8A8A96] mt-0.5">{h.startTime}</div>
                     {isCurrent && (
                       <motion.div
                         className="mt-1 h-0.5 rounded-full"
@@ -291,7 +291,7 @@ export function RealPlanetaryHoursPanel({ locale }: { locale: "ru" | "en" | "hi"
           </div>
 
           {/* All 7 planets legend */}
-          <div className="mt-3 flex flex-wrap gap-2 text-[10px] text-[#6B6B78]">
+          <div className="mt-3 flex flex-wrap gap-2 text-[10px] text-[#8A8A96]">
             <span className="text-[#9A9AA8]">{t("Планеты:", "Planets:", "ग्रह:")} </span>
             {(["Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn"] as const).map(p => {
               const colors: Record<string, string> = {

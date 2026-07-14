@@ -50,12 +50,12 @@ export function OverviewScreen({ onNavigate }: { onNavigate?: (s: ScreenKey) => 
           />
           <div className="mt-6 overflow-x-auto scrollbar-astro">
             <div className="grid min-w-[640px] grid-cols-6 gap-2">
-              <div className="text-[10px] uppercase tracking-wider text-[#6B6B78] px-2 py-1">Phase</div>
-              <div className="text-[10px] uppercase tracking-wider text-[#6B6B78] px-2 py-1">MAU</div>
-              <div className="text-[10px] uppercase tracking-wider text-[#6B6B78] px-2 py-1">ARR</div>
-              <div className="text-[10px] uppercase tracking-wider text-[#6B6B78] px-2 py-1">WARD</div>
-              <div className="text-[10px] uppercase tracking-wider text-[#6B6B78] px-2 py-1">Viral k</div>
-              <div className="text-[10px] uppercase tracking-wider text-[#6B6B78] px-2 py-1">LTV</div>
+              <div className="text-[10px] uppercase tracking-wider text-[#8A8A96] px-2 py-1">Phase</div>
+              <div className="text-[10px] uppercase tracking-wider text-[#8A8A96] px-2 py-1">MAU</div>
+              <div className="text-[10px] uppercase tracking-wider text-[#8A8A96] px-2 py-1">ARR</div>
+              <div className="text-[10px] uppercase tracking-wider text-[#8A8A96] px-2 py-1">WARD</div>
+              <div className="text-[10px] uppercase tracking-wider text-[#8A8A96] px-2 py-1">Viral k</div>
+              <div className="text-[10px] uppercase tracking-wider text-[#8A8A96] px-2 py-1">LTV</div>
               {TRAJECTORY.flatMap((row) => [
                 <div key={`${row.phase}-p`} className="px-2 py-2 text-[12px] text-[#E8B86D] font-medium">{row.phase}</div>,
                 <div key={`${row.phase}-m`} className="px-2 py-2 text-[13px] font-mono text-[#F5F0E8]">{row.mau}</div>,
@@ -168,7 +168,7 @@ export function OverviewScreen({ onNavigate }: { onNavigate?: (s: ScreenKey) => 
       <FadeIn>
         <div className="text-center">
           <p className="font-display text-2xl italic text-[#E8B86D]">{t("brand.equipping")}</p>
-          <p className="mt-2 text-[12px] text-[#6B6B78]">
+          <p className="mt-2 text-[12px] text-[#8A8A96]">
             Full proposal: <span className="font-mono text-[#9A9AA8]">/home/z/my-project/docs/product-designer-proposal.md</span>
           </p>
         </div>

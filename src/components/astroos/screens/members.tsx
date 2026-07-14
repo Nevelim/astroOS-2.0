@@ -68,19 +68,19 @@ export function MembersScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => v
                 <CosmicDivider className="my-3" />
                 <div className="grid grid-cols-2 gap-3 text-[11px]">
                   <div>
-                    <div className="text-[9px] uppercase tracking-wider text-[#6B6B78]">Day Master</div>
+                    <div className="text-[9px] uppercase tracking-wider text-[#8A8A96]">Day Master</div>
                     <div className="mt-0.5 font-display text-[#5E8FA8]">{m.dayMaster}</div>
                   </div>
                   <div>
-                    <div className="text-[9px] uppercase tracking-wider text-[#6B6B78]">Top city</div>
+                    <div className="text-[9px] uppercase tracking-wider text-[#8A8A96]">Top city</div>
                     <div className="mt-0.5 font-display text-[#E8B86D]">{m.topCity}</div>
                   </div>
                   <div>
-                    <div className="text-[9px] uppercase tracking-wider text-[#6B6B78]">Gender (BaZi)</div>
+                    <div className="text-[9px] uppercase tracking-wider text-[#8A8A96]">Gender (BaZi)</div>
                     <div className="mt-0.5 text-[#9A9AA8]">{m.gender === 0 ? "Female" : "Male"}</div>
                   </div>
                   <div>
-                    <div className="text-[9px] uppercase tracking-wider text-[#6B6B78]">Relocation score</div>
+                    <div className="text-[9px] uppercase tracking-wider text-[#8A8A96]">Relocation score</div>
                     <div className="mt-0.5 font-mono text-[#5BB89C]">{m.score}</div>
                   </div>
                 </div>
@@ -96,7 +96,7 @@ export function MembersScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => v
             <button className="flex h-full min-h-[200px] w-full flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-[#2A2A35] bg-[#0B0B0F]/40 p-5 text-[#9A9AA8] transition hover:border-[#E8B86D]/40 hover:text-[#E8B86D]">
               <span className="text-3xl">＋</span>
               <span className="font-display text-base">{t("members.add")}</span>
-              <span className="text-[10px] text-[#6B6B78]">Pro · up to 5 profiles</span>
+              <span className="text-[10px] text-[#8A8A96]">Pro · up to 5 profiles</span>
             </button>
           </FadeIn>
         </div>

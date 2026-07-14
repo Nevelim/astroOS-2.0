@@ -94,7 +94,7 @@ export function ProfileScreen({ onNavigate }: ProfileProps = {}) {
       <FadeIn delay={0.05}>
         <GlassCard variant="gold" glow className="astro-card-sheen relative">
           {isMock && (
-            <div className="absolute top-2 right-2 text-[9px] px-1.5 py-0.5 rounded bg-[#6B6B78]/20 text-[#6B6B78]">
+            <div className="absolute top-2 right-2 text-[9px] px-1.5 py-0.5 rounded bg-[#8A8A96]/20 text-[#8A8A96]">
               {locale === "ru" ? "демо-режим" : locale === "hi" ? "डेमो मोड" : "demo mode"}
             </div>
           )}
@@ -110,13 +110,13 @@ export function ProfileScreen({ onNavigate }: ProfileProps = {}) {
               <div className="mt-1 text-[12px] text-[#9A9AA8]">
                 {displaySun} Sun · {displayMoon} Moon · {displayRising} Rising · {displayDayMaster}
               </div>
-              <div className="text-[11px] text-[#6B6B78]">
+              <div className="text-[11px] text-[#8A8A96]">
                 {locale === "ru" ? "Родилась" : locale === "hi" ? "जन्म" : "Born"}: {displayBirthPlace} · {member?.birth?.isoDateTime ?? USER.birthTime} · UTC+{member?.birth?.tzOffset ?? USER.birthTz}
               </div>
             </div>
             <div className="text-center">
               <RitualStarRow filled={displayStreak} />
-              <div className="mt-1 text-[10px] text-[#6B6B78]">{displayStreak}/7 {locale === "ru" ? "дней" : locale === "hi" ? "दिन" : "days"}</div>
+              <div className="mt-1 text-[10px] text-[#8A8A96]">{displayStreak}/7 {locale === "ru" ? "дней" : locale === "hi" ? "दिन" : "days"}</div>
             </div>
           </div>
         </GlassCard>
@@ -210,7 +210,7 @@ export function ProfileScreen({ onNavigate }: ProfileProps = {}) {
                         <span className="text-base"></span>
                         {locale === "ru" ? "Подключить Apple" : locale === "hi" ? "Apple जोड़ें" : "Connect Apple"}
                       </span>
-                      <span className="text-[#6B6B78]">→</span>
+                      <span className="text-[#8A8A96]">→</span>
                     </button>
                   </div>
                 </div>
@@ -259,7 +259,7 @@ export function ProfileScreen({ onNavigate }: ProfileProps = {}) {
                 <CosmicButton variant="outline" className="!py-2 !px-4 !text-[12px] w-full" onClick={() => onNavigate?.("birth")}>
                   {locale === "ru" ? "Изменить данные рождения →" : locale === "hi" ? "जन्म डेटा बदलें →" : "Edit birth data →"}
                 </CosmicButton>
-                <p className="mt-2 text-[10px] text-[#6B6B78]">
+                <p className="mt-2 text-[10px] text-[#8A8A96]">
                   {locale === "ru"
                     ? "Внимание: изменение данных рождения пересчитает всю карту. История сохранится."
                     : locale === "hi"
@@ -304,7 +304,7 @@ export function ProfileScreen({ onNavigate }: ProfileProps = {}) {
                 <div className="flex items-center justify-between">
                   <div>
                     <div className="text-[12px] text-[#F5F0E8]">2 a.m. Companion</div>
-                    <div className="text-[10px] text-[#6B6B78]">{locale === "ru" ? "Авто 23:00–05:00" : locale === "hi" ? "स्वतः 23:00–05:00" : "Auto 23:00–05:00"}</div>
+                    <div className="text-[10px] text-[#8A8A96]">{locale === "ru" ? "Авто 23:00–05:00" : locale === "hi" ? "स्वतः 23:00–05:00" : "Auto 23:00–05:00"}</div>
                   </div>
                   <Toggle on={twoAmCompanion} onClick={() => setTwoAmCompanion(!twoAmCompanion)} tone="rose" />
                 </div>
@@ -333,7 +333,7 @@ export function ProfileScreen({ onNavigate }: ProfileProps = {}) {
                     >
                       <div>
                         <div className="text-[13px] text-[#F5F0E8]">{h.label}</div>
-                        <div className="text-[10px] text-[#6B6B78]">{h.desc[locale]}</div>
+                        <div className="text-[10px] text-[#8A8A96]">{h.desc[locale]}</div>
                       </div>
                       {houseSystem === h.key && <Pill tone="jade">✓</Pill>}
                     </button>
@@ -354,7 +354,7 @@ export function ProfileScreen({ onNavigate }: ProfileProps = {}) {
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="text-[12px] text-[#F5F0E8]">{locale === "ru" ? "Память AI-наставника" : locale === "hi" ? "AI स्मृति" : "AI mentor memory"}</div>
-                      <div className="text-[10px] text-[#6B6B78]">{locale === "ru" ? "Запоминает прошлые разговоры" : locale === "hi" ? "पिछली बातचीत याद रखता है" : "Remembers past conversations"}</div>
+                      <div className="text-[10px] text-[#8A8A96]">{locale === "ru" ? "Запоминает прошлые разговоры" : locale === "hi" ? "पिछली बातचीत याद रखता है" : "Remembers past conversations"}</div>
                     </div>
                     <Toggle on={memoryEnabled} onClick={() => setMemoryEnabled(!memoryEnabled)} tone="jade" />
                   </div>
@@ -362,7 +362,7 @@ export function ProfileScreen({ onNavigate }: ProfileProps = {}) {
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="text-[12px] text-[#F5F0E8]">{locale === "ru" ? "Push-уведомления" : locale === "hi" ? "Push सूचनाएं" : "Push notifications"}</div>
-                      <div className="text-[10px] text-[#6B6B78]">{locale === "ru" ? "Calm by default" : "Calm by default"}</div>
+                      <div className="text-[10px] text-[#8A8A96]">{locale === "ru" ? "Calm by default" : "Calm by default"}</div>
                     </div>
                     <Toggle on={pushEnabled} onClick={() => setPushEnabled(!pushEnabled)} tone="gold" />
                   </div>
@@ -381,11 +381,11 @@ export function ProfileScreen({ onNavigate }: ProfileProps = {}) {
                   <div className="space-y-2">
                     <button className="flex w-full items-center justify-between rounded-lg border border-[#2A2A35] bg-[#0B0B0F]/40 p-3 text-left text-[12px] text-[#9A9AA8] hover:border-[#9A9AA8]/40 transition">
                       <span>{locale === "ru" ? "Просмотреть память AI" : locale === "hi" ? "AI स्मृति देखें" : "View AI memory"}</span>
-                      <span className="text-[#6B6B78]">→</span>
+                      <span className="text-[#8A8A96]">→</span>
                     </button>
                     <button className="flex w-full items-center justify-between rounded-lg border border-[#2A2A35] bg-[#0B0B0F]/40 p-3 text-left text-[12px] text-[#9A9AA8] hover:border-[#9A9AA8]/40 transition">
                       <span>{locale === "ru" ? "Экспорт моих данных" : locale === "hi" ? "मेरा डेटा निर्यात" : "Export my data"}</span>
-                      <span className="text-[#6B6B78]">→</span>
+                      <span className="text-[#8A8A96]">→</span>
                     </button>
                     <button className="flex w-full items-center justify-between rounded-lg border border-[#D98E7A]/30 bg-[#D98E7A]/5 p-3 text-left text-[12px] text-[#D98E7A] hover:border-[#D98E7A]/50 transition">
                       <span>{locale === "ru" ? "Удалить аккаунт" : locale === "hi" ? "खाता हटाएं" : "Delete account"}</span>
@@ -413,7 +413,7 @@ export function ProfileScreen({ onNavigate }: ProfileProps = {}) {
                         <span className="text-xl">{l.flag}</span>
                         <div>
                           <div className="text-[13px] text-[#F5F0E8]">{l.native}</div>
-                          <div className="text-[10px] text-[#6B6B78]">
+                          <div className="text-[10px] text-[#8A8A96]">
                             {l.key === "en" && "Western primary · all voices"}
                             {l.key === "ru" && "Western · calm voice"}
                             {l.key === "hi" && "Vedic phrasing · panchang"}
@@ -424,7 +424,7 @@ export function ProfileScreen({ onNavigate }: ProfileProps = {}) {
                     </button>
                   ))}
                 </div>
-                <div className="mt-3 text-[10px] text-[#6B6B78]">
+                <div className="mt-3 text-[10px] text-[#8A8A96]">
                   {locale === "ru" ? "Скоро: ES, PT, AR (RTL), ZH, JA, KO, DE, FR" : locale === "hi" ? "जल्द: ES, PT, AR, ZH, JA, KO, DE, FR" : "Coming: ES, PT, AR (RTL), ZH, JA, KO, DE, FR"}
                 </div>
               </GlassCard>
@@ -446,7 +446,7 @@ export function ProfileScreen({ onNavigate }: ProfileProps = {}) {
                       {m.name.charAt(0)}
                     </div>
                     <div className="mt-1.5 text-[11px] font-medium text-[#F5F0E8]">{m.name}</div>
-                    <div className="text-[9px] text-[#6B6B78]">{m.relation}</div>
+                    <div className="text-[9px] text-[#8A8A96]">{m.relation}</div>
                   </div>
                 ))}
               </div>
@@ -524,7 +524,7 @@ export function ProfileScreen({ onNavigate }: ProfileProps = {}) {
                     ? (locale === "ru" ? "Изменить имя" : locale === "hi" ? "नाम बदलें" : "Edit name")
                     : (locale === "ru" ? "Изменить email" : locale === "hi" ? "email बदलें" : "Edit email")}
                 </Pill>
-                <button onClick={() => setEditingField(null)} className="text-[#6B6B78] transition hover:text-[#F5F0E8]" aria-label="Close">✕</button>
+                <button onClick={() => setEditingField(null)} className="text-[#8A8A96] transition hover:text-[#F5F0E8]" aria-label="Close">✕</button>
               </div>
               <label className="mt-4 block text-[10px] uppercase tracking-wider text-[#9A9AA8]">
                 {editingField === "name" ? (locale === "ru" ? "Имя" : locale === "hi" ? "नाम" : "Name") : "Email"}
@@ -552,7 +552,7 @@ export function ProfileScreen({ onNavigate }: ProfileProps = {}) {
                   {locale === "ru" ? "Сохранить" : locale === "hi" ? "सहेजें" : "Save"}
                 </button>
               </div>
-              <p className="mt-2 text-center text-[10px] text-[#6B6B78]">
+              <p className="mt-2 text-center text-[10px] text-[#8A8A96]">
                 {locale === "ru" ? "Enter — сохранить · Esc — отмена" : locale === "hi" ? "Enter — सहेजें · Esc — रद्द" : "Enter to save · Esc to cancel"}
               </p>
             </motion.div>

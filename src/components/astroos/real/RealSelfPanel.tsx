@@ -182,7 +182,7 @@ export function RealSelfPanel({ locale }: { locale:"ru"|"en"|"hi" }) {
                     <span style={{ color:"#5BB89C" }} className="text-sm">{ZODIAC_GLYPHS[signIdx]}</span>
                   </div>
                   {kw && (
-                    <div className="text-[9px] text-[#6B6B78] leading-tight">
+                    <div className="text-[9px] text-[#8A8A96] leading-tight">
                       {locale === "ru" ? kw.ru : locale === "hi" ? kw.hi : kw.en}
                     </div>
                   )}

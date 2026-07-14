@@ -173,7 +173,7 @@ export function MentorScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => vo
                       )}
                     </div>
                     <span
-                      className={`text-[#6B6B78] text-[10px] transition-transform ${isExpanded ? "rotate-180" : ""}`}
+                      className={`text-[#8A8A96] text-[10px] transition-transform ${isExpanded ? "rotate-180" : ""}`}
                       aria-hidden
                     >
                       ▾
@@ -228,7 +228,7 @@ export function MentorScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => vo
               );
             })}
           </div>
-          <p className="mt-2 text-[11px] text-[#6B6B78]">
+          <p className="mt-2 text-[11px] text-[#8A8A96]">
             Stable persona + persistent pgvector memory from day one — anti-Replika identity-discontinuity trap.
           </p>
         </div>
@@ -358,7 +358,7 @@ export function MentorScreen({ onNavigate }: { onNavigate?: (k: ScreenKey) => vo
                       ? "Speak softly… the night listens"
                       : "Ask anything about your chart…"
                   }
-                  className="flex-1 bg-transparent px-3 py-2 text-[14px] text-[#F5F0E8] placeholder:text-[#6B6B78] outline-none disabled:opacity-60"
+                  className="flex-1 bg-transparent px-3 py-2 text-[14px] text-[#F5F0E8] placeholder:text-[#8A8A96] outline-none disabled:opacity-60"
                 />
                 <CosmicButton
                   variant={companion ? "rose" : "primary"}

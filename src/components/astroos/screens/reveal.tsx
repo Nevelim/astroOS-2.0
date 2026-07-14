@@ -76,7 +76,7 @@ export function RevealScreen({ onNavigate }: RevealProps = {}) {
                     {locale === "ru" ? "«90 секунд — позволь нам назвать, что делало небо, когда ты пришёл.»" : locale === "hi" ? "«90 सेकंड — जब आप आए थे तब आकाश क्या कर रहा था, उसे नाम देने दें।»" : "“For 90 seconds, let us name what the sky was doing when you arrived.”"}
                   </p>
                   <CosmicButton variant="primary" onClick={() => setPhase("revealed")} className="astro-pulse-glow">✧ {t("reveal.cta")}</CosmicButton>
-                  <p className="text-[11px] text-[#6B6B78]">{t("reveal.nopaywall")}</p>
+                  <p className="text-[11px] text-[#8A8A96]">{t("reveal.nopaywall")}</p>
                 </motion.div>
               ) : (
                 <motion.div key="revealed" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }} className="space-y-5">

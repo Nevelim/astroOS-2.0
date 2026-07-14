@@ -141,7 +141,7 @@ export function RealBaZiPanel({ locale }: { locale: "ru" | "en" | "hi" }) {
         <p className="text-sm text-[#D98E7A]">
           {L("Failed to calculate BaZi", "Не удалось рассчитать BaZi", "BaZi की गणना विफल", locale)}
         </p>
-        <p className="mt-1 text-[11px] text-[#6B6B78]">{error}</p>
+        <p className="mt-1 text-[11px] text-[#8A8A96]">{error}</p>
       </GlassCard>
     );
   }
@@ -230,7 +230,7 @@ export function RealBaZiPanel({ locale }: { locale: "ru" | "en" | "hi" }) {
                       : "border-[#2A2A35] bg-[#0B0B0F]/50"
                   }`}
                 >
-                  <div className="text-[9px] uppercase tracking-wider text-[#6B6B78]">{p.position}</div>
+                  <div className="text-[9px] uppercase tracking-wider text-[#8A8A96]">{p.position}</div>
                   <motion.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
@@ -333,7 +333,7 @@ export function RealBaZiPanel({ locale }: { locale: "ru" | "en" | "hi" }) {
                         : "border-[#2A2A35] bg-[#0B0B0F]/40"
                     }`}
                   >
-                    <div className="text-[8px] text-[#6B6B78]">{lp.startAge}-{lp.endAge}</div>
+                    <div className="text-[8px] text-[#8A8A96]">{lp.startAge}-{lp.endAge}</div>
                     <div className="mt-1 font-display text-xl" style={{ color: stemColor }}>{lp.stem}</div>
                     <div className="font-display text-xl text-[#5BB89C]">{lp.branch}</div>
                     <div className="mt-0.5 text-[7px] text-[#9A9AA8]">{STEM_TO_ELEMENT[lp.stem] ?? "Earth"}</div>
@@ -375,7 +375,7 @@ export function RealBaZiPanel({ locale }: { locale: "ru" | "en" | "hi" }) {
           )}
 
           {/* Footer with metadata */}
-          <div className="mt-4 flex items-center justify-between text-[10px] text-[#6B6B78]">
+          <div className="mt-4 flex items-center justify-between text-[10px] text-[#8A8A96]">
             <span>{L("Calculated in", "Вычислено за", "गणना", locale)} {latency}ms</span>
             <span className="font-mono">{source}</span>
           </div>

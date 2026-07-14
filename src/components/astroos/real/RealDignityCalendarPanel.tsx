@@ -87,7 +87,7 @@ const TONE_DOT: Record<string, string> = {
   gold: "#E8B86D",
   jade: "#5BB89C",
   rose: "#D98E7A",
-  neutral: "#6B6B78",
+  neutral: "#8A8A96",
 };
 
 /* ───────── i18n ───────── */
@@ -190,12 +190,12 @@ export function RealDignityCalendarPanel({ locale }: { locale: "ru" | "en" | "hi
           <div className="mt-4 space-y-4">
             {/* ── Upcoming transitions timeline ── */}
             <div>
-              <div className="mb-2 text-[10px] uppercase tracking-[0.18em] text-[#6B6B78]">
+              <div className="mb-2 text-[10px] uppercase tracking-[0.18em] text-[#8A8A96]">
                 {upcomingLabel}
                 <span className="ml-2 text-[#9A9AA8]">({transitions.length})</span>
               </div>
               {transitions.length === 0 ? (
-                <p className="rounded-lg border border-dashed border-[#2A2A35] px-3 py-4 text-center text-xs text-[#6B6B78]">
+                <p className="rounded-lg border border-dashed border-[#2A2A35] px-3 py-4 text-center text-xs text-[#8A8A96]">
                   {noTransitions}
                 </p>
               ) : (
@@ -228,16 +228,16 @@ export function RealDignityCalendarPanel({ locale }: { locale: "ru" | "en" | "hi
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-1.5 text-[12px] text-[#F5F0E8]">
                               <span className="font-medium">{tr.planet}</span>
-                              <span className="text-[#6B6B78]">·</span>
+                              <span className="text-[#8A8A96]">·</span>
                               <span className="text-[10px] text-[#9A9AA8]">
                                 {tr.from ? dignityLabel(locale, tr.from) : "—"}
                               </span>
-                              <span className="text-[#6B6B78]">→</span>
+                              <span className="text-[#8A8A96]">→</span>
                               <span className={`text-[11px] font-medium ${TONE_TEXT[tone]}`}>
                                 {DIGNITY_GLYPHS[tr.to]} {dignityLabel(locale, tr.to)}
                               </span>
                             </div>
-                            <div className="mt-0.5 flex items-center gap-2 text-[10px] text-[#6B6B78]">
+                            <div className="mt-0.5 flex items-center gap-2 text-[10px] text-[#8A8A96]">
                               <span className="text-[#E8B86D]">{ZODIAC_GLYPHS[tr.sign] ?? "·"}</span>
                               <span>{tr.sign}</span>
                               <span>·</span>
@@ -258,7 +258,7 @@ export function RealDignityCalendarPanel({ locale }: { locale: "ru" | "en" | "hi
             {/* ── Month summary ── */}
             {summary.length > 0 && (
               <div>
-                <div className="mb-2 text-[10px] uppercase tracking-[0.18em] text-[#6B6B78]">{monthLabel}</div>
+                <div className="mb-2 text-[10px] uppercase tracking-[0.18em] text-[#8A8A96]">{monthLabel}</div>
                 <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
                   {summary.map((m) => {
                     const planetColor = PLANET_COLORS[m.planet] ?? "#E8B86D";
@@ -290,12 +290,12 @@ export function RealDignityCalendarPanel({ locale }: { locale: "ru" | "en" | "hi
             )}
 
             {/* footer */}
-            <div className="flex items-center justify-between border-t border-[#2A2A35] pt-2 text-[10px] text-[#6B6B78]">
+            <div className="flex items-center justify-between border-t border-[#2A2A35] pt-2 text-[10px] text-[#8A8A96]">
               <span>
                 <span className="text-[#E8B86D]">♔ Ruler</span>
-                <span className="text-[#6B6B78]"> · </span>
+                <span className="text-[#8A8A96]"> · </span>
                 <span className="text-[#5BB89C]">↑ Exalted</span>
-                <span className="text-[#6B6B78]"> · </span>
+                <span className="text-[#8A8A96]"> · </span>
                 <span className="text-[#D98E7A]">↓ Detriment · ⤓ Fall</span>
               </span>
               <span className="flex items-center gap-1.5">

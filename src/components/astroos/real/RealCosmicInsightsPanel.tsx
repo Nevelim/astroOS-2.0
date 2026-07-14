@@ -273,7 +273,7 @@ export function RealCosmicInsightsPanel({ locale }: { locale: "ru" | "en" | "hi"
           </div>
 
           {/* Footer note */}
-          <div className="mt-4 text-center text-[10px] text-[#6B6B78] italic">
+          <div className="mt-4 text-center text-[10px] text-[#8A8A96] italic">
             {t(
               "Сгенерировано из ваших реальных позиций планет + BaZi. Не чат-генерация — чистая астрология.",
               "Generated from your real planet positions + BaZi. Not chat-generated — pure astrology.",

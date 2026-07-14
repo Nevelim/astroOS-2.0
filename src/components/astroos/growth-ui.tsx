@@ -56,7 +56,7 @@ export function SoftPaywall({
           <Pill tone="gold">✦ Pro · {trigger}</Pill>
           <button
             onClick={onDismiss}
-            className="rounded-md p-1 text-[#6B6B78] transition hover:bg-[#1C1C26] hover:text-[#F5F0E8]"
+            className="rounded-md p-1 text-[#8A8A96] transition hover:bg-[#1C1C26] hover:text-[#F5F0E8]"
             aria-label="Dismiss"
           >
             ✕
@@ -70,7 +70,7 @@ export function SoftPaywall({
         >
           {cta}
         </button>
-        <p className="mt-2 text-center text-[11px] text-[#6B6B78]">{note}</p>
+        <p className="mt-2 text-center text-[11px] text-[#8A8A96]">{note}</p>
       </motion.div>
     </motion.div>
   );
@@ -370,7 +370,7 @@ export function NotificationsBell({
           >
             <div className="flex items-center justify-between border-b border-[#2A2A35] px-4 py-2.5">
               <span className="font-display text-sm font-semibold text-[#F5F0E8]">Cosmic inbox</span>
-              <span className="text-[10px] text-[#6B6B78]">{unread} new</span>
+              <span className="text-[10px] text-[#8A8A96]">{unread} new</span>
             </div>
             <div className="max-h-80 overflow-y-auto scrollbar-astro">
               {notifications.map((n) => (
@@ -391,7 +391,7 @@ export function NotificationsBell({
                   <span className="flex-1">
                     <span className="flex items-center justify-between gap-2">
                       <span className="text-[12px] font-medium text-[#F5F0E8]">{n.title}</span>
-                      <span className="shrink-0 text-[10px] text-[#6B6B78]">{n.time}</span>
+                      <span className="shrink-0 text-[10px] text-[#8A8A96]">{n.time}</span>
                     </span>
                     <span className="mt-0.5 block text-[11px] leading-relaxed text-[#9A9AA8]">{n.body}</span>
                     {n.action && (
@@ -403,7 +403,7 @@ export function NotificationsBell({
               ))}
             </div>
             <div className="border-t border-[#2A2A35] px-4 py-2 text-center">
-              <button className="text-[11px] text-[#6B6B78] transition hover:text-[#E8B86D]">Mark all read</button>
+              <button className="text-[11px] text-[#8A8A96] transition hover:text-[#E8B86D]">Mark all read</button>
             </div>
           </motion.div>
         )}
@@ -518,7 +518,7 @@ export function OnboardingStepper({
                   "flex h-7 w-7 shrink-0 items-center justify-center rounded-full border text-[11px] font-semibold transition-all",
                   done && "border-[#5BB89C]/50 bg-[#5BB89C]/15 text-[#5BB89C]",
                   active && "border-[#E8B86D] bg-[#E8B86D] text-[#0B0B0F] shadow-[0_0_16px_rgba(232,184,109,0.5)]",
-                  !done && !active && "border-[#2A2A35] text-[#6B6B78]"
+                  !done && !active && "border-[#2A2A35] text-[#8A8A96]"
                 )}
               >
                 {done ? "✓" : s.n}
@@ -526,7 +526,7 @@ export function OnboardingStepper({
               <span
                 className={cn(
                   "hidden text-[11px] font-medium sm:inline",
-                  active ? "text-[#E8B86D]" : done ? "text-[#5BB89C]" : "text-[#6B6B78]"
+                  active ? "text-[#E8B86D]" : done ? "text-[#5BB89C]" : "text-[#8A8A96]"
                 )}
               >
                 {s.label}
@@ -797,7 +797,7 @@ export function TourSpotlight({
           </span>
           <button
             onClick={onClose}
-            className="rounded p-1 text-[#6B6B78] transition hover:bg-[#1C1C26] hover:text-[#F5F0E8]"
+            className="rounded p-1 text-[#8A8A96] transition hover:bg-[#1C1C26] hover:text-[#F5F0E8]"
             aria-label="Skip tour"
           >
             ✕

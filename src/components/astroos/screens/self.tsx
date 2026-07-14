@@ -175,7 +175,7 @@ export function SelfScreen() {
                 {BAZI.recommendations.stones.map((s) => (
                   <div key={s.name} className="flex items-center justify-between text-[11px]">
                     <span className="text-[#F5F0E8]">{s.name}</span>
-                    <span className="font-mono text-[10px] text-[#6B6B78]">{s.finger}</span>
+                    <span className="font-mono text-[10px] text-[#8A8A96]">{s.finger}</span>
                   </div>
                 ))}
               </div>

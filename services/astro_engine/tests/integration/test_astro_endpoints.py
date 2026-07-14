@@ -200,3 +200,41 @@ class TestFamilyAbundanceEndpoint:
         for t in ("resonance", "crossAspect", "complementarity", "harmony"):
             assert t in bbst and "city" in bbst[t]
 
+
+class TestLocalSpaceFromBirthEndpoint:
+    """Local-space computed server-side from UTC + observer coordinates."""
+
+    def test_missing_data_422(self, client):
+        r = client.post("/v1/local-space-from-birth", json={"utc": "2020-01-01T00:00:00Z"})
+        assert r.status_code == 422
+
+    def test_invalid_utc_422(self, client):
+        r = client.post("/v1/local-space-from-birth", json={
+            "utc": "not-a-date", "lat": 50.0, "lng": 10.0,
+        })
+        assert r.status_code == 422
+
+    def test_returns_planet_lines_or_ephemeris_unavailable(self, client):
+        """Either the ephemeris loads (200) or it's absent (503) — both valid
+        in a test environment. We assert the success-path shape."""
+        r = client.post("/v1/local-space-from-birth", json={
+            "utc": "1989-04-15T09:40:00Z", "lat": 52.2833, "lng": 76.9667,
+        })
+        if r.status_code == 503:
+            pytest.skip("Ephemeris not available in this test environment")
+        assert r.status_code == 200
+        body = r.json()
+        assert "planet_lines" in body
+        assert "lst_deg" in body
+        assert "planet_longitudes" in body
+        assert isinstance(body["planet_lines"], list)
+        if body["planet_lines"]:
+            line = body["planet_lines"][0]
+            for key in ("planet", "azimuth_deg", "altitude_deg", "sector", "above_horizon"):
+                assert key in line
+            # Azimuth is a compass bearing [0, 360).
+            assert 0 <= line["azimuth_deg"] < 360
+            # Sector is one of the 8 compass points.
+            assert line["sector"] in ("N", "NE", "E", "SE", "S", "SW", "W", "NW")
+
+

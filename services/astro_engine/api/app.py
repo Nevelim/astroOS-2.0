@@ -706,6 +706,74 @@ def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
             ],
         })
 
+    # ---- local space from birth: compute RA/Dec + LST server-side ---------- #
+    @app.post("/v1/local-space-from-birth", tags=["astro"])
+    def local_space_from_birth(payload: dict, request: Request) -> JSONResponse:
+        """Local Space for an arbitrary observer point, computed from birth data.
+
+        Unlike /v1/local-space (which requires pre-computed RA/Dec + LST), this
+        endpoint takes raw UTC + observer coordinates and resolves the planet
+        positions server-side via the skyfield ephemeris. This makes local-space
+        usable for ANY city (birthplace for "me", a candidate relocation city
+        for the family overlay) without the caller needing ephemeris access.
+
+        Body: { "utc": "1989-04-15T09:40:00Z", "lat": 52.2833, "lng": 76.9667 }
+        Returns the same shape as /v1/local-space plus the resolved planet
+        longitudes (so the caller can reuse them for other calculations).
+        """
+        from services.astro_engine.domain.chart import local_sidereal_time_deg
+        from services.astro_engine.domain.local_space import compute_local_space
+        utc_str = payload.get("utc")
+        lat = payload.get("lat")
+        lng = payload.get("lng")
+        if not utc_str or lat is None or lng is None:
+            return problem(422, "astro/local-space-from-birth-invalid",
+                           "Missing data",
+                           "'utc', 'lat', and 'lng' are all required.",
+                           request.url.path)
+        try:
+            utc = datetime.fromisoformat(utc_str.replace("Z", "+00:00"))
+        except ValueError:
+            return problem(422, "astro/local-space-from-birth-invalid",
+                           "Invalid utc",
+                           "'utc' must be ISO-8601, e.g. "
+                           "'1989-04-15T09:40:00Z'.",
+                           request.url.path)
+        try:
+            eph = SkyfieldEphemeris()
+            positions = eph.positions(utc, float(lat), float(lng))
+        except Exception as exc:  # ephemeris file missing / load error
+            return problem(503, "astro/ephemeris-unavailable",
+                           "Ephemeris not loaded",
+                           f"Could not compute planet positions: {exc}",
+                           request.url.path)
+        # Build {planet_lower: (ra, dec)} for compute_local_space, plus keep the
+        # ecliptic longitudes for the response (useful for the client).
+        planet_positions: dict[str, tuple[float, float]] = {}
+        planet_longitudes: dict[str, float] = {}
+        for pos in positions:
+            if pos.ra_deg is None or pos.dec_deg is None:
+                continue
+            planet_positions[pos.planet.value] = (pos.ra_deg, pos.dec_deg)
+            planet_longitudes[pos.planet.value] = pos.ecliptic_longitude_deg
+        lst = local_sidereal_time_deg(utc, float(lng))
+        result = compute_local_space(planet_positions, float(lat), float(lng), lst)
+        return JSONResponse(status_code=200, content={
+            "utc": utc.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "observer_lat": result.observer_lat,
+            "observer_lng": result.observer_lng,
+            "lst_deg": round(lst, 6),
+            "planet_longitudes": {k: round(v, 4) for k, v in planet_longitudes.items()},
+            "total_above": result.total_above,
+            "total_below": result.total_below,
+            "planet_lines": [
+                {"planet": l.planet, "azimuth_deg": l.azimuth_deg,
+                 "altitude_deg": l.altitude_deg, "sector": l.sector,
+                 "above_horizon": l.above_horizon}
+                for l in result.lines
+            ],
+        })
+
     instrument_app(app)
     return app
 

@@ -13,6 +13,8 @@ import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, MapPin, Navigation, Loader2 } from "lucide-react";
+import type { FamilyCityReportDTO } from "@/lib/astroos/real/api-client";
+import type { LocalSpaceSpoke } from "@/lib/astroos/real/local-space-geo";
 
 interface AstroLinePoint { lat: number; lng: number }
 interface AstroLine {
@@ -49,6 +51,17 @@ interface AstroMapProps {
   onCitySelect?: (city: RankedCity) => void;
   selectedCityId?: string | null;
   className?: string;
+  /** Optional overlay: family abundance cities (synergy heatmap markers). */
+  abundanceCities?: FamilyCityReportDTO[];
+  /** Optional callback when an abundance city is clicked. */
+  onAbundanceCitySelect?: (c: FamilyCityReportDTO) => void;
+  /** Optional selected abundance city name (for highlight). */
+  selectedAbundanceCityName?: string | null;
+  /** Optional overlay: local-space radial spokes from a city point. */
+  localSpaceSpokes?: LocalSpaceSpoke[];
+  /** Whether to fetch the single-person chart (default true). Set false when
+   * the caller only wants abundance overlays, e.g. pure family mode. */
+  fetchChart?: boolean;
 }
 
 function FlyToController({ target, zoom }: { target: { lat: number; lng: number } | null; zoom?: number }) {
@@ -61,7 +74,11 @@ function FlyToController({ target, zoom }: { target: { lat: number; lng: number 
   return null;
 }
 
-export function AstroMap({ birthData, onCitySelect, selectedCityId, className }: AstroMapProps) {
+export function AstroMap({
+  birthData, onCitySelect, selectedCityId, className,
+  abundanceCities, onAbundanceCitySelect, selectedAbundanceCityName,
+  localSpaceSpokes, fetchChart = true,
+}: AstroMapProps) {
   const [lines, setLines] = useState<AstroLine[]>([]);
   const [rankedCities, setRankedCities] = useState<RankedCity[]>([]);
   const [loading, setLoading] = useState(true);
@@ -71,8 +88,13 @@ export function AstroMap({ birthData, onCitySelect, selectedCityId, className }:
   const [flyTarget, setFlyTarget] = useState<{ lat: number; lng: number } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Загрузка линий + ранжирование городов
+  // Загрузка линий + ранжирование городов (optional — caller may supply only
+  // abundance overlays in pure family mode).
   useEffect(() => {
+    if (!fetchChart) {
+      setLines([]); setRankedCities([]); setLoading(false);
+      return;
+    }
     let cancelled = false;
     setLoading(true);
     setError(null);
@@ -300,6 +322,64 @@ export function AstroMap({ birthData, onCitySelect, selectedCityId, className }:
                 </div>
               </Tooltip>
             </CircleMarker>
+          );
+        })}
+
+        {/* Abundance cities overlay — family synergy heatmap markers */}
+        {abundanceCities?.map((c, i) => {
+          const maxSyn = Math.max(...abundanceCities.map((x) => x.totalSynergy), 1);
+          const share = c.totalSynergy / maxSyn;
+          const radius = 8 + share * 20;
+          const isSel = selectedAbundanceCityName === c.city.name;
+          const isStrict = c.allMembersAllPositive;
+          const color = i === 0 ? "#E8B86D" : i < abundanceCities.length * 0.2 ? "#D9A75D" : i < abundanceCities.length * 0.5 ? "#5BB89C" : "#5E8FA8";
+          return (
+            <CircleMarker
+              key={`ab-${c.city.name}-${i}`}
+              center={[c.city.lat, c.city.lng]}
+              radius={radius}
+              pathOptions={{
+                color: isStrict ? "#E8B86D" : color,
+                fillColor: color,
+                fillOpacity: isSel ? 0.85 : 0.55,
+                weight: isStrict ? 3 : isSel ? 2 : 1,
+              }}
+              eventHandlers={{ click: () => onAbundanceCitySelect?.(c) }}
+            >
+              <Tooltip direction="top" offset={[0, -radius]} opacity={1}>
+                <div style={{ fontFamily: "serif", color: "#F5F0E8" }}>
+                  <strong>{c.city.name}</strong>
+                  <div style={{ fontSize: 10, opacity: 0.8 }}>{c.city.country}</div>
+                  <div style={{ fontSize: 11, marginTop: 2 }}>
+                    ✦ {c.totalSynergy.toFixed(1)} · ☯ {c.abundanceIndex.toFixed(2)}
+                  </div>
+                </div>
+              </Tooltip>
+            </CircleMarker>
+          );
+        })}
+
+        {/* Local-space radial spokes overlay (from a selected city) */}
+        {localSpaceSpokes?.map((spoke, i) => {
+          const color = PLANET_COLORS[spoke.planet] ?? "#E8B86D";
+          return (
+            <Polyline
+              key={`ls-${i}`}
+              positions={spoke.points}
+              pathOptions={{
+                color,
+                weight: spoke.aboveHorizon ? 2.5 : 1.5,
+                opacity: spoke.aboveHorizon ? 0.85 : 0.45,
+                dashArray: spoke.aboveHorizon ? undefined : "5 5",
+              }}
+            >
+              <Tooltip sticky>
+                <div className="text-xs">
+                  <strong style={{ color }}>{spoke.planet}</strong>{" "}
+                  {spoke.aboveHorizon ? "↑" : "↓"} {spoke.azimuthDeg.toFixed(0)}° · {spoke.sector}
+                </div>
+              </Tooltip>
+            </Polyline>
           );
         })}
 

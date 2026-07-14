@@ -12,6 +12,7 @@ import {
 } from "../ui";
 import { B2B_EMPLOYEES, B2B_ROLES } from "@/lib/astroos/data";
 import { useI18n } from "@/lib/astroos/i18n-context";
+import { RealHrPanel } from "@/components/astroos/real/RealHrPanel";
 
 const elementColor = (el: string) =>
   el === "Earth" ? "#E8B86D" :
@@ -223,6 +224,11 @@ export function BusinessScreen() {
             <CosmicButton variant="outline">Book a discovery call →</CosmicButton>
           </div>
         </section>
+      </FadeIn>
+
+      {/* Live HR tools (BaZi candidate/burnout/firing analysis) */}
+      <FadeIn delay={0.3}>
+        <RealHrPanel locale={locale} />
       </FadeIn>
     </div>
   );

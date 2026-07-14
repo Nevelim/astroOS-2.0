@@ -163,6 +163,11 @@ export function BaZiReportScreen({ onNavigate }: BaZiReportScreenProps) {
         </FadeIn>
       )}
 
+      {/* Блок: Выбор даты (календарь удачных дней) */}
+      <FadeIn delay={0.27}>
+        <DateSelectionCard bazi={bazi} L={L} locale={locale} />
+      </FadeIn>
+
       {/* Блок 10: Знаменитые двойники */}
       <FadeIn delay={0.3}>
         <FamousPeopleCard bazi={bazi} el={el} L={L} locale={locale} />
@@ -396,6 +401,86 @@ function ForecastCard({ forecast, L, locale }: any) {
           </div>
         ))}
       </div>
+    </GlassCard>
+  );
+}
+
+function DateSelectionCard({ bazi, L, locale }: any) {
+  const [goal, setGoal] = useState("business");
+  const [dates, setDates] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Hanzi → stem value (for the API).
+  const HANZI_TO_STEM: Record<string, string> = {
+    "甲": "jia", "乙": "yi", "丙": "bing", "丁": "ding", "戊": "wu",
+    "己": "ji", "庚": "geng", "辛": "xin", "壬": "ren", "癸": "gui",
+  };
+  const dmStem = HANZI_TO_STEM[bazi.dayMaster] ?? "jia";
+
+  const pick = async () => {
+    setLoading(true);
+    try {
+      const r = await api.baziDateSelection({ day_master_stem: dmStem, goal, days_ahead: 90, top_n: 5 });
+      setDates(r.dates);
+    } catch {
+      setDates([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const goals = [
+    { value: "business", ru: "Бизнес", en: "Business", hi: "व्यवसाय" },
+    { value: "wedding", ru: "Свадьба", en: "Wedding", hi: "विवाह" },
+    { value: "relocation", ru: "Переезд", en: "Relocation", hi: "पुनर्वास" },
+    { value: "travel", ru: "Путешествие", en: "Travel", hi: "यात्रा" },
+    { value: "contract", ru: "Контракт", en: "Contract", hi: "अनुबंध" },
+  ];
+
+  return (
+    <GlassCard variant="jade" className="p-4 mb-4">
+      <div className="flex items-center gap-2 mb-3">
+        <Calendar className="w-4 h-4" style={{ color: "#5BB89C" }} />
+        <h3 className="font-serif text-lg" style={{ color: "#F5F0E8" }}>
+          {L("Выбор благоприятной даты", "Auspicious date picker", "शुभ तिथि चयनकर्ता")}
+        </h3>
+      </div>
+      <div className="flex flex-wrap gap-1.5 mb-3">
+        {goals.map((g) => (
+          <button key={g.value} onClick={() => setGoal(g.value)}
+            className="text-[11px] px-2 py-1 rounded-full border transition-colors"
+            style={{
+              borderColor: goal === g.value ? "#5BB89C" : "#2A2A35",
+              background: goal === g.value ? "#5BB89C20" : "transparent",
+              color: goal === g.value ? "#5BB89C" : "#9A9AA8",
+            }}>
+            {L(g.ru, g.en, g.hi)}
+          </button>
+        ))}
+      </div>
+      <CosmicButton onClick={pick} disabled={loading} variant="jade">
+        {loading ? (L("Поиск...", "Searching...", "खोज...")) : (L("Найти даты", "Find dates", "तिथियाँ खोजें"))}
+      </CosmicButton>
+      {dates.length > 0 && (
+        <div className="mt-3 space-y-1.5">
+          {dates.map((d, i) => {
+            const labelColor = d.label === "excellent" ? "#5BB89C"
+              : d.label === "good" ? "#5BB89C" : d.label === "avoid" ? "#D98E7A" : "#E8B86D";
+            return (
+              <div key={i} className="flex items-center gap-3 p-2 rounded" style={{ background: `${labelColor}10` }}>
+                <span className="text-sm font-mono w-24" style={{ color: "#F5F0E8" }}>{d.date}</span>
+                <span className="text-lg" style={{ fontFamily: "serif", color: labelColor }}>
+                  {d.pillar.stem_hanzi}{d.pillar.branch_hanzi}
+                </span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: `${labelColor}20`, color: labelColor }}>
+                  {d.label}
+                </span>
+                <span className="text-[10px] flex-1" style={{ color: "#9A9AA8" }}>{d.reason}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </GlassCard>
   );
 }

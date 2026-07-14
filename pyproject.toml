@@ -3,9 +3,9 @@ requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "astroos-birth-time"
+name = "astroos"
 version = "1.0.0"
-description = "AstroOS Birth-Time Resolution service — UTC/LMT/TST + DST-aware historical resolution for BaZi/astrology."
+description = "AstroOS Python microservices — birth-time, bazi, astro, daily, cosmic-match, ai-mentor (Clean Architecture)."
 readme = "README.md"
 requires-python = ">=3.9"
 license = { text = "Proprietary" }
@@ -29,8 +29,9 @@ dev = [
 include = ["services*"]
 
 [tool.pytest.ini_options]
-testpaths = ["services/birth_time/tests"]
+testpaths = ["services"]
 addopts = "-ra --strict-markers"
+asyncio_mode = "auto"
 markers = [
     "unit: pure domain logic, no I/O",
     "integration: adapter + API boundaries",

@@ -3,6 +3,8 @@
 # Ports follow the Architecture ADR Service Catalog:
 #   3001 Astro Engine (Go in prod, Python reference here)
 #   3002 BaZi Engine
+#   3004 Cosmic Match
+#   3007 Daily Content
 #   3009 Birth-Time Resolution  (infra-service)
 #   3000 BFF / Next.js (started separately via `npm run dev`)
 #
@@ -35,6 +37,7 @@ services=(
   "bazi-engine|3002|services.bazi_engine.api.app:app"
   "astro-engine|3001|services.astro_engine.api.app:app"
   "daily-content|3007|services.daily_content.api.app:app"
+  "cosmic-match|3004|services.cosmic_match.api.app:app"
 )
 
 for svc in "${services[@]}"; do
@@ -62,3 +65,4 @@ echo "  Birth-Time  http://127.0.0.1:3009/docs"
 echo "  BaZi        http://127.0.0.1:3002/docs"
 echo "  Astro       http://127.0.0.1:3001/docs"
 echo "  Daily       http://127.0.0.1:3007/docs"
+echo "  Match       http://127.0.0.1:3004/docs"

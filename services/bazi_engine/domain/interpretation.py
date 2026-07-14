@@ -120,16 +120,15 @@ def day_master_profile(day_pillar: Pillar) -> DayMasterProfile:
 
 
 # --------------------------------------------------------------------------- #
-# Favorable elements (用神 heuristic)
+# Favorable elements (用神)
 # --------------------------------------------------------------------------- #
 def favorable_elements(day_master_element: Element) -> tuple[Element, ...]:
-    """Heuristic favorable elements for the Day Master.
+    """Fallback heuristic favorable elements (used when no full chart is avail).
 
-    Classical 用神 selection requires a full chart analysis (strength of the
-    DM, season, etc.). For the service-layer advisory output we use a simple
-    balancing heuristic: the element that GENERATES the DM (the mother) is
-    favorable, plus the element the DM controls (the wealth it can acquire).
-    A real BaZi reading overrides this; we label it clearly as advisory.
+    Returns the mother (generates DM) + wealth (DM controls). This is the
+    BALANCED-chart default. For strength-aware selection, use
+    ``favorable_elements_from_chart`` instead, which applies the traditional
+    扶抑 (support/suppress) method. A real BaZi reading overrides both.
     """
     from services.bazi_engine.domain.constants import generates, controls, Element
     mother = next(
@@ -141,3 +140,28 @@ def favorable_elements(day_master_element: Element) -> tuple[Element, ...]:
         Element.FIRE,
     )
     return (mother, wealth)
+
+
+def favorable_elements_from_chart(
+    four_pillars: "FourPillars",
+) -> tuple[Element, ...]:
+    """Strength-aware 用神 selection from the full Four Pillars chart.
+
+    Applies the traditional 扶抑 method: assesses Day Master strength (旺衰)
+    via season/roots/allies, then selects favorable elements accordingly —
+    support (Resource+Companion) for a weak DM, or drain (Output+Wealth+
+    Officer) for a strong DM. This is significantly more accurate than the
+    element-only heuristic and matches how a practitioner reads a chart.
+    """
+    from services.bazi_engine.domain.yong_shen import select_yong_shen
+    fp = four_pillars
+    yong_shen = select_yong_shen(
+        dm_stem=fp.day.stem,
+        month_branch=fp.month.branch,
+        year_branch=fp.year.branch,
+        day_branch=fp.day.branch,
+        hour_branch=fp.hour.branch if fp.hour else None,
+        year_stem=fp.year.stem,
+        hour_stem=fp.hour.stem if fp.hour else None,
+    )
+    return yong_shen.favorable

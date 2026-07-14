@@ -168,6 +168,11 @@ def create_app(deps: Optional[Dependencies] = None,
                 ],
                 "ten_gods": {k: v.value for k, v in chart.ten_gods.items()},
                 "favorable_elements": [e.value for e in chart.favorable_elements],
+                "dm_strength": chart.dm_strength,
+                "yong_shen": {
+                    "method": chart.yong_shen_method,
+                    "reasoning": chart.yong_shen_reasoning,
+                },
                 "note": chart.note,
             },
         )

@@ -47,6 +47,10 @@ class BaZiChart:
     time_standard_used: str
     tst_used: str
     note: str
+    # Strength-aware 用神 context (advisory). Empty strings when unavailable.
+    dm_strength: str = ""               # "strong" | "weak" | "balanced"
+    yong_shen_method: str = ""           # "support" | "drain" | "balance"
+    yong_shen_reasoning: str = ""
 
 
 # --------------------------------------------------------------------------- #
@@ -105,7 +109,18 @@ class ResolveBaZi:
         if hp is not None:
             gods["hour"] = ten_god(dm.stem, hp.stem)
 
-        fav = favorable_elements(dm.element)
+        # Strength-aware 用神 selection (traditional 扶抑 method).
+        from services.bazi_engine.domain.yong_shen import select_yong_shen
+        yong_shen = select_yong_shen(
+            dm_stem=dm.stem,
+            month_branch=mp.branch,
+            year_branch=yp.branch,
+            day_branch=dp.branch,
+            hour_branch=hp.branch if hp else None,
+            year_stem=yp.stem,
+            hour_stem=hp.stem if hp else None,
+        )
+        fav = yong_shen.favorable
 
         note = (
             "Hour pillar computed from True Solar Time "
@@ -124,4 +139,8 @@ class ResolveBaZi:
             time_standard_used="true_solar_time",
             tst_used=facts.tst.strftime("%H:%M:%S"),
             note=note,
+            dm_strength=yong_shen.reasoning.split(" is ")[1].split(".")[0]
+                if " is " in yong_shen.reasoning else "",
+            yong_shen_method=yong_shen.method,
+            yong_shen_reasoning=yong_shen.reasoning,
         )

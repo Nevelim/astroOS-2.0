@@ -72,3 +72,22 @@ logs/
 de421.bsp
 de430.bsp
 de422.bsp
+
+# Python — virtualenv, bytecode, caches, build artifacts
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.mypy_cache/
+.ruff_cache/
+

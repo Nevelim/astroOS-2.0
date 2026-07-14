@@ -252,6 +252,24 @@ def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
             ],
         })
 
+    # ---- lunar phase: Moon phase from Sun-Moon longitudes ------------- #
+    @app.get("/v1/lunar-phase", tags=["astro"])
+    def get_lunar_phase(sun: float, moon: float) -> JSONResponse:
+        """Current lunar phase from the Sun + Moon ecliptic longitudes."""
+        from services.astro_engine.domain.lunar_phase import (
+            lunar_phase, PHASE_DISPLAY)
+        lp = lunar_phase(sun, moon)
+        display = PHASE_DISPLAY[lp.phase]
+        return JSONResponse(status_code=200, content={
+            "phase": lp.phase.value,
+            "name_en": display["en"], "name_ru": display["ru"],
+            "emoji": display["emoji"],
+            "elongation_deg": lp.elongation_deg,
+            "illumination_pct": lp.illumination_pct,
+            "age_days": lp.age_days,
+            "days_to_next_phase": lp.days_to_next_phase,
+        })
+
     instrument_app(app)
     return app
 

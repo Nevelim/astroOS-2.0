@@ -19,6 +19,7 @@ from services.ai_mentor.domain.entities import (
     ConversationContext,
     CrisisLevel,
     Message,
+    MessageRole,
     MentorResponse,
     VoiceProfile,
 )
@@ -122,9 +123,7 @@ class MentorChat:
             )
 
         # Persist user message
-        user_msg = Message(role=__import__("services.ai_mentor.domain.entities",
-                                           fromlist=["MessageRole"]).MessageRole.USER,
-                           content=user_message)
+        user_msg = Message(role=MessageRole.USER, content=user_message)
         await self.store.append(conversation_id, user_msg)
 
         # LLM generation
@@ -142,9 +141,8 @@ class MentorChat:
         await self.cache.set(cache_key, raw)
 
         # Persist assistant message
-        asst_role = __import__("services.ai_mentor.domain.entities",
-                               fromlist=["MessageRole"]).MessageRole.ASSISTANT
-        await self.store.append(conversation_id, Message(role=asst_role, content=raw, voice=voice))
+        await self.store.append(conversation_id, Message(
+            role=MessageRole.ASSISTANT, content=raw, voice=voice))
 
         return MentorResponse(
             content=raw, voice=voice, crisis=response_crisis,

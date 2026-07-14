@@ -139,6 +139,20 @@ def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
                 "south": {"longitude_deg": round(chart.nodes.south_longitude_deg, 4),
                           "sign": sign_of(chart.nodes.south_longitude_deg).value},
             }
+        # Part of Fortune (needs ASC + Sun + Moon longitudes).
+        part_of_fortune = None
+        sun_pos = next((p for p in chart.planets if p.planet is Planet.SUN), None)
+        moon_pos = next((p for p in chart.planets if p.planet is Planet.MOON), None)
+        asc_deg = chart.houses.angles.ascendant_deg
+        if sun_pos and moon_pos and asc_deg is not None:
+            from services.astro_engine.domain.arabic_parts import part_of_fortune as pf
+            computed = pf(ascendant_deg=asc_deg,
+                          sun_longitude_deg=sun_pos.ecliptic_longitude_deg,
+                          moon_longitude_deg=moon_pos.ecliptic_longitude_deg)
+            part_of_fortune = {
+                "longitude_deg": round(computed.longitude_deg, 4),
+                "sign": sign_of(computed.longitude_deg).value,
+            }
         return {
             "birth_utc": chart.birth_utc.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "latitude": chart.latitude,
@@ -148,6 +162,7 @@ def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
             "houses": houses_dto,
             "aspects": aspects_dto,
             "nodes": nodes_dto,
+            "part_of_fortune": part_of_fortune,
         }
 
     @app.get("/v1/charts/natal/{birth_data_hash}", tags=["astro"])
@@ -268,6 +283,80 @@ def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
             "illumination_pct": lp.illumination_pct,
             "age_days": lp.age_days,
             "days_to_next_phase": lp.days_to_next_phase,
+        })
+
+    # ---- astrocartography: planetary lines across the globe ------------ #
+    @app.post("/v1/astrocartography", tags=["astro"])
+    def astrocartography(payload: dict, request: Request) -> JSONResponse:
+        """Compute planetary lines (MC/IC/ASC/DSC) for a set of planets.
+
+        Body: { "utc": "1989-04-15T09:40:00Z",
+                "planets": {"sun": {"ra": 22.5, "dec": 10.0}, ...},
+                "latitudes": [-60, -30, 0, 30, 60]  (optional) }
+        """
+        from services.astro_engine.domain.astrocartography import planetary_lines
+        utc_str = payload.get("utc")
+        planets_in = payload.get("planets", {})
+        latitudes = tuple(payload.get("latitudes", (-60, -30, 0, 30, 60)))
+        if not utc_str or not planets_in:
+            return problem(422, "astro/astrocartography-invalid",
+                           "Missing data",
+                           "Both 'utc' and 'planets' (with ra/dec) are required.",
+                           request.url.path)
+        from datetime import datetime
+        utc = datetime.fromisoformat(utc_str.replace("Z", "+00:00"))
+        all_lines = []
+        for pname, coords in planets_in.items():
+            ra = coords.get("ra")
+            dec = coords.get("dec")
+            if ra is None or dec is None:
+                continue
+            for line in planetary_lines(pname, ra_deg=ra, dec_deg=dec,
+                                        utc=utc, latitudes=latitudes):
+                all_lines.append({
+                    "planet": line.planet, "angle": line.angle,
+                    "latitude_deg": line.latitude_deg,
+                    "longitude_deg": round(line.longitude_deg, 4),
+                })
+        return JSONResponse(status_code=200, content={"lines": all_lines})
+
+    # ---- synastry: cross-chart aspects between two charts -------------- #
+    @app.post("/v1/synastry", tags=["astro"])
+    def synastry(payload: dict, request: Request) -> JSONResponse:
+        """Compute synastry (cross-chart aspects + soulmate indicators).
+
+        Body: { "planets_a": {"sun": 25.5, "venus": 28.2, ...},
+                "planets_b": {"sun": 120.0, ...},
+                "nodes_a": [332.0, 152.0],   (optional)
+                "nodes_b": [100.0, 280.0] }  (optional)
+        """
+        from services.astro_engine.domain.synastry import compute_synastry
+        planets_a = payload.get("planets_a", {})
+        planets_b = payload.get("planets_b", {})
+        if not planets_a or not planets_b:
+            return problem(422, "astro/synastry-invalid",
+                           "Missing chart data",
+                           "Both 'planets_a' and 'planets_b' dicts are required.",
+                           request.url.path)
+        nodes_a = tuple(payload["nodes_a"]) if payload.get("nodes_a") else None
+        nodes_b = tuple(payload["nodes_b"]) if payload.get("nodes_b") else None
+        result = compute_synastry(planets_a, planets_b, nodes_a, nodes_b)
+        return JSONResponse(status_code=200, content={
+            "composite_score": result.composite_score,
+            "summary": result.summary,
+            "highlights": list(result.highlights),
+            "nodal_contacts": [
+                {"whose_node": nc.whose_node, "which_node": nc.which_node,
+                 "whose_planet": nc.whose_planet, "planet": nc.planet,
+                 "orb_deg": nc.orb_deg}
+                for nc in result.nodal_contacts
+            ],
+            "aspects": [
+                {"a": a.a_planet, "b": a.b_planet,
+                 "type": a.aspect_type.value, "orb_deg": a.orb_deg,
+                 "weight": a.weight, "is_highlight": a.is_highlight}
+                for a in result.aspects
+            ],
         })
 
     instrument_app(app)

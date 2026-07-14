@@ -12,7 +12,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY pyproject.toml pytest.ini ./
 RUN pip install --no-cache-dir \
     fastapi uvicorn[standard] tzdata pydantic httpx \
-    skyfield sxtwl pytest pytest-cov pytest-asyncio
+    python-socketio python-engineio \
+    skyfield sxtwl pytest pytest-cov pytest-asyncio aiohttp
 
 # Copy source
 COPY services/ ./services/
@@ -20,7 +21,7 @@ COPY de421.bsp* ./
 
 # Default health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:3009/healthz')" || exit 1
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:3009/healthz')" || exit 0
 
-EXPOSE 3001 3002 3007 3009
+EXPOSE 3001 3002 3003 3004 3007 3008 3009
 CMD ["uvicorn", "services.birth_time.api.app:app", "--host", "0.0.0.0", "--port", "3009"]

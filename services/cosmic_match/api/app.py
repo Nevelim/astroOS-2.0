@@ -21,6 +21,8 @@ import hashlib
 from dataclasses import dataclass
 from typing import Optional
 
+import socketio
+
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, Response
 from pydantic import BaseModel, Field, field_validator
@@ -257,4 +259,21 @@ def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
     return app
 
 
-app = create_app()
+# --------------------------------------------------------------------------- #
+# ASGI composition: mount Socket.IO realtime server alongside FastAPI.
+# Uvicorn loads `app`; Socket.IO handles ws://..., FastAPI handles the REST.
+# --------------------------------------------------------------------------- #
+def create_asgi_app():
+    from services.cosmic_match.api.realtime import create_socketio
+    from services.cosmic_match.adapter.chat_store import InMemoryChatStore
+    from services.cosmic_match.usecase.handle_chat import HandleChatMessage
+
+    fastapi_app = create_app()
+    chat_store = InMemoryChatStore()
+    sio = create_socketio(store=chat_store,
+                          usecase=HandleChatMessage(store=chat_store))
+    fastapi_app.state.chat_store = chat_store
+    return socketio.ASGIApp(sio, other_asgi_app=fastapi_app)
+
+
+app = create_asgi_app()

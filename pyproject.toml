@@ -16,6 +16,8 @@ dependencies = [
     "tzdata>=2024.1",
     "pydantic>=2.5",
     "httpx>=0.25,<0.28",
+    "python-socketio>=5.11",
+    "python-engineio>=4.9",
 ]
 
 [project.optional-dependencies]
@@ -23,6 +25,7 @@ dev = [
     "pytest>=7.4",
     "pytest-cov>=4.1",
     "pytest-asyncio>=0.23",
+    "aiohttp>=3.9",  # socketio.AsyncClient websocket transport for tests
 ]
 
 [tool.setuptools.packages.find]

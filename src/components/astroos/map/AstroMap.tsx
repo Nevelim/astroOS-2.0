@@ -119,7 +119,7 @@ export function AstroMap({
         setLoading(false);
       });
     return () => { cancelled = true; };
-  }, [birthData.birthDateTime, birthData.birthLat, birthData.birthLng]);
+  }, [birthData.birthDateTime, birthData.birthLat, birthData.birthLng, fetchChart]);
 
   const filteredLines = useMemo(
     () => lines.filter((l) => visiblePlanets.has(l.planet)),

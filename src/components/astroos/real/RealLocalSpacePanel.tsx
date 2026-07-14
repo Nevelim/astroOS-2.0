@@ -36,6 +36,20 @@ const COMPASS_DIRS: Record<string, string> = {
   W: "З", WNW: "ЗСЗ", NW: "СЗ", NNW: "ССЗ",
 };
 
+/** The 8 compass sectors the local-space engine emits (N/NE/E/...). */
+const COMPASS_8 = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"] as const;
+
+const PLANET_GLYPH: Record<string, string> = {
+  sun: "☉", moon: "☽", mercury: "☿", venus: "♀", mars: "♂",
+  jupiter: "♃", saturn: "♄", uranus: "♅", neptune: "♆", pluto: "♇",
+};
+
+const PLANET_COLOR: Record<string, string> = {
+  sun: "#FBBF24", moon: "#94A3B8", mercury: "#60A5FA", venus: "#F472B6",
+  mars: "#EF4444", jupiter: "#A78BFA", saturn: "#94A3B8",
+  uranus: "#22D3EE", neptune: "#2DD4BF", pluto: "#9333EA",
+};
+
 export function RealLocalSpacePanel({ locale }: { locale: "ru" | "en" | "hi" }) {
   const [data, setData] = useState<LocalSpaceData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -46,18 +60,45 @@ export function RealLocalSpacePanel({ locale }: { locale: "ru" | "en" | "hi" }) 
 
   useEffect(() => {
     const m = member ?? mockMember();
-    fetch("/api/local-space", {
+    // Use the birth-aware endpoint (computes RA/Dec + LST server-side) instead
+    // of the raw /api/local-space route, which required pre-computed RA/Dec.
+    fetch("/api/local-space-from-birth", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        birthDateTime: m.birth.isoDateTime,
-        birthLat: m.birth.lat,
-        birthLng: m.birth.lng,
-        birthTzOffset: m.birth.tzOffset,
+        utc: m.birth.isoDateTime,
+        lat: m.birth.lat,
+        lng: m.birth.lng,
       }),
     })
       .then((r) => r.json())
-      .then((d) => { setData(d); setLoading(false); })
+      .then((d) => {
+        // Adapt the endpoint's snake_case shape to this panel's internal model.
+        const lines: PlanetLine[] = (d.planet_lines ?? []).map((p: {
+          planet: string; azimuth_deg: number; altitude_deg: number;
+          sector: string; above_horizon: boolean;
+        }) => ({
+          planet: p.planet,
+          glyph: PLANET_GLYPH[p.planet] ?? "•",
+          color: PLANET_COLOR[p.planet] ?? "#E8B86D",
+          azimuth: p.azimuth_deg,
+          altitude: p.altitude_deg,
+          sector: p.sector,
+          above: p.above_horizon,
+        }));
+        const sectors = COMPASS_8.map((sec) => ({
+          sector: sec,
+          planets: lines.filter((l) => l.sector === sec),
+        }));
+        setData({
+          birth: { lat: d.observer_lat, lng: d.observer_lng, placeName: m.birth.placeName },
+          planetLines: lines,
+          sectors,
+          totalAbove: d.total_above ?? 0,
+          totalBelow: d.total_below ?? 0,
+        });
+        setLoading(false);
+      })
       .catch(() => setLoading(false));
   }, [member]);
 

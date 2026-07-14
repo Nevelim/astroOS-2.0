@@ -13,7 +13,7 @@
  *  - Family mode: MemberRoster → api.familyAbundance(/api/family-astro).
  *  - Local space: api call to /api/local-space-from-birth for the selected city.
  */
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { GlassCard, Pill, CosmicButton, SectionHeading, FadeIn } from "../ui";
 import { useI18n } from "@/lib/astroos/i18n-context";
@@ -26,6 +26,7 @@ import {
 import {
   FAMILY_CITY_SEEDS,
   FAMILY_CITY_CLIMATES,
+  FAMILY_CITY_COUNT,
 } from "@/lib/astroos/real/family-city-seeds";
 import { buildLocalSpaceSpokes, type LocalSpaceSpoke } from "@/lib/astroos/real/local-space-geo";
 import { MemberRoster, type MemberEntry } from "./member-roster";
@@ -58,6 +59,7 @@ export function AstroTravelScreen({ onNavigate }: AstroTravelScreenProps) {
   const { t, locale } = useI18n();
   const { member } = useMember();
   const [mode, setMode] = useState<Mode>("me");
+
   const [showFilters, setShowFilters] = useState(false);
   const [regionFilter, setRegionFilter] = useState<string>("all");
   const [climateFilter, setClimateFilter] = useState<string>("all");
@@ -74,11 +76,23 @@ export function AstroTravelScreen({ onNavigate }: AstroTravelScreenProps) {
   const [selectedCity, setSelectedCity] = useState<FamilyCityReportDTO | null>(null);
   const [localSpaceSpokes, setLocalSpaceSpokes] = useState<LocalSpaceSpoke[]>([]);
   const [localSpaceLoading, setLocalSpaceLoading] = useState(false);
+  const [localSpaceError, setLocalSpaceError] = useState<boolean>(false);
+
+  const switchMode = (m: Mode) => {
+    setMode(m);
+    // Clear mode-specific state so no stale family result / selected city
+    // leaks across the Me/Family boundary (different ranking semantics).
+    setSelectedCity(null);
+    setLocalSpaceSpokes([]);
+    setLocalSpaceError(false);
+    setFamilyResult(null);
+  };
 
   const meMember = useMemo(() => member ?? mockMember(), [member]);
 
   // Anchor member birth data for planetary lines (Me mode = current user;
-  // Family mode = first complete member, or the user as fallback).
+  // Family mode = members[0], the labeled "anchor"). Used both for the chart
+  // fetch and the local-space overlay origin-time.
   const anchorBirth = useMemo(() => {
     if (mode === "me") {
       return {
@@ -90,14 +104,15 @@ export function AstroTravelScreen({ onNavigate }: AstroTravelScreenProps) {
         gender: meMember.birth.gender,
       };
     }
-    const anchor = members.find((m) => m.complete) ?? members[0];
-    if (anchor?.birthUtc && anchor.lat && anchor.lng) {
+    // Anchor = members[0] (matches the gold "anchor" badge in MemberRoster).
+    const anchor = members[0];
+    if (anchor?.birthUtc && anchor.lat && anchor.lng && isValidIsoUtc(anchor.birthUtc)) {
       return {
         birthDateTime: anchor.birthUtc,
         birthLat: anchor.lat,
         birthLng: anchor.lng,
         birthTzOffset: 0,
-        birthPlaceName: anchor.name,
+        birthPlaceName: anchor.name || "Anchor",
         gender: 0 as const,
       };
     }
@@ -115,17 +130,19 @@ export function AstroTravelScreen({ onNavigate }: AstroTravelScreenProps) {
     }));
   }, [regionFilter, climateFilter]);
 
-  const completeMembers = members.filter((m) => m.complete && m.birthUtc && m.lat && m.lng);
-  const canCompute = mode === "me" || completeMembers.length >= 1;
+  const completeMembers = members.filter(
+    (m) => m.complete && isValidIsoUtc(m.birthUtc) && m.lat !== undefined && m.lng !== undefined,
+  );
+  const canCompute = mode === "me" || (completeMembers.length >= 1 && filteredCities.length > 0);
 
-  const computeFamily = useCallback(async () => {
+  const computeFamily = async () => {
     if (completeMembers.length === 0) return;
     setFamilyLoading(true);
     setFamilyError(null);
     try {
-      const payload = completeMembers.map((m) => ({
+      const payload = completeMembers.map((m, i) => ({
         key: m.key,
-        name: m.name || `Member ${members.indexOf(m) + 1}`,
+        name: m.name || `Member ${i + 1}`,
         birthUtc: m.birthUtc,
         lat: m.lat,
         lng: m.lng,
@@ -142,7 +159,13 @@ export function AstroTravelScreen({ onNavigate }: AstroTravelScreenProps) {
     } finally {
       setFamilyLoading(false);
     }
-  }, [completeMembers, filteredCities, members, t]);
+  };
+
+  // Stable primitive for the local-space fetch key — avoids the array-identity
+  // refetch loop (completeMembers is a new array every render).
+  const anchorUtc = mode === "me"
+    ? meMember.birth.isoDateTime
+    : (completeMembers[0]?.birthUtc ?? null);
 
   // Fetch local-space spokes when a city is selected.
   useEffect(() => {
@@ -150,27 +173,37 @@ export function AstroTravelScreen({ onNavigate }: AstroTravelScreenProps) {
       setLocalSpaceSpokes([]);
       return;
     }
+    if (!anchorUtc) {
+      setLocalSpaceSpokes([]);
+      setLocalSpaceError(false);
+      return;
+    }
     let cancelled = false;
     setLocalSpaceLoading(true);
-    // Use the anchor member's birth moment at the selected city's location.
-    const utc = mode === "me" ? meMember.birth.isoDateTime : (completeMembers[0]?.birthUtc ?? null);
-    if (!utc) { setLocalSpaceLoading(false); return; }
+    setLocalSpaceError(false);
+    const lat = selectedCity.city.lat;
+    const lng = selectedCity.city.lng;
     fetch("/api/local-space-from-birth", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ utc, lat: selectedCity.city.lat, lng: selectedCity.city.lng }),
+      body: JSON.stringify({ utc: anchorUtc, lat, lng }),
     })
       .then(async (r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
       .then((data) => {
         if (cancelled) return;
-        setLocalSpaceSpokes(buildLocalSpaceSpokes(
-          selectedCity.city.lat, selectedCity.city.lng, data.planet_lines ?? [],
-        ));
+        setLocalSpaceSpokes(buildLocalSpaceSpokes(lat, lng, data.planet_lines ?? []));
         setLocalSpaceLoading(false);
       })
-      .catch(() => { if (!cancelled) setLocalSpaceLoading(false); });
+      .catch(() => {
+        if (cancelled) return;
+        setLocalSpaceSpokes([]);
+        setLocalSpaceLoading(false);
+        setLocalSpaceError(true);
+      });
     return () => { cancelled = true; };
-  }, [selectedCity, mode, meMember, completeMembers]);
+    // Depend on stable primitives + selectedCity identity (city object changes
+    // only when the user picks a different one).
+  }, [selectedCity, anchorUtc]);
 
   const topSynergy = familyResult?.topCitiesBySynergy ?? [];
 
@@ -203,7 +236,7 @@ export function AstroTravelScreen({ onNavigate }: AstroTravelScreenProps) {
         <div className="flex flex-wrap items-center gap-2 mb-3">
           <div className="flex rounded-lg overflow-hidden border" style={{ borderColor: "#2A2A35" }}>
             <button
-              onClick={() => setMode("me")}
+              onClick={() => switchMode("me")}
               className="px-3 py-1.5 text-sm flex items-center gap-1.5 transition-colors"
               style={{
                 background: mode === "me" ? "#E8B86D20" : "transparent",
@@ -213,7 +246,7 @@ export function AstroTravelScreen({ onNavigate }: AstroTravelScreenProps) {
               <User className="w-3.5 h-3.5" /> {locale === "ru" ? "Я" : locale === "hi" ? "मैं" : "Me"}
             </button>
             <button
-              onClick={() => setMode("family")}
+              onClick={() => switchMode("family")}
               className="px-3 py-1.5 text-sm flex items-center gap-1.5 transition-colors"
               style={{
                 background: mode === "family" ? "#E8B86D20" : "transparent",
@@ -254,7 +287,7 @@ export function AstroTravelScreen({ onNavigate }: AstroTravelScreenProps) {
                     className="w-full rounded px-2 py-1.5 text-sm"
                     style={{ background: "#0B0B0F", border: "1px solid #2A2A35", color: "#F5F0E8" }}
                   >
-                    <option value="all">{locale === "ru" ? "Все регионы" : "All regions"}</option>
+                    <option value="all">{locale === "ru" ? "Все регионы" : locale === "hi" ? "सभी क्षेत्र" : "All regions"}</option>
                     {REGIONS.map((r) => <option key={r} value={r}>{r}</option>)}
                   </select>
                 </label>
@@ -268,18 +301,33 @@ export function AstroTravelScreen({ onNavigate }: AstroTravelScreenProps) {
                     className="w-full rounded px-2 py-1.5 text-sm"
                     style={{ background: "#0B0B0F", border: "1px solid #2A2A35", color: "#F5F0E8" }}
                   >
-                    <option value="all">{locale === "ru" ? "Все климаты" : "All climates"}</option>
+                    <option value="all">{locale === "ru" ? "Все климаты" : locale === "hi" ? "सभी जलवायु" : "All climates"}</option>
                     {FAMILY_CITY_CLIMATES.filter((c) => c !== "unknown").map((c) => (
                       <option key={c} value={c}>{c}</option>
                     ))}
                   </select>
                 </label>
               </div>
-              <p className="text-[10px] mt-2" style={{ color: "#9A9AA8" }}>
-                {locale === "ru"
-                  ? `Показано городов: ${filteredCities.length} из 682`
-                  : `Cities shown: ${filteredCities.length} of 682`}
-              </p>
+              <div className="flex items-center justify-between mt-2">
+                <p className="text-[10px]" style={{ color: filteredCities.length === 0 ? "#D98E7A" : "#9A9AA8" }}>
+                  {filteredCities.length === 0
+                    ? (locale === "ru" ? "Нет городов по этим фильтрам" : locale === "hi" ? "इन फ़िल्टर से कोई शहर नहीं" : "No cities match these filters")
+                    : (locale === "ru"
+                      ? `Показано городов: ${filteredCities.length} из ${FAMILY_CITY_COUNT}`
+                      : locale === "hi"
+                      ? `दिखाए गए शहर: ${filteredCities.length} / ${FAMILY_CITY_COUNT}`
+                      : `Cities shown: ${filteredCities.length} of ${FAMILY_CITY_COUNT}`)}
+                </p>
+                {(regionFilter !== "all" || climateFilter !== "all") && (
+                  <button
+                    onClick={() => { setRegionFilter("all"); setClimateFilter("all"); }}
+                    className="text-[10px] underline"
+                    style={{ color: "#E8B86D" }}
+                  >
+                    {locale === "ru" ? "Сбросить" : locale === "hi" ? "रीसेट" : "Reset"}
+                  </button>
+                )}
+              </div>
             </GlassCard>
           </motion.div>
         )}
@@ -336,7 +384,7 @@ export function AstroTravelScreen({ onNavigate }: AstroTravelScreenProps) {
               onAbundanceCitySelect={setSelectedCity}
               selectedAbundanceCityName={selectedCity?.city.name ?? null}
               localSpaceSpokes={localSpaceSpokes}
-              fetchChart={mode === "me"}
+              fetchChart={true}
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
@@ -446,26 +494,38 @@ export function AstroTravelScreen({ onNavigate }: AstroTravelScreenProps) {
               </div>
 
               {/* Local-space recommendations */}
-              {localSpaceSpokes.length > 0 && (
-                <div className="mb-3">
-                  <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: "#F5F0E860" }}>
-                    {locale === "ru" ? "🧭 Локальное пространство (направления)" : "🧭 Local space (directions)"}
+              <div className="mb-3">
+                <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: "#F5F0E860" }}>
+                  {locale === "ru" ? "🧭 Локальное пространство (направления)" : locale === "hi" ? "🧭 स्थानीय अंतरिक्ष (दिशाएं)" : "🧭 Local space (directions)"}
+                </p>
+                {localSpaceLoading ? (
+                  <p className="text-[11px]" style={{ color: "#9A9AA8" }}>
+                    {locale === "ru" ? "Расчёт направлений…" : locale === "hi" ? "दिशाएं गणना हो रही हैं…" : "Computing directions…"}
                   </p>
-                  <div className="grid grid-cols-2 gap-1">
-                    {localSpaceSpokes.filter((s) => s.aboveHorizon).slice(0, 6).map((s, i) => (
-                      <div key={i} className="text-[11px] flex items-center justify-between" style={{ color: "#F5F0E8" }}>
-                        <span>{s.planet}</span>
-                        <span style={{ color: "#9A9AA8" }}>{s.sector} · {s.azimuthDeg.toFixed(0)}°</span>
-                      </div>
-                    ))}
-                  </div>
-                  <p className="text-[10px] mt-1.5" style={{ color: "#5BB89C" }}>
-                    {locale === "ru"
-                      ? "↑ Над горизонтом — благоприятные сектора для жилья; окна в эту сторону."
-                      : "↑ Above horizon — favorable sectors for housing; windows facing this way."}
+                ) : localSpaceError ? (
+                  <p className="text-[11px]" style={{ color: "#D98E7A" }}>
+                    {locale === "ru" ? "Не удалось рассчитать направления." : "Could not compute directions."}
                   </p>
-                </div>
-              )}
+                ) : localSpaceSpokes.length > 0 ? (
+                  <>
+                    <div className="grid grid-cols-2 gap-1">
+                      {localSpaceSpokes.filter((s) => s.aboveHorizon).slice(0, 6).map((s, i) => (
+                        <div key={i} className="text-[11px] flex items-center justify-between" style={{ color: "#F5F0E8" }}>
+                          <span>{s.planet}</span>
+                          <span style={{ color: "#9A9AA8" }}>{s.sector} · {s.azimuthDeg.toFixed(0)}°</span>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-[10px] mt-1.5" style={{ color: "#5BB89C" }}>
+                      {locale === "ru"
+                        ? "↑ Над горизонтом — благоприятные сектора для жилья; окна в эту сторону."
+                        : locale === "hi"
+                        ? "↑ क्षितिज के ऊपर — आवास के लिए अनुकूल क्षेत्र; खिड़कियां इस दिशा में।"
+                        : "↑ Above horizon — favorable sectors for housing; windows facing this way."}
+                    </p>
+                  </>
+                ) : null}
+              </div>
 
               {/* Sphere leaders */}
               {selectedCity.sphereLeaders.length > 0 && (
@@ -509,6 +569,14 @@ function sphereLabel(sphere: string, locale: string): string {
   const m = map[sphere];
   if (!m) return sphere;
   return locale === "ru" ? m.ru : locale === "hi" ? m.hi : m.en;
+}
+
+/** Validate an ISO-8601 UTC string (must end in Z and parse to a real date). */
+function isValidIsoUtc(s: string | undefined | null): boolean {
+  if (!s) return false;
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?Z$/.test(s)) return false;
+  const d = new Date(s);
+  return !isNaN(d.getTime());
 }
 
 export default AstroTravelScreen;

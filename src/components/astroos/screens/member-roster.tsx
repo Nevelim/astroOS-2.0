@@ -106,19 +106,24 @@ function MemberBirthRow({ index, member, canRemove, onUpdate, onRemove }: Member
     onUpdate({
       lat: result.calculatePayload.birthLat,
       lng: result.calculatePayload.birthLng,
-      // Use the resolved UTC when available; fall back to assembled local.
-      birthUtc: result.birth.utcISO || assembleUtc(date, unknownTime ? "12:00" : time, result),
+      // birthUtc is the true UTC, resolved by the geo service (DST-aware).
+      // We do NOT assemble local-time-as-UTC — that would shift every planet.
+      birthUtc: result.birth.utcISO || "",
     });
   };
 
   const handleDateChange = (newDate: string) => {
     setDate(newDate);
-    onUpdate({ birthUtc: newDate ? `${newDate}T${unknownTime ? "12:00" : time || "12:00"}:00Z` : "" });
+    // Date alone cannot produce a UTC instant without the city's timezone.
+    // Clear any stale birthUtc; CityAutocomplete will re-resolve on its next
+    // pick (it receives the updated birthDateTime prop).
+    onUpdate({ birthUtc: "" });
   };
 
   const handleTimeChange = (newTime: string) => {
     setTime(newTime);
-    if (date) onUpdate({ birthUtc: `${date}T${newTime}:00Z` });
+    // Time change invalidates the resolved UTC until the city is re-confirmed.
+    onUpdate({ birthUtc: "" });
   };
 
   const isAnchor = index === 0;
@@ -162,7 +167,9 @@ function MemberBirthRow({ index, member, canRemove, onUpdate, onRemove }: Member
               checked={unknownTime}
               onChange={(e) => {
                 setUnknownTime(e.target.checked);
-                if (date) onUpdate({ birthUtc: `${date}T12:00:00Z` });
+                // Toggling unknown-time changes the effective local time; the
+                // resolved UTC is no longer valid until re-resolve.
+                onUpdate({ birthUtc: "" });
               }}
             />
             {locale === "ru" ? "Время неизвестно" : locale === "hi" ? "समय अज्ञात" : "Time unknown"}
@@ -197,11 +204,3 @@ function MemberBirthRow({ index, member, canRemove, onUpdate, onRemove }: Member
   );
 }
 
-/** Build a UTC ISO string from local date + time + resolved birth (tz-aware). */
-function assembleUtc(date: string, time: string, resolved: ResolvedBirthDTO): string {
-  if (!date) return "";
-  const localIso = `${date}T${time || "12:00"}:00`;
-  // ResolvedBirthDTO.birth.utcISO is the true UTC; use it directly when available.
-  // Fallback: treat as UTC if resolution didn't produce one.
-  return resolved?.birth?.utcISO ?? `${localIso}Z`;
-}

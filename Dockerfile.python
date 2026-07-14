@@ -1,0 +1,26 @@
+# AstroOS Python services — shared Dockerfile.
+# Each service specifies its own `command` in docker-compose.yml.
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# System deps for skyfield + astronomy
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc g++ && rm -rf /var/lib/apt/lists/*
+
+# Install Python deps first (cache layer)
+COPY pyproject.toml pytest.ini ./
+RUN pip install --no-cache-dir \
+    fastapi uvicorn[standard] tzdata pydantic httpx \
+    skyfield sxtwl pytest pytest-cov pytest-asyncio
+
+# Copy source
+COPY services/ ./services/
+COPY de421.bsp* ./
+
+# Default health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:3009/healthz')" || exit 1
+
+EXPOSE 3001 3002 3007 3009
+CMD ["uvicorn", "services.birth_time.api.app:app", "--host", "0.0.0.0", "--port", "3009"]

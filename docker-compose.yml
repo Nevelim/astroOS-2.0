@@ -1,0 +1,95 @@
+# AstroOS — Development Docker Compose
+#
+# Starts all Python microservices + shared infrastructure (Postgres, Redis).
+# The Next.js BFF runs separately via `npm run dev` (it needs hot reload).
+#
+# Usage:
+#   docker compose up -d              # start everything
+#   docker compose logs -f birth-time # tail a service
+#   docker compose down               # stop
+#
+# Services:
+#   birth-time   :3009  UTC/LMT/TST resolution
+#   bazi-engine  :3002  Four Pillars + Day Master + Ten Gods
+#   astro-engine :3001  Natal chart (skyfield/DE421)
+#   daily        :3007  Horoscopes + affirmations
+#   postgres     :5432  Shared DB (B2C schemas)
+#   redis        :6379  Cache + event bus
+
+version: "3.9"
+
+services:
+  # ===== Python microservices =====
+  birth-time:
+    build:
+      context: .
+      dockerfile: Dockerfile.python
+    command: uvicorn services.birth_time.api.app:app --host 0.0.0.0 --port 3009
+    ports: ["3009:3009"]
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - GEONAMES_USERNAME=${GEONAMES_USERNAME:-}
+    depends_on: [redis]
+    restart: unless-stopped
+
+  bazi-engine:
+    build:
+      context: .
+      dockerfile: Dockerfile.python
+    command: uvicorn services.bazi_engine.api.app:app --host 0.0.0.0 --port 3002
+    ports: ["3002:3002"]
+    environment:
+      - BIRTH_TIME_URL=http://birth-time:3009
+      - REDIS_URL=redis://redis:6379/2
+    depends_on: [redis, birth-time]
+    restart: unless-stopped
+
+  astro-engine:
+    build:
+      context: .
+      dockerfile: Dockerfile.python
+    command: uvicorn services.astro_engine.api.app:app --host 0.0.0.0 --port 3001
+    ports: ["3001:3001"]
+    volumes:
+      - ephemeris:/app/ephemeris
+    environment:
+      - ASTRO_EPH_FILE=/app/ephemeris/de421.bsp
+      - REDIS_URL=redis://redis:6379/1
+    depends_on: [redis]
+    restart: unless-stopped
+
+  daily-content:
+    build:
+      context: .
+      dockerfile: Dockerfile.python
+    command: uvicorn services.daily_content.api.app:app --host 0.0.0.0 --port 3007
+    ports: ["3007:3007"]
+    environment:
+      - REDIS_URL=redis://redis:6379/5
+    depends_on: [redis]
+    restart: unless-stopped
+
+  # ===== Shared infrastructure =====
+  postgres:
+    image: postgres:16-alpine
+    ports: ["5432:5432"]
+    environment:
+      POSTGRES_USER: astroos
+      POSTGRES_PASSWORD: dev_only_not_for_prod
+      POSTGRES_DB: astroos
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redisdata:/data
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  redisdata:
+  ephemeris:

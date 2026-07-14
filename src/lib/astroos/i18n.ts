@@ -43,6 +43,7 @@ const en: Dict = {
   "nav.themes": "Life Themes",
   "nav.upgrade": "Upgrade",
   "nav.business": "Business · B2B",
+  "nav.baziAdmin": "BaZi · Admin",
   "nav.profile": "Profile",
   "nav.auth": "Sign in",
 
@@ -336,6 +337,7 @@ const ru: Dict = {
   "nav.themes": "Сферы жизни",
   "nav.upgrade": "Подписка",
   "nav.business": "Бизнес · B2B",
+  "nav.baziAdmin": "Ба Цзы · Справочники",
   "nav.profile": "Профиль",
   "nav.auth": "Вход",
 
@@ -613,6 +615,7 @@ const hi: Dict = {
   "nav.themes": "जीवन विषय",
   "nav.upgrade": "सदस्यता",
   "nav.business": "व्यापार · B2B",
+  "nav.baziAdmin": "बा ज़ी · संदर्भ",
   "nav.profile": "प्रोफ़ाइल",
   "nav.auth": "लॉगिन",
 

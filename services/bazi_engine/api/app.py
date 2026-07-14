@@ -396,6 +396,41 @@ def create_app(deps: Optional[Dependencies] = None,
             "reason": r.reason,
         })
 
+    # ---- admin: reference catalogs (read-only, блок: админка) ----------- #
+    @app.get("/v1/bazi/admin/catalog", tags=["bazi"])
+    def admin_catalog(request: Request) -> JSONResponse:
+        """All reference catalogs for the admin view (read-only).
+
+        Returns directions, professions, famous-people counts, and the
+        remedies catalog (stones/colors/amulets per element). Read-only —
+        editing requires a DB-backed catalog (future iteration).
+        """
+        from services.bazi_engine.domain.directions import (
+            ELEMENT_DIRECTION, ELEMENT_COUNTRIES)
+        from services.bazi_engine.domain.professions import ELEMENT_PROFESSIONS
+        from services.bazi_engine.domain.famous_people import (
+            famous_people_count_by_stem, _FAMOUS)
+        from services.bazi_engine.domain.constants import STEM_HANZI as _SH2
+        directions = {
+            e.value: {"direction": ELEMENT_DIRECTION[e],
+                      "purpose": ELEMENT_COUNTRIES[e][0],
+                      "countries": list(ELEMENT_COUNTRIES[e][1])}
+            for e in Element
+        }
+        professions = {
+            e.value: [{"title": p.title, "title_ru": p.title_ru, "reason": p.reason}
+                       for p in ELEMENT_PROFESSIONS[e]]
+            for e in Element
+        }
+        famous_counts = {_SH2.get(s, s.value): c
+                         for s, c in famous_people_count_by_stem().items()}
+        return JSONResponse(status_code=200, content={
+            "directions": directions,
+            "professions": professions,
+            "famous_people_counts": famous_counts,
+            "famous_people_total": len(_FAMOUS),
+        })
+
     # ---- partner compatibility (合婚, блок 5) --------------------------- #
     @app.post("/v1/bazi/compatibility", tags=["bazi"])
     def bazi_compatibility(payload: dict, request: Request) -> JSONResponse:

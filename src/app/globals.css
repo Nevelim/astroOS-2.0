@@ -1301,3 +1301,52 @@ button:active:not(:disabled) {
 
 
 
+
+/* ============ Print / PDF export (BaZi report) ============ */
+@media print {
+  /* Hide everything non-essential: nav, buttons, interactive controls. */
+  .no-print,
+  aside,
+  nav,
+  button,
+  [class*="sticky"],
+  [class*="fixed"] {
+    display: none !important;
+  }
+
+  /* Reset backgrounds for ink/paper economy. */
+  body, html {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  /* Report cards: white background, visible borders, full width. */
+  .min-h-screen {
+    min-height: auto !important;
+    background: #fff !important;
+    padding: 0 !important;
+  }
+
+  /* Force text colors to black for readability on paper. */
+  * {
+    color: #000 !important;
+    background: transparent !important;
+    border-color: #999 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  /* Avoid breaking cards across pages. */
+  [class*="rounded-xl"] {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    border: 1px solid #ccc !important;
+    margin-bottom: 12px !important;
+  }
+
+  /* Remove animations. */
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

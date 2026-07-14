@@ -8,7 +8,7 @@ export type ScreenKey =
   | "overview" | "reveal" | "today" | "self" | "world" | "local"
   | "mentor" | "divine" | "connect" | "members" | "upgrade" | "business"
   | "profile" | "auth" | "welcome" | "birth" | "themes" | "family" | "astro-travel"
-  | "bazi-report";
+  | "bazi-report" | "bazi-admin";
 
 export const USER = {
   name: "Aeliana",
@@ -590,6 +590,7 @@ export const NAV_ITEMS: { key: ScreenKey; label: string; icon: string; group: "j
   { key: "profile", label: "nav.profile", icon: "◉", group: "account" },
   { key: "upgrade", label: "nav.upgrade", icon: "◈", group: "growth" },
   { key: "business", label: "nav.business", icon: "⬡", group: "growth" },
+  { key: "bazi-admin", label: "nav.baziAdmin", icon: "⚙", group: "growth" },
   { key: "auth", label: "nav.auth", icon: "⎆", group: "growth" },
 ];
 

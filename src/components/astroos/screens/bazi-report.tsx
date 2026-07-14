@@ -122,7 +122,13 @@ export function BaZiReportScreen({ onNavigate }: BaZiReportScreenProps) {
               {t("nav.baziReport")}
             </h1>
           </div>
-          <Pill tone="jade"><Sparkles className="w-3 h-3 inline mr-1" /> {meMember.displayName}</Pill>
+          <div className="flex items-center gap-2">
+            <CosmicButton onClick={() => window.print()} variant="outline" className="text-xs no-print">
+              <Download className="w-3 h-3 inline mr-1" />
+              {L("PDF", "PDF", "PDF")}
+            </CosmicButton>
+            <Pill tone="jade"><Sparkles className="w-3 h-3 inline mr-1" /> {meMember.displayName}</Pill>
+          </div>
         </div>
       </FadeIn>
 

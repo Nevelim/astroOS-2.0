@@ -10,6 +10,7 @@
 #   3008 Notification
 #   3009 Birth-Time Resolution  (infra-service)
 #   3011 Divination (Tarot + I Ching)
+#   3006 B2B HR (EU-isolated)
 #   3000 BFF / Next.js (started separately via `npm run dev`)
 #
 # Usage:  ./start-services.sh          # background, logs to logs/*.log
@@ -46,6 +47,7 @@ services=(
   "notification|3008|services.notification.api.app:app"
   "remedies|3005|services.remedies.api.app:app"
   "divination|3011|services.divination.api.app:app"
+  "b2b-hr|3006|services.b2b_hr.api.app:app"
 )
 
 for svc in "${services[@]}"; do
@@ -78,3 +80,4 @@ echo "  Mentor      http://127.0.0.1:3003/docs"
 echo "  Notification http://127.0.0.1:3008/docs"
 echo "  Remedies    http://127.0.0.1:3005/docs"
 echo "  Divination  http://127.0.0.1:3011/docs"
+echo "  B2B HR      http://127.0.0.1:3006/docs"

@@ -359,6 +359,47 @@ def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
             ],
         })
 
+    # ---- retrograde status: which planets are retrograde now ----------- #
+    @app.get("/v1/retrogrades", tags=["astro"])
+    def retrograde_status(request: Request) -> JSONResponse:
+        """Which planets are currently retrograde (computed at 12:00 UTC today).
+
+        Uses the same day-over-day longitude-comparison the natal chart uses.
+        """
+        from services.astro_engine.adapter.ephemeris import SkyfieldEphemeris
+        from datetime import datetime, timezone, timedelta
+        try:
+            eph = SkyfieldEphemeris()
+        except Exception:
+            return problem(503, "astro/ephemeris-unavailable",
+                           "Ephemeris not loaded",
+                           "The skyfield ephemeris (de421.bsp) is not available.",
+                           request.url.path)
+        now = datetime.now(timezone.utc).replace(hour=12, minute=0, second=0,
+                                                 microsecond=0)
+        positions = eph.positions(now, 0.0, 0.0, planets=PLANETS)
+        retrograde_list = []
+        direct_list = []
+        for p in positions:
+            entry = {
+                "planet": p.planet.value,
+                "name_ru": PLANET_NAME_RU.get(p.planet, p.planet.value),
+                "symbol": PLANET_SYMBOL.get(p.planet, ""),
+                "longitude_deg": round(p.ecliptic_longitude_deg, 4),
+                "sign": p.sign.value,
+                "retrograde": p.retrograde,
+            }
+            if p.retrograde:
+                retrograde_list.append(entry)
+            else:
+                direct_list.append(entry)
+        return JSONResponse(status_code=200, content={
+            "as_of_utc": now.strftime("%Y-%m-%dT%H:%M:%SZ"),
+            "retrograde": retrograde_list,
+            "direct": direct_list,
+            "retrograde_count": len(retrograde_list),
+        })
+
     instrument_app(app)
     return app
 

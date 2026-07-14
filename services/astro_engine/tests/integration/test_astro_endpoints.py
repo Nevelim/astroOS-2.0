@@ -109,3 +109,25 @@ class TestTransitsEndpoint:
     def test_missing_positions_422(self, client):
         r = client.post("/v1/transits/daily", json={"current": {}})
         assert r.status_code == 422
+
+
+class TestRetrogradeStatusEndpoint:
+    def test_returns_planet_status(self, client):
+        r = client.get("/v1/retrogrades")
+        # May return 200 (ephemeris available) or 503 (not loaded in test env).
+        if r.status_code == 503:
+            pytest.skip("Ephemeris not available in this test environment")
+        assert r.status_code == 200
+        body = r.json()
+        assert "as_of_utc" in body
+        assert "retrograde" in body
+        assert "direct" in body
+        assert body["retrograde_count"] == len(body["retrograde"])
+        # Sun and Moon are never retrograde — must be in 'direct'.
+        direct_names = {p["planet"] for p in body["direct"]}
+        assert "sun" in direct_names
+        assert "moon" in direct_names
+        # Each entry has the required fields.
+        for entry in body["retrograde"] + body["direct"]:
+            assert "planet" in entry and "longitude_deg" in entry
+            assert "retrograde" in entry

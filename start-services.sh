@@ -6,6 +6,7 @@
 #   3003 AI Mentor
 #   3004 Cosmic Match
 #   3007 Daily Content
+#   3008 Notification
 #   3009 Birth-Time Resolution  (infra-service)
 #   3000 BFF / Next.js (started separately via `npm run dev`)
 #
@@ -40,6 +41,7 @@ services=(
   "daily-content|3007|services.daily_content.api.app:app"
   "cosmic-match|3004|services.cosmic_match.api.app:app"
   "ai-mentor|3003|services.ai_mentor.api.app:app"
+  "notification|3008|services.notification.api.app:app"
 )
 
 for svc in "${services[@]}"; do
@@ -69,3 +71,4 @@ echo "  Astro       http://127.0.0.1:3001/docs"
 echo "  Daily       http://127.0.0.1:3007/docs"
 echo "  Match       http://127.0.0.1:3004/docs"
 echo "  Mentor      http://127.0.0.1:3003/docs"
+echo "  Notification http://127.0.0.1:3008/docs"

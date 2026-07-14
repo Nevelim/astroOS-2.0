@@ -88,6 +88,8 @@ class NatalChart:
     planets: tuple[PlanetPosition, ...]
     houses: HouseCusps
     aspects: tuple[Aspect, ...]
+    # The lunar nodal axis (☊ Rahu / ☋ Ketu). Always computed (pure math).
+    nodes: Optional["LunarNodePosition"] = None
 
     def planet(self, p: Planet) -> Optional[PlanetPosition]:
         for pp in self.planets:

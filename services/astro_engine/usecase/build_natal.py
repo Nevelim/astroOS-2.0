@@ -47,6 +47,9 @@ class BuildNatalChart:
         else:
             houses = whole_sign_houses(angles)
         aspects = compute_aspects(planets)
+        # Lunar Nodes (karmic axis) — pure math, always available.
+        from services.astro_engine.domain.lunar_nodes import mean_lunar_node
+        nodes = mean_lunar_node(utc)
         return NatalChart(
             birth_utc=utc,
             latitude=lat,
@@ -55,4 +58,5 @@ class BuildNatalChart:
             planets=planets,
             houses=houses,
             aspects=aspects,
+            nodes=nodes,
         )

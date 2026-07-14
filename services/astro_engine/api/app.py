@@ -20,6 +20,7 @@ from services.astro_engine.domain.chart import house_of
 from services.astro_engine.domain.constants import (
     HouseSystem, PLANETS, PLANET_NAME_RU, PLANET_SYMBOL,
     Planet, SIGN_ELEMENT, SIGN_MODALITY, SIGN_NAME_RU, SIGN_SYMBOL, Sign,
+    sign_of,
 )
 from services.astro_engine.usecase.build_natal import BuildNatalChart
 from services.bazi_engine.adapter.solar_terms import BirthFacts, BirthFactsProvider
@@ -130,6 +131,14 @@ def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
             },
             "polar_fallback": chart.houses.polar_fallback,
         }
+        nodes_dto = None
+        if chart.nodes is not None:
+            nodes_dto = {
+                "north": {"longitude_deg": round(chart.nodes.north_longitude_deg, 4),
+                          "sign": sign_of(chart.nodes.north_longitude_deg).value},
+                "south": {"longitude_deg": round(chart.nodes.south_longitude_deg, 4),
+                          "sign": sign_of(chart.nodes.south_longitude_deg).value},
+            }
         return {
             "birth_utc": chart.birth_utc.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
             "latitude": chart.latitude,
@@ -138,6 +147,7 @@ def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
             "planets": planets_dto,
             "houses": houses_dto,
             "aspects": aspects_dto,
+            "nodes": nodes_dto,
         }
 
     @app.get("/v1/charts/natal/{birth_data_hash}", tags=["astro"])

@@ -2,17 +2,21 @@
 
 import { GlassCard, SectionHeading, FadeIn } from "../ui";
 import { useI18n } from "@/lib/astroos/i18n-context";
+import { RealLocalSpacePanel } from "../real/RealLocalSpacePanel";
 
 export function LocalSpaceScreen() {
   const { t, locale } = useI18n();
   return (
     <FadeIn>
-      <SectionHeading title={locale === "ru" ? "Локальное пространство" : "Local Space"} />
-      <GlassCard>
-        <p className="text-sm opacity-70">
+      <SectionHeading title={t("local.title")} />
+      <RealLocalSpacePanel locale={locale} />
+      <GlassCard variant="jade" className="mt-4 p-4">
+        <p className="text-sm text-[#8A8A96]">
           {locale === "ru"
-            ? "Планетные линии в масштабе вашего дома. Раздел в разработке — скоро будет доступен."
-            : "Planetary lines in the scale of your home. This section is under construction — coming soon."}
+            ? "Астро Пространство показывает азимут (компасное направление) каждой планеты от точки вашего рождения. Линии расходятся от центра — вашего дома."
+            : locale === "hi"
+            ? "अस्ट्रो स्पेस आपके जन्म स्थान से प्रत्येक ग्रह की दिशा (azimuth) दिखाता है। रेखाएं केंद्र से बाहर की ओर फैलती हैं।"
+            : "Astro Space shows the azimuth (compass direction) of each planet from your birthplace. Lines radiate outward from the center — your home."}
         </p>
       </GlassCard>
     </FadeIn>

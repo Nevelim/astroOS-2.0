@@ -417,6 +417,108 @@ def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
             ],
         })
 
+    # ---- secondary progressions: "a day for a year" forecast ----------- #
+    @app.post("/v1/progressions", tags=["astro"])
+    def progressions(payload: dict, request: Request) -> JSONResponse:
+        """Compute secondary progressions from natal positions.
+
+        Advances each natal planet by its mean daily motion × current_age,
+        where one day after birth equals one year of life (the Alan Leo
+        "day for a year" technique). Also reports the progressed date and any
+        upcoming progressed-Sun sign changes (major life-theme shifts).
+
+        Body: { "natal_positions": {"sun": 25.5, "moon": 143.9, ...},
+                "birth_utc": "1989-04-15T09:40:00Z",
+                "current_age": 36,
+                "sign_change_years_ahead": 5 }   (optional, default 5)
+        """
+        from services.astro_engine.domain.progressions import (
+            progressed_chart, progressed_date, progressed_sun_sign_change)
+        natal_positions = payload.get("natal_positions", {})
+        birth_utc_str = payload.get("birth_utc")
+        current_age = payload.get("current_age")
+        if not natal_positions or not birth_utc_str or current_age is None:
+            return problem(422, "astro/progressions-invalid",
+                           "Missing data",
+                           "'natal_positions', 'birth_utc', and "
+                           "'current_age' are all required.",
+                           request.url.path)
+        try:
+            utc = datetime.fromisoformat(birth_utc_str.replace("Z", "+00:00"))
+        except ValueError:
+            return problem(422, "astro/progressions-invalid",
+                           "Invalid birth_utc",
+                           "'birth_utc' must be ISO-8601, e.g. "
+                           "'1989-04-15T09:40:00Z'.",
+                           request.url.path)
+        try:
+            age = float(current_age)
+        except (TypeError, ValueError):
+            return problem(422, "astro/progressions-invalid",
+                           "Invalid current_age",
+                           "'current_age' must be a number.",
+                           request.url.path)
+        years_ahead = int(payload.get("sign_change_years_ahead", 5))
+
+        progressed = progressed_chart(natal_positions, utc, age)
+        p_date = progressed_date(utc, age)
+
+        natal_sun = natal_positions.get("sun")
+        upcoming: list[dict] = []
+        if natal_sun is not None:
+            upcoming = progressed_sun_sign_change(
+                natal_sun, utc, age, years_ahead=years_ahead)
+
+        p_date_str = (p_date.astimezone(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+                      if p_date.tzinfo is not None
+                      else p_date.strftime("%Y-%m-%dT%H:%M:%SZ"))
+        return JSONResponse(status_code=200, content={
+            "progressed_positions": {k: round(v, 4) for k, v in progressed.items()},
+            "progressed_date": p_date_str,
+            "upcoming_sign_changes": upcoming,
+        })
+
+    # ---- local space: planetary azimuth/altitude from a birthplace ------- #
+    @app.post("/v1/local-space", tags=["astro"])
+    def local_space(payload: dict, request: Request) -> JSONResponse:
+        """Compute Local Space (azimuth lines) for planets at a birthplace.
+
+        Body: { "planets": {"sun": {"ra": 100.5, "dec": 10.0}, ...},
+                "observer_lat": 52.3, "observer_lng": 76.95,
+                "lst_deg": 120.0 }
+        Returns azimuth + altitude + sector for each planet.
+        """
+        from services.astro_engine.domain.local_space import compute_local_space
+        planets_in = payload.get("planets", {})
+        lat = payload.get("observer_lat")
+        lng = payload.get("observer_lng")
+        lst = payload.get("lst_deg")
+        if not planets_in or lat is None or lst is None:
+            return problem(422, "astro/local-space-invalid",
+                           "Missing data",
+                           "Required: planets (with ra/dec), observer_lat, lst_deg.",
+                           request.url.path)
+        planet_positions = {}
+        for name, coords in planets_in.items():
+            ra = coords.get("ra")
+            dec = coords.get("dec")
+            if ra is not None and dec is not None:
+                planet_positions[name] = (float(ra), float(dec))
+        result = compute_local_space(planet_positions, float(lat),
+                                     float(lng or 0), float(lst))
+        return JSONResponse(status_code=200, content={
+            "observer_lat": result.observer_lat,
+            "observer_lng": result.observer_lng,
+            "total_above": result.total_above,
+            "total_below": result.total_below,
+            "planet_lines": [
+                {"planet": l.planet, "azimuth_deg": l.azimuth_deg,
+                 "altitude_deg": l.altitude_deg, "sector": l.sector,
+                 "above_horizon": l.above_horizon}
+                for l in result.lines
+            ],
+        })
+
     instrument_app(app)
     return app
 

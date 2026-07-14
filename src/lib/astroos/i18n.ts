@@ -31,8 +31,8 @@ const en: Dict = {
   "nav.reveal": "Reveal",
   "nav.today": "Today",
   "nav.self": "Self · Charts",
-  "nav.world": "World · Astrocart",
-  "nav.local": "Local Space",
+  "nav.world": "Astro · Travel",
+  "nav.local": "Astro · Space",
   "nav.mentor": "Mentor",
   "nav.divine": "Divine",
   "nav.connect": "Connect · Match",
@@ -108,7 +108,7 @@ const en: Dict = {
 
   // World
   "world.eyebrow": "Place & direction · core moat",
-  "world.title": "World — Astrocartography",
+  "world.title": "Astro Travel — planetary lines on the world map",
   "world.subtitle": "3D Great Circle via Rodrigues rotation. 44 planetary lines (10 planets × MC/IC/Asc/Desc + 4 axes). 331 cities. 8-sphere multi-filter. Narrative AI: top-3 positive + top-2 negative.",
   "world.filter": "8-sphere multi-filter",
   "world.cities.ranked": "cities ranked",
@@ -147,7 +147,7 @@ const en: Dict = {
 
   // Local Space
   "local.eyebrow": "Place & direction · apartment-scale",
-  "local.title": "Local Space — your home compass",
+  "local.title": "Astro Space — your directional compass",
   "local.subtitle": "Planetary azimuths (0°=N, 90°=E) projected as rays from your home. 8 sectors. Recommendations for bed, workspace, door. 50km rays on map.",
   "local.sectors": "8 sectors",
   "local.rays": "Planetary rays · 50km",
@@ -295,8 +295,8 @@ const ru: Dict = {
   "nav.reveal": "Reveal",
   "nav.today": "Сегодня",
   "nav.self": "Я · Карты",
-  "nav.world": "Мир · Астрокарт",
-  "nav.local": "Локальное пространство",
+  "nav.world": "Астро · Путешествие",
+  "nav.local": "Астро · Пространство",
   "nav.mentor": "Наставник",
   "nav.divine": "Гадания",
   "nav.connect": "Связи · Матч",
@@ -368,7 +368,7 @@ const ru: Dict = {
   "auth.title": "Создайте аккаунт",
 
   "world.eyebrow": "Место и направление · ядро",
-  "world.title": "Мир — Астрокартография",
+  "world.title": "Астро Путешествие — планетарные линии на карте мира",
   "world.subtitle": "3D Great Circle через Rodrigues. 44 планетарные линии (10 планет × MC/IC/Asc/Desc + 4 оси). 331 город. 8-сферный мульти-фильтр. AI-нарратив: top-3 positive + top-2 negative.",
   "world.filter": "8-сферный мульти-фильтр",
   "world.cities.ranked": "городов ранжировано",
@@ -405,7 +405,7 @@ const ru: Dict = {
   "self.house.system": "Система домов",
 
   "local.eyebrow": "Место и направление · масштаб квартиры",
-  "local.title": "Локальное пространство — компас твоего дома",
+  "local.title": "Астро Пространство — твои направления силы",
   "local.subtitle": "Планетарные азимуты (0°=С, 90°=В) как лучи от твоего дома. 8 секторов. Рекомендации для кровати, рабочего места, двери. 50км лучи на карте.",
   "local.sectors": "8 секторов",
   "local.rays": "Планетарные лучи · 50км",
@@ -543,8 +543,8 @@ const hi: Dict = {
   "nav.reveal": "रिवील",
   "nav.today": "आज",
   "nav.self": "स्व · चार्ट",
-  "nav.world": "विश्व · अस्ट्रोकार्ट",
-  "nav.local": "स्थानीय अंतरिक्ष",
+  "nav.world": "अस्ट्रो · यात्रा",
+  "nav.local": "अस्ट्रो · अंतरिक्ष",
   "nav.mentor": "गुरु",
   "nav.divine": "दिव्य",
   "nav.connect": "संपर्क · मैच",
@@ -616,7 +616,7 @@ const hi: Dict = {
   "auth.title": "अपना खाता बनाएं",
 
   "world.eyebrow": "स्थान और दिशा · मूल",
-  "world.title": "विश्व — अस्ट्रोकार्टोग्राफी",
+  "world.title": "अस्ट्रो यात्रा — विश्व मानचित्र पर ग्रह रेखाएं",
   "world.subtitle": "Rodrigues द्वारा 3D Great Circle। 44 ग्रह रेखाएं (10 ग्रह × MC/IC/Asc/Desc + 4 अक्ष)। 331 शहर। 8-क्षेत्र मल्टी-फ़िल्टर। AI कथन: top-3 सकारात्मक + top-2 नकारात्मक।",
   "world.filter": "8-क्षेत्र मल्टी-फ़िल्टर",
   "world.cities.ranked": "शहर क्रमबद्ध",
@@ -653,7 +653,7 @@ const hi: Dict = {
   "self.house.system": "भाव प्रणाली",
 
   "local.eyebrow": "स्थान और दिशा · अपार्टमेंट-स्तर",
-  "local.title": "स्थानीय अंतरिक्ष — आपके घर का कम्पास",
+  "local.title": "अस्ट्रो अंतरिक्ष — आपकी दिशा कंपास",
   "local.subtitle": "ग्रह दिगंश (0°=N, 90°=E) आपके घर से किरणों के रूप में। 8 क्षेत्र। बिस्तर, कार्यस्थल, दरवाज़े के लिए अनुशंसा। मानचित्र पर 50किमी किरणें।",
   "local.sectors": "8 क्षेत्र",
   "local.rays": "ग्रह किरणें · 50किमी",

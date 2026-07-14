@@ -48,7 +48,7 @@ interface BaZiReportScreenProps {
 export function BaZiReportScreen({ onNavigate }: BaZiReportScreenProps) {
   const { t, locale } = useI18n();
   const { member } = useMember();
-  const [bazi, setBazi] = useState<BaZiDTO | null>(null);
+  const [bazi, setBazi] = useState<(BaZiDTO & { favorableElements?: string[] }) | null>(null);
   const [forecast, setForecast] = useState<BaziForecastDTO | null>(null);
   const [recommendations, setRecommendations] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -68,9 +68,28 @@ export function BaZiReportScreen({ onNavigate }: BaZiReportScreenProps) {
         birthPlaceName: meMember.birth.placeName,
         gender: meMember.birth.gender,
       });
-      setBazi(r.bazi);
-      setRecommendations(r.recommendations);
-      setForecast(null); // forecast fetched separately by hash (not available client-side here)
+      // Normalize the BaZi DTO: the TS use-case returns elementBalance with
+      // Titlecase keys (Wood/Fire/...) and no favorableElements field. We
+      // normalize to lowercase keys and derive favorableElements from the
+      // recommendations object so the report blocks render correctly.
+      const rawBal = r.bazi.elementBalance ?? {};
+      const normBal: Record<string, number> = {};
+      Object.entries(rawBal).forEach(([k, v]) => {
+        normBal[k.toLowerCase()] = v as number;
+      });
+      const recs = (r.recommendations ?? {}) as Record<string, unknown>;
+      const favRaw = (recs.favorable as string[]) ?? [];
+      const favorable = favRaw.map((e) => e.toLowerCase());
+      const enriched = {
+        ...r.bazi,
+        elementBalance: normBal,
+        dayMasterElement: r.bazi.dayMasterElement.toLowerCase(),
+        favorableElements: favorable.length > 0 ? favorable
+          : [r.bazi.dayMasterElement.toLowerCase()],
+      };
+      setBazi(enriched);
+      setRecommendations(recs);
+      setForecast(null);
     } catch (e) {
       setError(locale === "ru" ? "Не удалось рассчитать карту" : "Could not compute chart");
     } finally {
@@ -148,13 +167,13 @@ export function BaZiReportScreen({ onNavigate }: BaZiReportScreenProps) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
           {/* Камни */}
           <RemedyCard icon={<ShoppingBag className="w-4 h-4" />} title={L("Камни и кристаллы", "Stones & crystals", "रत्न")}
-            remedies={(recommendations as any[])} filterType="stone" locale={locale} L={L} />
+            elements={(bazi.favorableElements ?? [])} filterType="stone" locale={locale} L={L} />
           {/* Цвета */}
           <RemedyCard icon={<Palette className="w-4 h-4" />} title={L("Цвета", "Colors", "रंग")}
-            remedies={(recommendations as any[])} filterType="color" locale={locale} L={L} />
+            elements={(bazi.favorableElements ?? [])} filterType="color" locale={locale} L={L} />
           {/* Артефакты */}
           <RemedyCard icon={<Home className="w-4 h-4" />} title={L("Артефакты для дома", "Home artifacts", "घर के लिए कलाकृतियाँ")}
-            remedies={(recommendations as any[])} filterType="amulet" locale={locale} L={L} />
+            elements={(bazi.favorableElements ?? [])} filterType="amulet" locale={locale} L={L} />
           {/* Профессии */}
           <ProfessionsCard bazi={bazi} el={el} L={L} locale={locale} />
         </div>
@@ -295,8 +314,17 @@ function ElementBalanceCard({ bazi, el, L, locale }: any) {
   );
 }
 
-function RemedyCard({ icon, title, remedies, filterType, locale, L }: any) {
-  const items = (remedies ?? []).filter((r: any) => r?.type === filterType);
+function RemedyCard({ icon, title, elements, filterType, locale, L }: any) {
+  // Look up remedies from the static catalogs (mirrors the Python remedies
+  // catalog) for each favorable element + the requested type.
+  const catalog = filterType === "stone" ? STONE_CATALOG
+    : filterType === "color" ? COLOR_CATALOG
+    : AMULET_CATALOG;
+  const items: any[] = [];
+  for (const el of elements) {
+    const entries = catalog[el] ?? [];
+    for (const e of entries) items.push({ ...e, element: el });
+  }
   if (items.length === 0) return null;
   return (
     <GlassCard variant="neutral" className="p-4">
@@ -312,13 +340,11 @@ function RemedyCard({ icon, title, remedies, filterType, locale, L }: any) {
               <span className="w-2 h-2 rounded-full mt-1.5 shrink-0" style={{ background: eDisp.color }} />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium" style={{ color: "#F5F0E8" }}>{r.name}</p>
-                <p className="text-[10px]" style={{ color: "#9A9AA8" }}>{r.reasoning}</p>
-                {r.element && (
-                  <span className="text-[9px] px-1.5 py-0.5 rounded inline-block mt-0.5"
-                    style={{ background: `${eDisp.color}15`, color: eDisp.color }}>
-                    {eDisp[locale === "ru" ? "ru" : "en"]}
-                  </span>
-                )}
+                {r.reasoning && <p className="text-[10px]" style={{ color: "#9A9AA8" }}>{r.reasoning}</p>}
+                <span className="text-[9px] px-1.5 py-0.5 rounded inline-block mt-0.5"
+                  style={{ background: `${eDisp.color}15`, color: eDisp.color }}>
+                  {eDisp[locale === "ru" ? "ru" : "en"]}
+                </span>
               </div>
               {filterType !== "amulet" && (
                 <BuyButton name={r.name} L={L} />
@@ -677,6 +703,29 @@ function BuyButton({ name, L }: { name: string; L: any }) {
 }
 
 // ============ Reference data (frontend mirror) ============
+// Remedy catalogs (mirror of the Python remedies catalog) — keyed by element.
+const STONE_CATALOG: Record<string, Array<{ name: string; reasoning: string }>> = {
+  wood: [{ name: "Green Aventurine", reasoning: "Growth, vitality, new beginnings" }, { name: "Jade", reasoning: "Renewal and harmony" }],
+  fire: [{ name: "Carnelian", reasoning: "Courage, motivation, creative spark" }, { name: "Red Jasper", reasoning: "Passion and stamina" }],
+  earth: [{ name: "Tiger's Eye", reasoning: "Grounding, protection, stability" }, { name: "Yellow Jade", reasoning: "Nourishment and patience" }],
+  metal: [{ name: "Clear Quartz", reasoning: "Focus, precision, clarity" }, { name: "Hematite", reasoning: "Structure and grounding" }],
+  water: [{ name: "Aquamarine", reasoning: "Flow, intuition, emotional calm" }, { name: "Moonstone", reasoning: "Reflection and wisdom" }],
+};
+const COLOR_CATALOG: Record<string, Array<{ name: string; reasoning: string }>> = {
+  wood: [{ name: "Green", reasoning: "Encourages renewal and growth" }],
+  fire: [{ name: "Red", reasoning: "Activates passion and visibility" }],
+  earth: [{ name: "Earthy Yellow / Brown", reasoning: "Stability and nourishment" }],
+  metal: [{ name: "White / Silver", reasoning: "Precision and clarity" }],
+  water: [{ name: "Deep Blue / Black", reasoning: "Reflective wisdom and depth" }],
+};
+const AMULET_CATALOG: Record<string, Array<{ name: string; reasoning: string }>> = {
+  wood: [{ name: "Green Dragon (东方青龙)", reasoning: "East — protects family and growth" }],
+  fire: [{ name: "Red Phoenix (南方朱雀)", reasoning: "South — activates recognition and fame" }],
+  earth: [{ name: "Pi Xiu (貔貅)", reasoning: "Entrance — draws wealth, wards off misfortune" }],
+  metal: [{ name: "White Tiger (西方白虎)", reasoning: "West — sharpens focus and discipline" }],
+  water: [{ name: "Black Tortoise (北方玄武)", reasoning: "North — anchors career and wisdom" }],
+};
+
 const DIRECTION_BY_ELEMENT: Record<string, string> = {
   wood: "E", fire: "S", earth: "C", metal: "W", water: "N",
 };

@@ -34,6 +34,7 @@ services=(
   "birth-time|3009|services.birth_time.api.app:app"
   "bazi-engine|3002|services.bazi_engine.api.app:app"
   "astro-engine|3001|services.astro_engine.api.app:app"
+  "daily-content|3007|services.daily_content.api.app:app"
 )
 
 for svc in "${services[@]}"; do
@@ -60,3 +61,4 @@ echo "Endpoints (Swagger UI):"
 echo "  Birth-Time  http://127.0.0.1:3009/docs"
 echo "  BaZi        http://127.0.0.1:3002/docs"
 echo "  Astro       http://127.0.0.1:3001/docs"
+echo "  Daily       http://127.0.0.1:3007/docs"

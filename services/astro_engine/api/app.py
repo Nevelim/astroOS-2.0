@@ -221,6 +221,37 @@ def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
             },
         )
 
+    # ---- transits: current planets vs a natal chart (daily forecast) ----- #
+    @app.post("/v1/transits/daily", tags=["astro"])
+    def daily_transits(payload: dict, request: Request) -> JSONResponse:
+        """Compute today's transits against natal positions → daily forecast.
+
+        Body: { "current": {"sun": 120.5, ...}, "natal": {"sun": 25.5, ...},
+                "natal_sun_sign": "aries" (optional) }
+        """
+        from services.astro_engine.domain.transits import daily_forecast
+        current = payload.get("current", {})
+        natal = payload.get("natal", {})
+        sign = payload.get("natal_sun_sign")
+        if not current or not natal:
+            return problem(422, "astro/transits-invalid",
+                           "Missing positions",
+                           "Both 'current' and 'natal' position dicts are required.",
+                           request.url.path)
+        f = daily_forecast(current, natal, sign)
+        return JSONResponse(status_code=200, content={
+            "score": f.score,
+            "dominant_theme": f.dominant_theme.value if f.dominant_theme else None,
+            "summary": f.summary,
+            "highlights": list(f.highlights),
+            "aspects": [
+                {"transiting": a.transiting, "natal_planet": a.natal_planet,
+                 "aspect_type": a.aspect_type.value, "orb_deg": a.orb_deg,
+                 "weight": a.weight, "theme": a.theme.value}
+                for a in f.aspects
+            ],
+        })
+
     instrument_app(app)
     return app
 

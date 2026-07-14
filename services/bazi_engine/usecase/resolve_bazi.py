@@ -93,11 +93,20 @@ class ResolveBaZi:
         # Luck pillars: direction = yang-year/male OR yin-year/female → forward.
         year_stem_polarity_yang = (yp.polarity.value == "yang")
         forward = (year_stem_polarity_yang == (facts.gender == "male"))
+        # Accurate start-age: day-distance from birth to the forward/backward
+        # JieQi month-boundary, divided by 3 (1 day ≈ 4 months).
+        try:
+            prev_jie, next_jie = st.nearest_month_jieqi(facts.birth_date)
+            from services.bazi_engine.domain.pillars import luck_start_age
+            start_age = luck_start_age(facts.birth_date, forward, prev_jie, next_jie)
+        except Exception:
+            start_age = 0.0  # adapter fallback (no exact JieQi available)
         lp = luck_pillars(
             month=mp,
             year_gender_forward=forward,
             birth_solar_year=bazi_year,
             current_age=facts.current_age,
+            start_age=start_age,
         )
 
         # Ten Gods: classify each pillar's STEM relative to Day Master.

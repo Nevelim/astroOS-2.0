@@ -29,6 +29,7 @@ class RemedyType(str, Enum):
     COLOR = "color"      # supportive colors
     METAL = "metal"      # precious metals
     SCENT = "scent"      # essential oils / incense
+    AMULET = "amulet"    # home artifacts / feng-shui amulets (блок 6)
 
 
 @dataclass(frozen=True)

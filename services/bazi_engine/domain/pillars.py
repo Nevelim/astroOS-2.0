@@ -246,43 +246,80 @@ def luck_pillars(
     years_per_pillar: float = 10.0,
     count: int = 8,
     current_age: Optional[int] = None,
+    start_age: float = 0.0,
 ) -> list[LuckPillar]:
-    """Compute the sequence of 10-year Luck Pillars.
+    """Compute the sequence of 10-year Luck Pillars (大运).
 
     Direction (forward/backward through the 60-cycle) depends on:
       - year stem polarity (yang → forward for men / yin → forward for women)
       - `year_gender_forward=True` means "advance" through the cycle.
 
-    The starting age is determined by the distance (in days) from birth to
-    the nearest solar term boundary, divided by 3 (≈ 1 day = 4 months ≈ 1/3
-    year). We accept it as an input here because computing it requires the
-    solar-term adapter; keeping this function pure means it is fully testable.
+    The starting age of the first pillar is `start_age` (years). The classical
+    formula: count days from birth to the forward (or backward) JieQi
+    month-boundary, divide by 3 (1 day ≈ 4 months ≈ 1/3 year). The caller
+    computes this from the solar-term adapter (keeping this fn pure) and
+    passes it in. Default 0 = "pillars start at birth" (the legacy fallback).
 
     Each Luck Pillar spans `years_per_pillar` (10 by default) years.
     """
     if count <= 0:
         return []
-    base_index = STEMS.index(month.stem)  # 0..9
-    base_branch = BRANCHES.index(month.branch)  # 0..11
     direction = +1 if year_gender_forward else -1
     # The first luck pillar begins at month-pillar's NEXT (or PREV) cycle entry.
     start_index_60 = _sexagenary_index(month)
 
     out: list[LuckPillar] = []
-    starting_age = 0  # caller may pass the real start age via current_age shift
-    # Without the precise day-count we begin at age 0 and step by 10. Real
-    # production code receives the start_age from the solar-term adapter; we
-    # accept it as a parameter when available.
     for i in range(count):
         idx = (start_index_60 + direction * (i + 1)) % 60
         pillar = pillar_at(idx)
-        age_start = int(starting_age + i * years_per_pillar)
+        age_start_f = start_age + i * years_per_pillar
+        age_start = int(round(age_start_f))
         is_current = (
             current_age is not None
             and age_start <= current_age < age_start + years_per_pillar
         )
         out.append(LuckPillar(age_start=age_start, pillar=pillar, current=is_current))
     return out
+
+
+def luck_start_age(
+    birth_date,
+    forward: bool,
+    prev_jieqi,
+    next_jieqi,
+) -> float:
+    """Classical Luck Pillar starting age from day-distance to a JieQi.
+
+    Count days from birth to the forward JieQi (if luck runs forward) or to
+    the backward JieQi (if backward), divide by 3 (3 days ≈ 1 year, i.e.
+    1 day ≈ 4 months). Returns the age in years (float).
+
+    `birth_date`, `prev_jieqi`, `next_jieqi` are datetime.date values.
+    """
+    target = next_jieqi if forward else prev_jieqi
+    days = abs((target - birth_date).days)
+    return round(days / 3.0, 3)  # 3 days per year
+
+
+# --------------------------------------------------------------------------- #
+# ANNUAL PILLARS (流年) — yearly transit pillars
+# --------------------------------------------------------------------------- #
+def annual_pillar(year: int) -> Pillar:
+    """The annual pillar (流年) for a Gregorian year.
+
+    Wraps year_pillar with the standard Lichun boundary (the BaZi year
+    begins at Lichun, ~Feb 4). For date-precision boundary handling, callers
+    resolve the Lichun fact externally and use year_pillar(year, after_lichun).
+    """
+    return year_pillar(year, after_lichun=True)
+
+
+def annual_pillars_range(start_year: int, count: int = 3) -> list[tuple[int, Pillar]]:
+    """A sequence of (year, pillar) pairs starting from `start_year`.
+
+    Used for the multi-year forecast (блок 9: годы переезда и рисков).
+    """
+    return [(y, annual_pillar(y)) for y in range(start_year, start_year + count)]
 
 
 def _sexagenary_index(p: Pillar) -> int:

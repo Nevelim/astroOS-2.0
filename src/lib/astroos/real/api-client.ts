@@ -111,6 +111,34 @@ export interface BaZiDTO {
   tenGods: string[];
 }
 
+export interface BaziForecastYearDTO {
+  year: number;
+  annual_pillar: { stem: string; branch: string; stem_hanzi: string; branch_hanzi: string; element: string };
+  high_risk: boolean;
+  clashes: Array<{ kind: string; natal_pillar: string; severity: string; risk_domains: string[]; description: string }>;
+}
+export interface BaziForecastDTO {
+  birth_data_hash: string;
+  base_year: number;
+  years: BaziForecastYearDTO[];
+}
+export interface BaziDateSelectionResultDTO {
+  date: string;
+  score: number;
+  label: string;  // "excellent"|"good"|"neutral"|"caution"|"avoid"
+  stem_element: string;
+  branch_element: string;
+  ten_god: string | null;
+  pillar: { stem: string; branch: string; stem_hanzi: string; branch_hanzi: string };
+  reason: string;
+}
+export interface BaziDateSelectionDTO {
+  day_master_stem: string;
+  goal: string;
+  start_date: string;
+  dates: BaziDateSelectionResultDTO[];
+}
+
 export interface IChingHexagramDTO {
   primaryNumber: number;
   primaryName: string;
@@ -295,4 +323,10 @@ export const api = {
   }) => request<FamilyAbundanceResultDTO>("/api/family-astro", {
     method: "POST", body: JSON.stringify(data),
   }),
+
+  // BaZi forecast + date selection (report blocks 9 + date-picker)
+  baziForecast: (birthDataHash: string, years = 3) =>
+    request<BaziForecastDTO>(`/api/bazi/forecast?birth_data_hash=${encodeURIComponent(birthDataHash)}&years=${years}`),
+  baziDateSelection: (data: { day_master_stem: string; goal?: string; days_ahead?: number; top_n?: number; start_date?: string }) =>
+    request<BaziDateSelectionDTO>("/api/bazi/date-selection", { method: "POST", body: JSON.stringify(data) }),
 };

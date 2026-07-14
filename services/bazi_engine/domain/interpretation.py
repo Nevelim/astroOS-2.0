@@ -165,3 +165,42 @@ def favorable_elements_from_chart(
         hour_stem=fp.hour.stem if fp.hour else None,
     )
     return yong_shen.favorable
+
+
+# --------------------------------------------------------------------------- #
+# Element balance (五行平衡) — count of each element across the Four Pillars
+# --------------------------------------------------------------------------- #
+from services.bazi_engine.domain.constants import BRANCH_ELEMENT
+from collections import Counter
+
+
+def element_balance(four_pillars: "FourPillars") -> dict[Element, int]:
+    """Tally the Five Elements across the Four Pillars (блок 3 отчёта).
+
+    Each pillar contributes its stem's element + its branch's primary element.
+    The Day pillar (self) is weighted ×2 (the Day Master dominates the chart).
+    Returns a {Element: count} dict; every Element key is present (0 if absent).
+    """
+    counts: Counter = Counter({e: 0 for e in Element})
+    for pillar in four_pillars.as_list():
+        counts[STEM_ELEMENT[pillar.stem]] += 1
+        counts[BRANCH_ELEMENT[pillar.branch]] += 1
+    # Day stem is the Day Master — weight it double (it IS the self).
+    counts[STEM_ELEMENT[four_pillars.day.stem]] += 1
+    return dict(counts)
+
+
+def dominant_element(balance: dict[Element, int]) -> Element:
+    """The strongest element in the chart (highest count). Ties → WOOD."""
+    if not balance:
+        return Element.WOOD
+    return max(balance, key=lambda e: balance.get(e, 0))
+
+
+def deficient_elements(balance: dict[Element, int]) -> list[Element]:
+    """Elements with 0 or the minimum count (what the chart lacks)."""
+    if not balance:
+        return []
+    mn = min(balance.values())
+    return [e for e, c in balance.items() if c <= max(mn, 1)]
+

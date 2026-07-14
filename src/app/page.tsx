@@ -29,6 +29,7 @@ import { BirthDataScreen } from "@/components/astroos/screens/birth";
 import { ThemesScreen } from "@/components/astroos/screens/themes";
 import { FamilyAstroScreen } from "@/components/astroos/screens/family-astro";
 import { AstroTravelScreen } from "@/components/astroos/screens/astro-travel";
+import { BaZiReportScreen } from "@/components/astroos/screens/bazi-report";
 
 type ScreenProps = { onNavigate?: (k: ScreenKey) => void };
 
@@ -52,6 +53,7 @@ const SCREENS: Record<ScreenKey, React.ComponentType<ScreenProps>> = {
   themes: ThemesScreen,
   family: FamilyAstroScreen,
   "astro-travel": AstroTravelScreen,
+  "bazi-report": BaZiReportScreen,
 };
 
 // Sample cosmic inbox — demonstrates the growth surface (transit / streak / city / trial / divine)

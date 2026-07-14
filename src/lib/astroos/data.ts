@@ -7,7 +7,8 @@ import type { Locale } from "./i18n";
 export type ScreenKey =
   | "overview" | "reveal" | "today" | "self" | "world" | "local"
   | "mentor" | "divine" | "connect" | "members" | "upgrade" | "business"
-  | "profile" | "auth" | "welcome" | "birth" | "themes" | "family" | "astro-travel";
+  | "profile" | "auth" | "welcome" | "birth" | "themes" | "family" | "astro-travel"
+  | "bazi-report";
 
 export const USER = {
   name: "Aeliana",
@@ -580,6 +581,7 @@ export const NAV_ITEMS: { key: ScreenKey; label: string; icon: string; group: "j
   { key: "today", label: "nav.today", icon: "☉", group: "journey" },
   { key: "self", label: "nav.self", icon: "✦", group: "journey" },
   { key: "astro-travel", label: "nav.astroTravel", icon: "⊕", group: "journey" },
+  { key: "bazi-report", label: "nav.baziReport", icon: "經", group: "journey" },
   { key: "mentor", label: "nav.mentor", icon: "✦", group: "journey" },
   { key: "divine", label: "nav.divine", icon: "☯", group: "journey" },
   { key: "connect", label: "nav.connect", icon: "♡", group: "journey" },

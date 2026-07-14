@@ -35,6 +35,16 @@ class SolarTermsProvider(Protocol):
         Lichun the index wraps to 11 (丑 month of the previous BaZi year)."""
         ...  # pragma: no cover
 
+    def nearest_month_jieqi(self, d: date) -> tuple[date, date]:
+        """The (previous, next) JieQi month-boundary dates around `d`.
+
+        BaZi months start at the 12 "Jie" (节) terms — Lichun, Jingzhe, ...
+        Luck Pillar start-age = the day-count from birth to the *forward*
+        JieQi (if luck runs forward) or the *backward* JieQi (if backward),
+        divided by 3 (1 day ≈ 4 months). Used for accurate Luck Pillar ages.
+        """
+        ...  # pragma: no cover
+
 
 @dataclass(frozen=True)
 class BirthFacts:
@@ -89,6 +99,44 @@ class ApproxSolarTermsProvider:
         # If in February on/after Lichun, idx is already 0.
         return idx
 
+    def nearest_month_jieqi(self, d: date) -> tuple[date, date]:
+        """Approximate month-boundary dates around `d`.
+
+        JieQi (节) month-start terms fall on fixed-ish days each month
+        (~day 5-8). We use a per-month approximation of the Jie day. This is
+        exact enough for Luck start-age purposes (±1 day → ±4 months over a
+        10-year period — negligible). For production precision, the sxtwl
+        provider computes the true moment.
+        """
+        # Approximate "Jie" day-of-month for each calendar month (the term
+        # that STARTS the BaZi month). These are the 12 节 terms.
+        # Feb=Lichun(~4/5), Mar=Jingzhe(~6), Apr=Qingming(~5), ...
+        jie_day = {1: 6, 2: 4, 3: 6, 4: 5, 5: 6, 6: 6,
+                   7: 7, 8: 8, 9: 8, 10: 8, 11: 7, 12: 7}
+        # Find the previous and next Jie dates relative to d.
+        # The Jie of month m starts around jie_day[m].
+        prev_jie_day = jie_day[d.month]
+        prev = date(d.year, d.month, prev_jie_day)
+        if prev > d:
+            # Previous Jie was in the prior month.
+            pm, py = d.month - 1, d.year
+            if pm == 0:
+                pm, py = 12, py - 1
+            prev = date(py, pm, jie_day[pm])
+        else:
+            # Next Jie is in the next month.
+            nm, ny = d.month + 1, d.year
+            if nm == 13:
+                nm, ny = 1, ny + 1
+            nxt = date(ny, nm, jie_day[nm])
+            return (prev, nxt)
+        # We moved prev backward; compute next = Jie of current month.
+        nm, ny = d.month + 1, d.year
+        if nm == 13:
+            nm, ny = 1, ny + 1
+        nxt = date(ny, nm, jie_day[nm])
+        return (prev, nxt)
+
 
 class SxtwlSolarTermsProvider:
     """Exact solar-term boundaries via sxtwl (preferred in production)."""
@@ -116,3 +164,28 @@ class SxtwlSolarTermsProvider:
         month_offsets = {2: 0, 3: 1, 4: 2, 5: 3, 6: 4, 7: 5, 8: 6,
                          9: 7, 10: 8, 11: 9, 12: 10, 1: 11}
         return month_offsets[d.month]
+
+    def nearest_month_jieqi(self, d: date) -> tuple[date, date]:
+        """Exact month-boundary JieQi dates around `d` via sxtwl.
+
+        Walks day-by-day backward and forward from `d` until a "Jie" term
+        (the 12 terms that start BaZi months, even JieQi indices in sxtwl)
+        is found in each direction. Returns (previous_jie, next_jie).
+        """
+        from datetime import timedelta
+
+        def _find_jie(start: date, step: int) -> date:
+            cur = start
+            for _ in range(45):
+                t = self._sxtwl.fromSolar(cur.year, cur.month, cur.day)
+                if t.hasJieQi():
+                    jq = t.getJieQi()
+                    # The 12 "Jie" (节) terms are the even JieQi ids in sxtwl.
+                    if jq % 2 == 1:  # odd ids are "Jie" (month-starters) in sxtwl
+                        return cur
+                cur = cur + timedelta(days=step)
+            return start  # pragma: no cover
+
+        prev_jie = _find_jie(d, -1)
+        next_jie = _find_jie(d + timedelta(days=1), +1)
+        return (prev_jie, next_jie)

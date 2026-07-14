@@ -108,6 +108,26 @@ _CATALOG: dict[Element, tuple[Remedy, ...]] = {
     ),
 }
 
+# Feng-shui amulets/artifacts per element (блок 6 отчёта). Placement follows
+# the Bagua/element-direction association (see bazi_engine.directions).
+_AMULETS: dict[Element, Remedy] = {
+    Element.WOOD: Remedy(Element.WOOD, RemedyType.AMULET, "Green Dragon (东方青龙)",
+                         "Place a dragon figurine in the EAST of the home — protects family and growth."),
+    Element.FIRE: Remedy(Element.FIRE, RemedyType.AMULET, "Red Phoenix (南方朱雀)",
+                         "Hang red artwork or a phoenix image in the SOUTH — activates recognition and fame."),
+    Element.EARTH: Remedy(Element.EARTH, RemedyType.AMULET, "Pi Xiu (貔貅)",
+                         "Place a Pi Xiu pair at the ENTRANCE — draws wealth, wards off misfortune."),
+    Element.METAL: Remedy(Element.METAL, RemedyType.AMULET, "White Tiger (西方白虎)",
+                         "Place a metal/white-toned object in the WEST — sharpens focus and discipline."),
+    Element.WATER: Remedy(Element.WATER, RemedyType.AMULET, "Black Tortoise (北方玄武)",
+                          "Place a tortoise figurine in the NORTH — anchors career and wisdom."),
+}
+
+# Merge amulets into the main catalog so remedies_for() returns them too.
+for _el, _amulet in _AMULETS.items():
+    _CATALOG[_el] = (*_CATALOG[_el], _amulet)
+
+
 
 def remedies_for(element: Element) -> tuple[Remedy, ...]:
     """Return the catalog remedies for an element (REMED-2)."""

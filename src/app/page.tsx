@@ -58,14 +58,14 @@ const SCREENS: Record<ScreenKey, React.ComponentType<ScreenProps>> = {
 const NOTIFICATIONS: AstroNotification[] = [
   { id: "n1", kind: "trial", title: "3 days left of Pro", body: "Your reverse trial auto-downgrades Sunday. No charge — keep it or cancel.", time: "now", action: { label: "Manage", screen: "upgrade" } },
   { id: "n2", kind: "transit", title: "Moon enters Scorpio", body: "Your Sun sign is lit. A 4-hour window for honest conversations opens at 14:20.", time: "2h", action: { label: "Today's reading", screen: "today" } },
-  { id: "n3", kind: "city", title: "New match: Porto", body: "Venus IC line · 41 km from Lisbon. A softer, cheaper twin for partnership.", time: "5h", action: { label: "See on map", screen: "world" } },
+  { id: "n3", kind: "city", title: "New match: Porto", body: "Venus IC line · 41 km from Lisbon. A softer, cheaper twin for partnership.", time: "5h", action: { label: "See on map", screen: "astro-travel" } },
   { id: "n4", kind: "streak", title: "5-day ritual streak", body: "Two more days and your WARD hits gold. Tomorrow's preview unlocks at 18:33.", time: "1d", action: { label: "Keep going", screen: "today" }, read: true },
   { id: "n5", kind: "divine", title: "I-Ching ready", body: "You haven't cast this week. A question about the conversation you're circling?", time: "1d", action: { label: "Cast", screen: "divine" }, read: true },
 ];
 
 // Mobile bottom-nav primary set + secondary sheet ordering (reveal + connect promoted)
-const MOBILE_PRIMARY: ScreenKey[] = ["today", "world", "mentor"];
-const MOBILE_SECONDARY: ScreenKey[] = ["welcome", "birth", "reveal", "connect", "themes", "self", "local", "divine", "members", "upgrade", "business", "profile", "overview", "auth"];
+const MOBILE_PRIMARY: ScreenKey[] = ["today", "astro-travel", "mentor"];
+const MOBILE_SECONDARY: ScreenKey[] = ["welcome", "birth", "reveal", "connect", "themes", "self", "divine", "members", "upgrade", "business", "profile", "overview", "auth"];
 
 function Shell() {
   const { locale, setLocale, t } = useI18n();

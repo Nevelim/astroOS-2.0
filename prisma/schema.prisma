@@ -27,6 +27,9 @@ model Member {
   birthLng        Float
   birthTzOffset   Float    // hours
   birthPlaceName  String
+  birthDataHash   String?  // sha256:... — canonical cache key for Astro+BaZi engines
+  trueSolarTime   String?  // "14:47:33" — resolved TST from birth-time service
+  ianaZone        String?  // "Asia/Almaty" — resolved IANA timezone
   gender          Int      // 0=female, 1=male
   // BaZi snapshot (cache)
   baziStem        String?  // Day Master stem

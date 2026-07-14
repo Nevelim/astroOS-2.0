@@ -156,6 +156,22 @@ export class PrismaMemberRepository implements MemberRepository {
     return toDomain(updated as unknown as PrismaMember, null);
   }
 
+  /** Persist the canonical birth_data_hash + resolved TST/zone onto the member. */
+  async saveBirthResolution(id: string, res: {
+    birthDataHash: string;
+    trueSolarTime: string;
+    ianaZone: string;
+  }): Promise<void> {
+    await db.member.update({
+      where: { id },
+      data: {
+        birthDataHash: res.birthDataHash,
+        trueSolarTime: res.trueSolarTime,
+        ianaZone: res.ianaZone,
+      },
+    });
+  }
+
   async updateBaZi(id: string, bazi: BaZi): Promise<Member> {
     const updated = await db.member.update({
       where: { id },

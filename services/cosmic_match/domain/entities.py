@@ -31,6 +31,13 @@ class NatalSummary:
     venus_sign: str
     mars_sign: str
     ascendant_sign: Optional[str] = None
+    # Optional planet longitudes — when present, enable true synastry (cross-chart
+    # aspect) scoring instead of the element-level heuristic. These are ecliptic
+    # degrees, NOT signs; the BFF computes them from the astro engine and passes
+    # only the matching-eligible subset. Still privacy-safe: longitudes alone
+    # cannot reverse-engineer birth data.
+    planet_longitudes: Optional[dict] = None     # {"sun": 25.5, "venus": 28.2, ...}
+    node_axis: Optional[tuple] = None            # (north_deg, south_deg)
 
 
 @dataclass(frozen=True)
@@ -171,13 +178,39 @@ def compute_compatibility(
     a: MemberProfile, b: MemberProfile,
     intent: MatchIntent = MatchIntent.ROMANTIC,
 ) -> CompatibilityResult:
-    """Full 3-layer compatibility (layers 1+2 implemented; 3 is V2)."""
+    """Full multi-layer compatibility.
+
+    Layers (additive, each refines the scores):
+      - western: element-level sign harmony (always available from signs)
+      - synastry: TRUE cross-chart aspects when planet longitudes are present
+        (soulmate indicators, nodal contacts — the deepest signal)
+      - bazi: Day Master element cycle
+    """
     layers = []
     love = comm = values = lifestyle = growth = 50  # defaults
+    synastry_summary = None
 
     if a.natal and b.natal:
         love, comm, values, lifestyle = western_synastry_score(a.natal, b.natal)
         layers.append("western")
+
+        # Upgrade to true synastry when longitudes are available.
+        if (a.natal.planet_longitudes and b.natal.planet_longitudes):
+            from services.astro_engine.domain.synastry import compute_synastry
+            nodes_a = a.natal.node_axis
+            nodes_b = b.natal.node_axis
+            result = compute_synastry(
+                a.natal.planet_longitudes, b.natal.planet_longitudes,
+                nodes_a, nodes_b)
+            # Blend: synastry carries the deeper signal, so weight it heavily
+            # (60% synastry / 40% element-level) for the composite spheres.
+            syn_score = result.composite_score
+            love = round(love * 0.4 + syn_score * 0.6)
+            comm = round(comm * 0.4 + syn_score * 0.6)
+            values = round(values * 0.4 + syn_score * 0.6)
+            lifestyle = round(lifestyle * 0.4 + syn_score * 0.6)
+            layers.append("synastry")
+            synastry_summary = result.summary
 
     if a.bazi and b.bazi:
         bazi_score = bazi_compatibility_score(a.bazi, b.bazi)
@@ -195,6 +228,8 @@ def compute_compatibility(
         explanation_parts.append(
             f"Sun signs {a.natal.sun_sign.title()}/{b.natal.sun_sign.title()}"
         )
+    if "synastry" in layers and synastry_summary:
+        explanation_parts.append(synastry_summary)
     if "bazi" in layers:
         explanation_parts.append(
             f"Day Masters {a.bazi.day_master_stem}/{b.bazi.day_master_stem}"

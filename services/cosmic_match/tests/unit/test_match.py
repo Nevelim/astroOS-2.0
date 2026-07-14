@@ -84,6 +84,57 @@ class TestComputeCompatibility:
         assert result.scores.composite == 50  # default neutral
 
 
+class TestSynastryEnriched:
+    """When planet longitudes are present, true synastry upgrades the scores."""
+
+    def _profile_with_longitudes(self, pid, longitudes, nodes=None):
+        return MemberProfile(
+            profile_id=pid, display_name=pid,
+            natal=NatalSummary(
+                sun_sign="aries", moon_sign="leo",
+                venus_sign="taurus", mars_sign="gemini",
+                planet_longitudes=longitudes, node_axis=nodes),
+            bazi=BaZiSummary(day_master_stem="jia", day_master_element="wood",
+                             year_branch="zi", month_branch="chen", day_branch="zi"),
+        )
+
+    def test_synastry_layer_added_when_longitudes_present(self):
+        a = self._profile_with_longitudes("a", {"sun": 0.0, "venus": 30.0})
+        b = self._profile_with_longitudes("b", {"moon": 0.0, "mars": 30.0})
+        result = compute_compatibility(a, b)
+        assert "synastry" in result.layers_used
+
+    def test_synastry_absent_without_longitudes(self):
+        a = _profile("a")  # no longitudes
+        b = _profile("b")
+        result = compute_compatibility(a, b)
+        assert "synastry" not in result.layers_used
+
+    def test_synastry_with_nodal_contacts_boosts_score(self):
+        """A nodal contact (soulmate indicator) should produce a high score."""
+        a = self._profile_with_longitudes(
+            "a", {"sun": 0.0, "venus": 0.0}, nodes=(0.0, 180.0))
+        b = self._profile_with_longitudes(
+            "b", {"moon": 0.0, "mars": 0.0}, nodes=(0.0, 180.0))
+        result = compute_compatibility(a, b)
+        assert result.scores.love >= 70  # synastry + nodal boost
+
+    def test_synastry_explanation_includes_summary(self):
+        a = self._profile_with_longitudes("a", {"sun": 0.0})
+        b = self._profile_with_longitudes("b", {"moon": 0.0})
+        result = compute_compatibility(a, b)
+        assert "Composite" in result.explanation or "synastry" in result.explanation.lower() \
+            or "compatibility" in result.explanation.lower()
+
+    def test_synastry_privacy_no_birth_data(self):
+        a = self._profile_with_longitudes("a", {"sun": 25.5}, nodes=(332.0, 152.0))
+        b = self._profile_with_longitudes("b", {"moon": 143.9})
+        result = compute_compatibility(a, b)
+        text = str(result.__dict__) + result.explanation
+        for forbidden in ("birth", "date", "hash", "lat", "lng", "1989"):
+            assert forbidden.lower() not in text.lower()
+
+
 class TestPrivacyInvariant:
     """CRITICAL: birth data must never appear in compatibility output."""
 

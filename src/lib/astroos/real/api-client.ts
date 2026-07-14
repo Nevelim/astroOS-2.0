@@ -123,6 +123,65 @@ export interface IChingHexagramDTO {
   image: { en: string; ru: string };
 }
 
+// ----------------------------------------------------------------------- //
+// Family Astrocartography & Synergy — multi-member city ranking
+// ----------------------------------------------------------------------- //
+export type FamilySphere = "career" | "love" | "travel" | "family" | "health" | "finance";
+
+export interface FamilyResonanceDTO {
+  planet: string;
+  members: string[];
+  count: number;
+  score: number;
+}
+
+export interface FamilyCrossAspectDTO {
+  m1: string; m2: string; p1: string; p2: string;
+  aspect: string; actualAngle: number; deviation: number;
+  type: "harmonious" | "challenging"; score: number;
+}
+
+export interface FamilySphereLeaderDTO {
+  sphere: FamilySphere; leader: string; score: number;
+}
+
+export interface FamilyCityReportDTO {
+  city: { name: string; country: string; lat: number; lng: number; region: string };
+  familyAvg: Record<FamilySphere, number>;
+  familyMin: Record<FamilySphere, number>;
+  allMembersAllPositive: boolean;
+  avgAllPositive: boolean;
+  abundanceIndex: number;
+  minScore: number;
+  avgScore: number;
+  harmonicMean: number;
+  balanceRatio: number;
+  resonances: FamilyResonanceDTO[];
+  resonanceScore: number;
+  crossAspects: FamilyCrossAspectDTO[];
+  crossAspectScore: number;
+  sphereLeaders: FamilySphereLeaderDTO[];
+  complementarityScore: number;
+  memberAvg: Record<string, number>;
+  harmonyRatio: number;
+  harmonyScore: number;
+  totalSynergy: number;
+  perMemberScores: Record<string, Record<FamilySphere, number>>;
+  perMemberDirectHits: Record<string, number>;
+  perMemberHasSynergy: Record<string, boolean>;
+}
+
+export interface FamilyAbundanceResultDTO {
+  members: { key: string; name: string }[];
+  generatedAt: string;
+  totalCities: number;
+  abundantCitiesCount: number;
+  strictCitiesCount: number;
+  topCitiesBySynergy: FamilyCityReportDTO[];
+  topCitiesByAbundance: FamilyCityReportDTO[];
+  bestBySynergyType: Record<string, FamilyCityReportDTO>;
+}
+
 async function request<T>(url: string, options?: RequestInit): Promise<T> {
   const r = await fetch(url, {
     ...options,
@@ -223,4 +282,17 @@ export const api = {
     cache: { chart: { size: number; hits: number; misses: number; hitRate: number }; bazi: { size: number; hits: number; misses: number; hitRate: number } };
     sessions: number;
   }>("/api/health"),
+
+  // Family Astrocartography & Synergy
+  familyAbundance: (data: {
+    members: Array<{
+      key: string; name?: string;
+      birthUtc?: string; lat?: number; lng?: number;
+    }>;
+    cities?: Array<{ name: string; country?: string; lat: number; lng: number; region?: string }>;
+    limit?: number;
+    region?: string;
+  }) => request<FamilyAbundanceResultDTO>("/api/family-astro", {
+    method: "POST", body: JSON.stringify(data),
+  }),
 };

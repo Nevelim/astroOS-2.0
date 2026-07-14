@@ -65,6 +65,113 @@ def default_dependencies() -> Dependencies:
     )
 
 
+def _normalize_planets(planets) -> dict[str, float]:
+    """Coerce planet longitudes to {planet: float_degrees}, accepting both the
+    flat form {\"Sun\": 25.4} and the nested reference form {\"Sun\": {\"eclip\": 25.4}}.
+    """
+    out: dict[str, float] = {}
+    for planet, val in planets.items():
+        if isinstance(val, dict):
+            out[planet] = float(val.get("eclip", 0.0))
+        else:
+            out[planet] = float(val)
+    return out
+
+
+def _family_member_longitudes(utc: datetime, lat: float, lng: float) -> dict[str, float]:
+    """Compute the 11 ecliptic longitudes for a family member (mode B).
+
+    Ten planets via SkyfieldEphemeris; NorthNode via the mean-node formula.
+    Capitalised names match the abundance engine's PLANETS table.
+    """
+    from services.astro_engine.domain.abundance import PLANETS as ABUNDANCE_PLANETS
+    from services.astro_engine.domain.lunar_nodes import mean_lunar_node
+    out: dict[str, float] = {}
+    # Reuse the ephemeris bound to the app's builder (single DE421 load).
+    positions = SkyfieldEphemeris().positions(utc, lat, lng)
+    name_map = {"sun": "Sun", "moon": "Moon", "mercury": "Mercury",
+                "venus": "Venus", "mars": "Mars", "jupiter": "Jupiter",
+                "saturn": "Saturn", "uranus": "Uranus", "neptune": "Neptune",
+                "pluto": "Pluto"}
+    for pos in positions:
+        cap = name_map.get(pos.planet.value)
+        if cap:
+            out[cap] = pos.ecliptic_longitude_deg
+    node = mean_lunar_node(utc)
+    out["NorthNode"] = node.north_longitude_deg
+    # Ensure all 11 keys exist (defensive).
+    for p in ABUNDANCE_PLANETS:
+        out.setdefault(p, 0.0)
+    return out
+
+
+def _family_report_to_dto(report) -> dict:
+    """Serialize a FamilyReport to the JSON shape consumed by the BFF/UI."""
+    from datetime import datetime, timezone
+
+    def city_dto(r) -> dict:
+        return {
+            "city": {
+                "name": r.city.name, "country": r.city.country,
+                "lat": r.city.lat, "lng": r.city.lng, "region": r.city.region,
+            },
+            "familyAvg": {s: round(r.family_avg[s], 6) for s in r.family_avg},
+            "familyMin": {s: round(r.family_min[s], 6) for s in r.family_min},
+            "allMembersAllPositive": r.all_members_all_positive,
+            "avgAllPositive": r.avg_all_positive,
+            "abundanceIndex": round(r.abundance_index, 6),
+            "minScore": round(r.min_score, 6),
+            "avgScore": round(r.avg_score, 6),
+            "harmonicMean": round(r.harmonic_mean, 6),
+            "balanceRatio": round(r.balance_ratio, 6),
+            "resonances": [
+                {"planet": x.planet, "members": list(x.members),
+                 "count": x.count, "score": round(x.score, 6)}
+                for x in r.resonances
+            ],
+            "resonanceScore": round(r.resonance_score, 6),
+            "crossAspects": [
+                {"m1": x.m1, "m2": x.m2, "p1": x.p1, "p2": x.p2,
+                 "aspect": x.aspect, "actualAngle": round(x.actual_angle, 6),
+                 "deviation": round(x.deviation, 6), "type": x.type,
+                 "score": round(x.score, 6)}
+                for x in r.cross_aspects
+            ],
+            "crossAspectScore": round(r.cross_aspect_score, 6),
+            "sphereLeaders": [
+                {"sphere": x.sphere, "leader": x.leader, "score": round(x.score, 6)}
+                for x in r.sphere_leaders
+            ],
+            "complementarityScore": round(r.complementarity_score, 6),
+            "memberAvg": {k: round(v, 6) for k, v in r.member_avg.items()},
+            "harmonyRatio": round(r.harmony_ratio, 6),
+            "harmonyScore": round(r.harmony_score, 6),
+            "totalSynergy": round(r.total_synergy, 6),
+            "perMemberScores": {
+                k: {s: round(v, 6) for s, v in scores.items()}
+                for k, scores in r.per_member_scores.items()
+            },
+            "perMemberDirectHits": dict(r.per_member_direct_hits),
+            "perMemberHasSynergy": dict(r.per_member_has_synergy),
+        }
+
+    members_dto = [
+        {"key": m.key, "name": m.name} for m in report.members
+    ]
+    return {
+        "members": members_dto,
+        "generatedAt": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "totalCities": report.total_cities,
+        "abundantCitiesCount": report.abundant_cities_count,
+        "strictCitiesCount": report.strict_cities_count,
+        "topCitiesBySynergy": [city_dto(r) for r in report.top_cities_by_synergy],
+        "topCitiesByAbundance": [city_dto(r) for r in report.top_cities_by_abundance],
+        "bestBySynergyType": {
+            k: city_dto(v) for k, v in report.best_by_synergy_type.items()
+        },
+    }
+
+
 def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
     from services.common.observability import setup_telemetry, instrument_app
     setup_telemetry("astroos-astro-engine")
@@ -477,6 +584,86 @@ def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
             "progressed_date": p_date_str,
             "upcoming_sign_changes": upcoming,
         })
+
+    # ---- family astrocartography & synergy: multi-member city ranking ------ #
+    @app.post("/v1/family-abundance", tags=["astro"])
+    def family_abundance(payload: dict, request: Request) -> JSONResponse:
+        """Rank cities for a family by combined astrocartographic abundance.
+
+        Body: {
+          "members": [
+            { "key": "igor", "name": "Игорь",
+              "planets": {"Sun": 25.4, ...},          # mode A: precomputed
+              "gst_deg": 348.53 },                     # GMST at birth (deg)
+            # OR mode B (auto-compute planets + GMST):
+            { "key": "yulia", "name": "Юлия",
+              "birth_utc": "1989-08-23T13:50:00Z",
+              "lat": 50.7889, "lng": 75.6956 }
+          ],
+          "cities": [ {"name": "...", "lat": 60.25, "lng": 74.8167,
+                       "country": "...", "region": "..."} ],
+          "limit": 50    # optional, top-N to return (default 50)
+        }
+
+        Mode A is preferred when the caller already has planet longitudes
+        (e.g. from a natal chart). Mode B recomputes all 11 longitudes via the
+        skyfield ephemeris + mean lunar node, and GMST via Meeus.
+        """
+        from services.astro_engine.domain.abundance import (
+            MemberInput, CityInput, PLANETS, compute_family_report)
+        members_in = payload.get("members")
+        cities_in = payload.get("cities")
+        if not members_in or not cities_in:
+            return problem(422, "astro/family-abundance-invalid",
+                           "Missing data",
+                           "Both 'members' (≥1) and 'cities' (≥1) are required.",
+                           request.url.path)
+        limit = int(payload.get("limit", 50))
+
+        # Resolve each member to {planets, gst_deg}.
+        members: list[MemberInput] = []
+        for m in members_in:
+            key = m.get("key") or m.get("name", "member")
+            name = m.get("name", key)
+            planets = m.get("planets")
+            gst = m.get("gst_deg")
+            if planets is None or gst is None:
+                # Mode B: compute from birth data.
+                utc_str = m.get("birth_utc")
+                lat = m.get("lat")
+                lng = m.get("lng")
+                if not utc_str or lat is None or lng is None:
+                    return problem(422, "astro/family-abundance-invalid",
+                                   "Incomplete member",
+                                   f"Member '{key}' needs either 'planets'+'gst_deg' "
+                                   f"or 'birth_utc'+'lat'+'lng'.",
+                                   request.url.path)
+                try:
+                    utc = datetime.fromisoformat(utc_str.replace("Z", "+00:00"))
+                except ValueError:
+                    return problem(422, "astro/family-abundance-invalid",
+                                   "Invalid birth_utc",
+                                   f"Member '{key}' birth_utc must be ISO-8601.",
+                                   request.url.path)
+                from services.astro_engine.domain.chart import (
+                    greenwich_sidereal_time_deg)
+                gst = greenwich_sidereal_time_deg(utc)
+                planets = _family_member_longitudes(utc, float(lat), float(lng))
+            planets = _normalize_planets(planets)
+            members.append(MemberInput(key=key, name=name,
+                                        planets=planets, gst_deg=float(gst)))
+
+        cities = tuple(
+            CityInput(
+                name=c.get("name", "?"),
+                country=c.get("country", ""),
+                lat=float(c.get("lat", 0.0)),
+                lng=float(c.get("lng", 0.0)),
+                region=c.get("region", ""),
+            ) for c in cities_in
+        )
+        report = compute_family_report(tuple(members), cities, top_limit=limit)
+        return JSONResponse(status_code=200, content=_family_report_to_dto(report))
 
     # ---- local space: planetary azimuth/altitude from a birthplace ------- #
     @app.post("/v1/local-space", tags=["astro"])

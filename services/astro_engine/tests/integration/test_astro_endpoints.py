@@ -131,3 +131,72 @@ class TestRetrogradeStatusEndpoint:
         for entry in body["retrograde"] + body["direct"]:
             assert "planet" in entry and "longitude_deg" in entry
             assert "retrograde" in entry
+
+
+class TestFamilyAbundanceEndpoint:
+    """Family astrocartography ranking endpoint (mode A: precomputed planets)."""
+
+    # Canonical family longitudes (family-synergy.json).
+    _IGOR = {"Sun": 25.3979365654, "Moon": 143.7677061800, "Mercury": 37.1230246217,
+             "Venus": 28.0811107907, "Mars": 81.4861726624, "Jupiter": 66.2583365169,
+             "Saturn": 283.8807168145, "Uranus": 275.3168427146, "Neptune": 282.3830719813,
+             "Pluto": 224.3205126794, "NorthNode": 153.4609428820}
+
+    def _two_members(self):
+        # Minimal two-member family (precomputed planets + GMST).
+        return [
+            {"key": "igor", "name": "Игорь", "planets": self._IGOR, "gst_deg": 348.5267},
+            {"key": "yulia", "name": "Юлия",
+             "planets": {"Sun": 150.4, "Jupiter": 94.47}, "gst_deg": 179.3319},
+        ]
+
+    def test_returns_ranked_cities(self, client):
+        r = client.post("/v1/family-abundance", json={
+            "members": self._two_members(),
+            "cities": [
+                {"name": "Лангепас", "lat": 60.25, "lng": 74.8167},
+                {"name": "Павлодар", "lat": 52.2833, "lng": 76.9667},
+            ],
+        })
+        assert r.status_code == 200
+        body = r.json()
+        assert body["totalCities"] == 2
+        assert len(body["topCitiesBySynergy"]) == 2
+        top = body["topCitiesBySynergy"][0]
+        # Required keys present.
+        for k in ("city", "familyAvg", "totalSynergy", "resonanceScore",
+                  "crossAspectScore", "complementarityScore", "harmonyScore"):
+            assert k in top
+        assert isinstance(top["totalSynergy"], (int, float))
+
+    def test_missing_members_422(self, client):
+        r = client.post("/v1/family-abundance", json={"cities": []})
+        assert r.status_code == 422
+
+    def test_member_needs_planets_or_birth_data_422(self, client):
+        r = client.post("/v1/family-abundance", json={
+            "members": [{"key": "x", "name": "X"}],   # neither mode
+            "cities": [{"name": "C", "lat": 0, "lng": 0}],
+        })
+        assert r.status_code == 422
+
+    def test_limit_truncates_top_cities(self, client):
+        cities = [{"name": f"C{i}", "lat": float(i), "lng": float(i)} for i in range(5)]
+        r = client.post("/v1/family-abundance", json={
+            "members": self._two_members(), "cities": cities, "limit": 2,
+        })
+        assert r.status_code == 200
+        assert len(r.json()["topCitiesBySynergy"]) <= 2
+
+    def test_best_by_synergy_type_populated(self, client):
+        r = client.post("/v1/family-abundance", json={
+            "members": self._two_members(),
+            "cities": [
+                {"name": "A", "lat": 60.25, "lng": 74.8167},
+                {"name": "B", "lat": 52.2833, "lng": 76.9667},
+            ],
+        })
+        bbst = r.json()["bestBySynergyType"]
+        for t in ("resonance", "crossAspect", "complementarity", "harmony"):
+            assert t in bbst and "city" in bbst[t]
+

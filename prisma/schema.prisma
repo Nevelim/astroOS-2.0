@@ -131,11 +131,13 @@ model City {
   climate       String?
   iso2          String?
   aliases       String?
+  region        String?  // cultural region (e.g. "💃 Латино") — family astrocartography
   createdAt     DateTime @default(now())
 
   @@index([name])
   @@index([country])
   @@index([lat, lng])
+  @@index([region])
 }
 
 model CustomCity {

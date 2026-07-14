@@ -7,7 +7,7 @@ import type { Locale } from "./i18n";
 export type ScreenKey =
   | "overview" | "reveal" | "today" | "self" | "world" | "local"
   | "mentor" | "divine" | "connect" | "members" | "upgrade" | "business"
-  | "profile" | "auth" | "welcome" | "birth" | "themes";
+  | "profile" | "auth" | "welcome" | "birth" | "themes" | "family";
 
 export const USER = {
   name: "Aeliana",
@@ -581,6 +581,7 @@ export const NAV_ITEMS: { key: ScreenKey; label: string; icon: string; group: "j
   { key: "self", label: "nav.self", icon: "✦", group: "journey" },
   { key: "world", label: "nav.world", icon: "⊕", group: "journey" },
   { key: "local", label: "nav.local", icon: "⌖", group: "journey" },
+  { key: "family", label: "nav.familyAstro", icon: "⌂", group: "journey" },
   { key: "mentor", label: "nav.mentor", icon: "✦", group: "journey" },
   { key: "divine", label: "nav.divine", icon: "☯", group: "journey" },
   { key: "connect", label: "nav.connect", icon: "♡", group: "journey" },

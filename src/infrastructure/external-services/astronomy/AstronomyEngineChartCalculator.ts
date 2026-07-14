@@ -41,7 +41,7 @@ export class AstronomyEngineChartCalculator implements ChartCalculator {
     const Astro = await loadEngine();
     const date = birth.toUtcDate();
 
-    const observer = new Astro.Observer(birth.coord.lat, birth.coord.lng, 0);
+    const observer = new (Astro as any).Observer(birth.coord.lat, birth.coord.lng, 0);
 
     // Позиции планет (геоцентрические эклиптические координаты)
     // Uses the shared ecliptic.ts helper which computes GEOCENTRIC apparent
@@ -87,7 +87,7 @@ export class AstronomyEngineChartCalculator implements ChartCalculator {
   async calculateGreatCircle(birth: BirthData, planet: PlanetKey, type: LineType): Promise<AstroLine> {
     const Astro = await loadEngine();
     const date = birth.toUtcDate();
-    const ascendantLonDeg = this.computeAscendant(Astro, new Astro.Observer(birth.coord.lat, birth.coord.lng, 0), date);
+    const ascendantLonDeg = this.computeAscendant(Astro, new (Astro as any).Observer(birth.coord.lat, birth.coord.lng, 0), date);
     const midheavenLonDeg = this.computeMidheaven(Astro, date);
     return this.buildGreatCircleLine(birth, planet, type, ascendantLonDeg, midheavenLonDeg);
   }
@@ -248,7 +248,7 @@ export class AstronomyEngineChartCalculator implements ChartCalculator {
   private computeMidheaven(Astro: AstronomyEngine, date: Date): number {
     try {
       // MC = GMST в долготе (упрощённо)
-      const gmst = Astro.SiderealTime(date);
+      const gmst = (Astro as any).SiderealTime(date) as number;
       return ((gmst * 15) % 360 + 360) % 360;
     } catch {
       return 0;

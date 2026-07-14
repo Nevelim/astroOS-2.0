@@ -123,7 +123,7 @@ export function RealCosmicInsightsPanel({ locale }: { locale: "ru" | "en" | "hi"
 
     // Insight 2: Western-BaZi Day Master cross-reference
     const dayMasterEl = bazi.dayMasterElement;
-    const westernEl = sunEl;
+    const westernEl: string = sunEl;
     const crossTone = dayMasterEl === westernEl
       ? "gold"
       : (dayMasterEl === "Wood" && westernEl === "Fire") || (dayMasterEl === "Fire" && westernEl === "Earth") ||

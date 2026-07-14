@@ -189,8 +189,8 @@ export async function POST(req: NextRequest) {
       calculateChartUseCase.execute(birthB),
     ]);
 
-    const planetsA = chartA.planetPositions;
-    const planetsB = chartB.planetPositions;
+    const planetsA = chartA.planetPositions.map(p => ({ planet: p.planet, eclipticLonDeg: p.eclipticLonDeg }));
+    const planetsB = chartB.planetPositions.map(p => ({ planet: p.planet, eclipticLonDeg: p.eclipticLonDeg }));
 
     const crossAspects = computeCrossAspects(planetsA, planetsB);
     const compat = computeCompatibilityScore(crossAspects, planetsA, planetsB);

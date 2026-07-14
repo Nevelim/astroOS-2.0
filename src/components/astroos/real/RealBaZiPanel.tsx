@@ -36,6 +36,12 @@ const ELEMENT_ICONS: Record<string, string> = {
   Water: "水",
 };
 
+const STEM_TO_ELEMENT: Record<string, string> = {
+  "甲": "Wood", "乙": "Wood", "丙": "Fire", "丁": "Fire",
+  "戊": "Earth", "己": "Earth", "庚": "Metal", "辛": "Metal",
+  "壬": "Water", "癸": "Water",
+};
+
 const BRANCH_ANIMALS: Record<string, string> = {
   子: "Rat", 丑: "Ox", 寅: "Tiger", 卯: "Rabbit",
   辰: "Dragon", 巳: "Snake", 午: "Horse", 未: "Goat",
@@ -122,7 +128,7 @@ export function RealBaZiPanel({ locale }: { locale: "ru" | "en" | "hi" }) {
             <span className="text-xl text-[#5BB89C]" style={{ fontFamily: "serif" }}>壬</span>
           </motion.div>
           <p className="mt-3 text-sm font-serif italic text-[#F5F0E8]">
-            {L("Calculating your BaZi pillars...", "Вычисляю столпы BaZi...", "आपके BaZi स्तंभ गणना...")}
+            {L("Calculating your BaZi pillars...", "Вычисляю столпы BaZi...", "आपके BaZi स्तंभ गणना...", locale)}
           </p>
         </div>
       </GlassCard>
@@ -133,7 +139,7 @@ export function RealBaZiPanel({ locale }: { locale: "ru" | "en" | "hi" }) {
     return (
       <GlassCard variant="rose" className="p-5">
         <p className="text-sm text-[#D98E7A]">
-          {L("Failed to calculate BaZi", "Не удалось рассчитать BaZi", "BaZi की गणना विफल")}
+          {L("Failed to calculate BaZi", "Не удалось рассчитать BaZi", "BaZi की गणना विफल", locale)}
         </p>
         <p className="mt-1 text-[11px] text-[#6B6B78]">{error}</p>
       </GlassCard>
@@ -164,7 +170,7 @@ export function RealBaZiPanel({ locale }: { locale: "ru" | "en" | "hi" }) {
           <div className="flex items-center gap-2 mb-4">
             <Sparkles className="w-4 h-4" style={{ color: "#5BB89C" }} />
             <h3 className="font-serif text-lg text-[#F5F0E8]">
-              {L("BaZi · Four Pillars", "BaZi · Четыре столпа", "BaZi · चार स्तंभ")}
+              {L("BaZi · Four Pillars", "BaZi · Четыре столпа", "BaZi · चार स्तंभ", locale)}
             </h3>
             <span className="text-[10px] px-1.5 py-0.5 rounded ml-auto" style={{ background: "#5BB89C20", color: "#5BB89C" }}>
               {source === "python" ? "Python engine" : source === "ts-fallback" ? "TS engine" : source}
@@ -179,7 +185,7 @@ export function RealBaZiPanel({ locale }: { locale: "ru" | "en" | "hi" }) {
             className="rounded-xl border border-[#5E8FA8]/30 bg-gradient-to-br from-[#5E8FA8]/10 to-[#5E8FA8]/5 p-4 text-center mb-4"
           >
             <div className="text-[10px] uppercase tracking-wider text-[#9A9AA8]">
-              {L("Day Master (日主)", "Day Master (日主)", "Day Master (日主)")}
+              {L("Day Master (日主)", "Day Master (日主)", "Day Master (日主)", locale)}
             </div>
             <motion.div
               initial={{ scale: 0 }}
@@ -254,7 +260,7 @@ export function RealBaZiPanel({ locale }: { locale: "ru" | "en" | "hi" }) {
           {recommendations && (
             <div className="mb-4">
               <div className="text-[10px] uppercase tracking-wider text-[#9A9AA8] mb-2">
-                {L("Five Elements Balance", "Баланс пяти стихий", "पंच तत्व संतुलन")}
+                {L("Five Elements Balance", "Баланс пяти стихий", "पंच तत्व संतुलन", locale)}
               </div>
               <div className="grid grid-cols-5 gap-2">
                 {(["Wood", "Fire", "Earth", "Metal", "Water"] as const).map((el) => {
@@ -289,7 +295,7 @@ export function RealBaZiPanel({ locale }: { locale: "ru" | "en" | "hi" }) {
                         />
                       </div>
                       {isFavorable && (
-                        <div className="mt-1 text-[8px] text-[#5BB89C]">★ {L("Fav", "Благ", "अनुकूल")}</div>
+                        <div className="mt-1 text-[8px] text-[#5BB89C]">★ {L("Fav", "Благ", "अनुकूल", locale)}</div>
                       )}
                     </div>
                   );
@@ -297,10 +303,10 @@ export function RealBaZiPanel({ locale }: { locale: "ru" | "en" | "hi" }) {
               </div>
               <div className="mt-2 flex flex-wrap gap-2 text-[10px]">
                 <span className="text-[#E8B86D]">
-                  {L("Dominant:", "Доминанта:", "प्रधान:")} {recommendations.dominant} ({ELEMENT_ICONS[recommendations.dominant]})
+                  {L("Dominant:", "Доминанта:", "प्रधान:", locale)} {recommendations.dominant} ({ELEMENT_ICONS[recommendations.dominant]})
                 </span>
                 <span className="text-[#D98E7A]">
-                  {L("Deficient:", "Дефицит:", "कमी:")} {recommendations.deficient} ({ELEMENT_ICONS[recommendations.deficient]})
+                  {L("Deficient:", "Дефицит:", "कमी:", locale)} {recommendations.deficient} ({ELEMENT_ICONS[recommendations.deficient]})
                 </span>
               </div>
             </div>
@@ -309,12 +315,12 @@ export function RealBaZiPanel({ locale }: { locale: "ru" | "en" | "hi" }) {
           {/* Luck Pillars timeline */}
           <div className="mb-4">
             <div className="text-[10px] uppercase tracking-wider text-[#9A9AA8] mb-2">
-              {L("Luck Pillars (大运)", "Столпы Удачи (大运)", "Luck Pillars (大运)")}
+              {L("Luck Pillars (大运)", "Столпы Удачи (大运)", "Luck Pillars (大运)", locale)}
             </div>
             <div className="flex gap-1 overflow-x-auto scrollbar-astro pb-2">
               {bazi.luckPillars.map((lp, i) => {
                 const isCurrent = currentLuck?.startAge === lp.startAge;
-                const stemColor = ELEMENT_COLORS[lp.stemElement] ?? "#E8B86D";
+                const stemColor = ELEMENT_COLORS[STEM_TO_ELEMENT[lp.stem] ?? "Earth"] ?? "#E8B86D";
                 return (
                   <motion.div
                     key={i}
@@ -330,7 +336,7 @@ export function RealBaZiPanel({ locale }: { locale: "ru" | "en" | "hi" }) {
                     <div className="text-[8px] text-[#6B6B78]">{lp.startAge}-{lp.endAge}</div>
                     <div className="mt-1 font-display text-xl" style={{ color: stemColor }}>{lp.stem}</div>
                     <div className="font-display text-xl text-[#5BB89C]">{lp.branch}</div>
-                    <div className="mt-0.5 text-[7px] text-[#9A9AA8]">{lp.stemElement}</div>
+                    <div className="mt-0.5 text-[7px] text-[#9A9AA8]">{STEM_TO_ELEMENT[lp.stem] ?? "Earth"}</div>
                     {isCurrent && (
                       <motion.div
                         animate={{ opacity: [1, 0.5, 1] }}
@@ -350,7 +356,7 @@ export function RealBaZiPanel({ locale }: { locale: "ru" | "en" | "hi" }) {
           {bazi.tenGods.length > 0 && (
             <div>
               <div className="text-[10px] uppercase tracking-wider text-[#9A9AA8] mb-2">
-                {L("Ten Gods (十神)", "Десять Богов (十神)", "Ten Gods (十神)")}
+                {L("Ten Gods (十神)", "Десять Богов (十神)", "Ten Gods (十神)", locale)}
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {bazi.tenGods.map((god, i) => (
@@ -370,7 +376,7 @@ export function RealBaZiPanel({ locale }: { locale: "ru" | "en" | "hi" }) {
 
           {/* Footer with metadata */}
           <div className="mt-4 flex items-center justify-between text-[10px] text-[#6B6B78]">
-            <span>{L("Calculated in", "Вычислено за", "गणना")} {latency}ms</span>
+            <span>{L("Calculated in", "Вычислено за", "गणना", locale)} {latency}ms</span>
             <span className="font-mono">{source}</span>
           </div>
         </div>

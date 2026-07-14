@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
     }
 
     const today = new Date();
-    const weekDays = [];
+    const weekDays: Array<{ day: string; date: string; completed: boolean; isToday: boolean; reward: { en: string; ru: string; hi: string; tone: string } | null }> = [];
     let wardCount = 0;
     for (let i = 0; i < 7; i++) {
       const date = new Date(today);

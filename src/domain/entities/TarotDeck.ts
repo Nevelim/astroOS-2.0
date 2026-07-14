@@ -43,7 +43,7 @@ const MAJOR_ARCANA: Array<{ name: string; nameRu: string; keywords: string[] }> 
   { name: "The World", nameRu: "Мир", keywords: ["completion", "achievement", "fulfillment", "wholeness"] },
 ];
 
-const SUITS: Array<{ suit: "wands" | "cups" | "swords" | "penticles"; element: "Fire" | "Water" | "Air" | "Earth"; nameRu: string }> = [
+const SUITS: Array<{ suit: "wands" | "cups" | "swords" | "pentacles"; element: "Fire" | "Water" | "Air" | "Earth"; nameRu: string }> = [
   { suit: "wands", element: "Fire", nameRu: "Жезлы" },
   { suit: "cups", element: "Water", nameRu: "Кубки" },
   { suit: "swords", element: "Air", nameRu: "Мечи" },

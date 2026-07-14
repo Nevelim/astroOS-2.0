@@ -16,6 +16,7 @@ export interface MemberDTO {
   streak: number;
   wardThisWeek: number;
   isPremium: boolean;
+  age?: number | null;
   bazi: { dayMaster: string; dayMasterElement: string } | null;
   birth: {
     isoDateTime: string;

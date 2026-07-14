@@ -88,10 +88,12 @@ export function WorldMapScreen({ onNavigate }: WorldMapScreenProps) {
       {/* Top-3 Sandwich Position */}
       {top3.length > 0 && (
         <FadeIn delay={0.2}>
-          <SectionHeading>
-            <Star className="w-4 h-4 inline mr-1" style={{ color: "#E8B86D" }} />
-            {locale === "ru" ? "Топ-3 города" : locale === "hi" ? "टॉप-3 शहर" : "Top-3 cities"}
-          </SectionHeading>
+          <SectionHeading title={
+            <>
+              <Star className="w-4 h-4 inline mr-1" style={{ color: "#E8B86D" }} />
+              {locale === "ru" ? "Топ-3 города" : locale === "hi" ? "टॉप-3 शहर" : "Top-3 cities"}
+            </>
+          } />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
             {top3.map((rc) => (
               <motion.div
@@ -145,10 +147,12 @@ export function WorldMapScreen({ onNavigate }: WorldMapScreenProps) {
       {/* Demoted — Worth considering */}
       {demoted.length > 0 && (
         <FadeIn delay={0.3}>
-          <SectionHeading>
-            <AlertCircle className="w-4 h-4 inline mr-1" style={{ color: "#D98E7A" }} />
-            {locale === "ru" ? "Стоит рассмотреть" : locale === "hi" ? "विचार करने योग्य" : "Worth considering"}
-          </SectionHeading>
+          <SectionHeading title={
+            <>
+              <AlertCircle className="w-4 h-4 inline mr-1" style={{ color: "#D98E7A" }} />
+              {locale === "ru" ? "Стоит рассмотреть" : locale === "hi" ? "विचार करने योग्य" : "Worth considering"}
+            </>
+          } />
           <p className="text-xs mb-2" style={{ color: "#F5F0E860" }}>
             {locale === "ru" ? "Города с повышенным K_irr — исследуйте с осторожностью"
               : "Cities with higher irrationality factor — explore with discernment"}

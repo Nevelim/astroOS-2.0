@@ -1,3 +1,4 @@
+/// <reference types="bun-types" />
 /**
  * AstroOS BaZi Service — mini-service (порт 3004).
  * HTTP endpoint для BaZi расчётов (TS-реализация, Python-ready).
@@ -113,7 +114,15 @@ function calculateBaZi(input: {
   // Luck Pillars
   const yearStem = STEMS[yearStemIdx];
   const forward = (yearStem.yinYang === "Yang" && input.gender === 1) || (yearStem.yinYang === "Yin" && input.gender === 0);
-  const luckPillars = [];
+  const luckPillars: Array<{
+    stem: string;
+    branch: string;
+    stemElement: string;
+    stemYinYang: string;
+    startAge: number;
+    endAge: number;
+    direction: string;
+  }> = [];
   for (let i = 1; i <= 8; i++) {
     const offset = forward ? i : -i;
     luckPillars.push({

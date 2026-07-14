@@ -6,6 +6,7 @@
  */
 import { useState, useEffect, useCallback } from "react";
 import { api, type MemberDTO } from "./api-client";
+export type { MemberDTO };
 import { USER } from "../data";
 
 interface UseMemberResult {

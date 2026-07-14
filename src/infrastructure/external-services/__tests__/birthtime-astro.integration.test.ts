@@ -8,6 +8,7 @@
  *
  * Skips automatically if services are unreachable (dev-laptop-only).
  */
+// @ts-expect-error vitest is a devDependency not present in this type-check build
 import { describe, it, expect, beforeAll } from "vitest";
 import { BirthTimeServiceClient } from "../birthtime/BirthTimeServiceClient";
 import { AstroEngineServiceClient } from "../astronomy/AstroEngineServiceClient";

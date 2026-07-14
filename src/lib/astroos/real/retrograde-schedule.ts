@@ -62,7 +62,7 @@ export interface RetrogradeCycle {
   isShadowActive: boolean;
 }
 
-type AstronomyEngineSearchLike = AstronomyEngineLike & {
+export type AstronomyEngineSearchLike = AstronomyEngineLike & {
   SearchRelativeLongitude?: (
     body: string,
     targetRelLon: number,

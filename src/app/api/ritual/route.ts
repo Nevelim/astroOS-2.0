@@ -17,7 +17,7 @@ async function getMemberId(req: NextRequest): Promise<string | null> {
 const RitualSchema = z.object({
   type: z.enum(["today", "reveal", "cast-iching", "tarot", "mentor", "explore-city", "horoscope"]),
   screenKey: z.string().optional(),
-  metadata: z.record(z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
 export async function GET(req: NextRequest) {

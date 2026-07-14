@@ -7,9 +7,7 @@ export function LocalSpaceScreen() {
   const { t, locale } = useI18n();
   return (
     <FadeIn>
-      <SectionHeading>
-        {locale === "ru" ? "Локальное пространство" : "Local Space"}
-      </SectionHeading>
+      <SectionHeading title={locale === "ru" ? "Локальное пространство" : "Local Space"} />
       <GlassCard>
         <p className="text-sm opacity-70">
           {locale === "ru"

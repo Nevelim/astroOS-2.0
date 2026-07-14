@@ -451,9 +451,9 @@ export function ThemesScreen({ onNavigate }: ThemesProps = {}) {
               </p>
               <div className="mt-3 space-y-2">
                 {[
-                  { date: "Jun 28", event: L("Moon ☌ your Pluto", "Луна ☌ ваш Плутон", "चंद्रमा ☌ आपका प्लूटो"), tone: "rose" as const },
-                  { date: "Jul 02", event: L("Sun ⚹ your Moon", "Солнце ⚹ ваша Луна", "सूर्य ⚹ आपका चंद्रमा"), tone: "gold" as const },
-                  { date: "Jul 09", event: L("Venus enters your 8th", "Венера в вашем 8-м доме", "शुक्र आपके 8वें में"), tone: "rose" as const },
+                  { date: "Jun 28", event: L("Moon ☌ your Pluto", "Луна ☌ ваш Плутон", "चंद्रमा ☌ आपका प्लूटो", locale), tone: "rose" as const },
+                  { date: "Jul 02", event: L("Sun ⚹ your Moon", "Солнце ⚹ ваша Луна", "सूर्य ⚹ आपका चंद्रमा", locale), tone: "gold" as const },
+                  { date: "Jul 09", event: L("Venus enters your 8th", "Венера в вашем 8-м доме", "शुक्र आपके 8वें में", locale), tone: "rose" as const },
                 ].map((r) => (
                   <div key={r.date} className="flex items-center gap-2 text-[12px]">
                     <Pill tone={r.tone} className="shrink-0">{r.date}</Pill>

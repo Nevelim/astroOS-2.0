@@ -24,13 +24,14 @@ export function CosmicGlow({ className }: { className?: string }) {
 }
 
 /* ============ GlassCard ============ */
-type GlassVariant = "neutral" | "gold" | "jade" | "rose";
+type GlassVariant = "neutral" | "gold" | "jade" | "rose" | "water";
 
 const glassClass: Record<GlassVariant, string> = {
   neutral: "glass",
   gold: "glass-gold",
   jade: "glass-jade",
   rose: "glass-rose",
+  water: "glass-water",
 };
 
 export function GlassCard({
@@ -118,11 +119,12 @@ export function Pill({
 }
 
 /* ============ CosmicButton ============ */
-type BtnVariant = "primary" | "ghost" | "jade" | "rose" | "outline";
+type BtnVariant = "primary" | "ghost" | "jade" | "rose" | "outline" | "gold";
 
 const btnClass: Record<BtnVariant, string> = {
   primary:
     "bg-gradient-to-br from-[#E8B86D] to-[#D98E7A] text-[#0B0B0F] hover:shadow-[0_0_24px_rgba(232,184,109,0.45)] font-semibold",
+  gold: "bg-[#E8B86D] text-[#1a1a1a] hover:bg-[#d4a55a] font-semibold",
   jade: "bg-gradient-to-br from-[#5BB89C] to-[#4A9A82] text-[#0B0B0F] hover:shadow-[0_0_24px_rgba(91,184,156,0.45)] font-semibold",
   rose: "bg-gradient-to-br from-[#D98E7A] to-[#B27361] text-[#0B0B0F] hover:shadow-[0_0_24px_rgba(217,142,122,0.45)] font-semibold",
   ghost: "bg-transparent text-[#F5F0E8] hover:bg-[#1C1C26] border border-[#2A2A35]",
@@ -130,16 +132,26 @@ const btnClass: Record<BtnVariant, string> = {
     "bg-transparent text-[#E8B86D] border border-[#E8B86D]/40 hover:bg-[#E8B86D]/10",
 };
 
+type BtnSize = "sm" | "md" | "lg";
+
+const btnSizeClass: Record<BtnSize, string> = {
+  sm: "px-3 py-1.5 text-xs",
+  md: "px-5 py-2.5 text-sm",
+  lg: "px-7 py-3 text-base",
+};
+
 export function CosmicButton({
   variant = "primary",
+  size,
   className,
   children,
   ...props
-}: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: BtnVariant }) {
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: BtnVariant; size?: BtnSize }) {
   return (
     <button
       className={cn(
-        "inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none",
+        "inline-flex items-center justify-center gap-2 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:pointer-events-none",
+        size ? btnSizeClass[size] : "px-5 py-2.5 text-sm",
         btnClass[variant],
         className
       )}

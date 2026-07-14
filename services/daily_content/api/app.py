@@ -40,11 +40,13 @@ def default_dependencies() -> Dependencies:
     )
 
 
-def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
+def create_app(deps: Optional[Dependencies] = None,
+               event_bus=None) -> FastAPI:
     deps = deps or default_dependencies()
     app = FastAPI(title="AstroOS Daily Content", version="1.0.0",
                   docs_url="/docs", redoc_url=None)
     app.state.deps = deps
+    app.state.event_bus = event_bus
 
     def problem(status: int, slug: str, title: str, detail: str,
                 instance: str) -> JSONResponse:
@@ -108,7 +110,27 @@ def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
             "language": lang,
         })
 
+    # ---- event publishing (DAILY-5: daily.generated → Notification) ------ #
+    @app.post("/v1/daily/events/emit", tags=["daily"])
+    async def emit_daily_generated(payload: dict, request: Request) -> JSONResponse:
+        """Debug endpoint to publish a daily.generated event (DAILY-5).
+        Production: emitted by the 02:00 UTC batch job after generation."""
+        if event_bus is None:
+            return JSONResponse(status_code=503, content={
+                "error": "event bus not configured"})
+        from services.common.events import DailyGeneratedEvent
+        ev = DailyGeneratedEvent(
+            member_id=payload["member_id"],
+            sun_sign=payload["sun_sign"],
+            ritual_type=payload.get("ritual_type", "horoscope"),
+            for_date=payload.get("for_date", ""))
+        await event_bus.publish(ev.envelope())
+        return JSONResponse(status_code=202, content={"published": True,
+                                                      "type": "daily.generated"})
+
     return app
 
 
-app = create_app()
+from services.common.eventbus import default_bus  # noqa: E402
+
+app = create_app(event_bus=default_bus())

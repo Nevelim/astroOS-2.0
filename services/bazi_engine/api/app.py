@@ -56,7 +56,8 @@ def default_dependencies() -> Dependencies:
     )
 
 
-def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
+def create_app(deps: Optional[Dependencies] = None,
+               event_bus=None) -> FastAPI:
     deps = deps or default_dependencies()
     app = FastAPI(
         title="AstroOS BaZi Engine",
@@ -65,6 +66,7 @@ def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
         redoc_url=None,
     )
     app.state.deps = deps
+    app.state.event_bus = event_bus
 
     def problem(status: int, slug: str, title: str, detail: str,
                 instance: str) -> JSONResponse:
@@ -168,7 +170,27 @@ def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
             },
         )
 
+    # ---- event publishing (BAZI-6: bazi.computed → Remedies prefetch) ---- #
+    @app.post("/v1/bazi/events/emit", tags=["bazi"])
+    async def emit_bazi_computed(payload: dict, request: Request) -> JSONResponse:
+        """Debug endpoint to publish a bazi.computed event (BAZI-6).
+        Production: emitted automatically after BaZi computation completes."""
+        if event_bus is None:
+            return JSONResponse(status_code=503, content={
+                "error": "event bus not configured"})
+        from services.common.events import BaziComputedEvent
+        ev = BaziComputedEvent(
+            member_id=payload["member_id"],
+            day_master_element=payload["day_master_element"],
+            favorable_elements=tuple(payload.get("favorable_elements", [])),
+            birth_data_hash=payload.get("birth_data_hash", ""))
+        await event_bus.publish(ev.envelope())
+        return JSONResponse(status_code=202, content={"published": True,
+                                                      "type": "bazi.computed"})
+
     return app
 
 
-app = create_app()
+from services.common.eventbus import default_bus  # noqa: E402
+
+app = create_app(event_bus=default_bus())

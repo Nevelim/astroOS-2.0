@@ -180,11 +180,13 @@ def _serialize_result(result: CompatibilityResult) -> dict:
 # --------------------------------------------------------------------------- #
 # App factory
 # --------------------------------------------------------------------------- #
-def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
+def create_app(deps: Optional[Dependencies] = None,
+               event_bus=None) -> FastAPI:
     deps = deps or default_dependencies()
     app = FastAPI(title="AstroOS Cosmic Match", version="1.0.0",
                   docs_url="/docs", redoc_url=None)
     app.state.deps = deps
+    app.state.event_bus = event_bus
 
     @app.get("/healthz", tags=["meta"])
     def healthz() -> dict:
@@ -192,7 +194,36 @@ def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
 
     @app.get("/readyz", tags=["meta"])
     def readyz() -> dict:
-        return {"status": "ready", "pool_size": deps.registry.count()}
+        return {"status": "ready", "pool_size": deps.registry.count(),
+                "event_bus": "wired" if event_bus is not None else "off"}
+
+    # ---- event publishing (MATCH-10) ------------------------------------- #
+    @app.post("/v1/match/events/emit", tags=["match"])
+    async def emit_event(payload: dict, request: Request) -> JSONResponse:
+        """Debug endpoint to publish a match event (MATCH-10).
+        Production: the realtime layer publishes automatically on match/message."""
+        if event_bus is None:
+            return JSONResponse(status_code=503, content={
+                "error": "event bus not configured"})
+        from services.common.events import MatchMadeEvent, MatchMessageSentEvent
+        etype = payload.get("type")
+        if etype == "match.made":
+            ev = MatchMadeEvent(
+                member_id=payload["member_id"],
+                partner_profile_id=payload["partner_profile_id"],
+                composite_score=payload.get("composite_score", 0))
+        elif etype == "match.message.sent":
+            ev = MatchMessageSentEvent(
+                member_id=payload["member_id"],
+                sender_profile_id=payload["sender_profile_id"],
+                conversation_id=payload.get("conversation_id", ""),
+                message_preview=payload.get("message_preview", ""))
+        else:
+            return JSONResponse(status_code=422, content={
+                "error": f"unknown type '{etype}'"})
+        await event_bus.publish(ev.envelope())
+        return JSONResponse(status_code=202, content={"published": True,
+                                                      "type": etype})
 
     # ---- profile pool management ------------------------------------------ #
     @app.post("/v1/match/profiles", tags=["match"], status_code=201)
@@ -264,11 +295,13 @@ def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
 # Uvicorn loads `app`; Socket.IO handles ws://..., FastAPI handles the REST.
 # --------------------------------------------------------------------------- #
 def create_asgi_app():
+    from services.common.eventbus import default_bus
     from services.cosmic_match.api.realtime import create_socketio
     from services.cosmic_match.adapter.chat_store import InMemoryChatStore
     from services.cosmic_match.usecase.handle_chat import HandleChatMessage
 
-    fastapi_app = create_app()
+    bus = default_bus()
+    fastapi_app = create_app(event_bus=bus)
     chat_store = InMemoryChatStore()
     sio = create_socketio(store=chat_store,
                           usecase=HandleChatMessage(store=chat_store))

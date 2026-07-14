@@ -112,11 +112,19 @@ def _etag(day_master: str, lang: str) -> str:
 # --------------------------------------------------------------------------- #
 # App factory
 # --------------------------------------------------------------------------- #
-def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
+def create_app(deps: Optional[Dependencies] = None,
+               event_bus=None) -> FastAPI:
     deps = deps or default_dependencies()
     app = FastAPI(title="AstroOS Remedies", version="1.0.0",
                   docs_url="/docs", redoc_url=None)
     app.state.deps = deps
+
+    # ---- event-bus consumer wiring (BAZI-6 prefetch, REMED-2) ------------- #
+    if event_bus is not None:
+        from services.remedies.adapter.event_bridge import RemediesEventBridge
+        bridge = RemediesEventBridge(event_bus, deps.usecase)
+        bridge.wire()
+        app.state.event_bridge = bridge
 
     @app.get("/healthz", tags=["meta"])
     def healthz() -> dict:
@@ -171,4 +179,6 @@ def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
     return app
 
 
-app = create_app()
+from services.common.eventbus import default_bus  # noqa: E402
+
+app = create_app(event_bus=default_bus())

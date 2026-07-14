@@ -131,11 +131,23 @@ def _parse_time(s: Optional[str]):
 # --------------------------------------------------------------------------- #
 # App factory
 # --------------------------------------------------------------------------- #
-def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
+def create_app(deps: Optional[Dependencies] = None,
+               event_bus=None) -> FastAPI:
     deps = deps or default_dependencies()
     app = FastAPI(title="AstroOS Notification", version="1.0.0",
                   docs_url="/docs", redoc_url=None)
     app.state.deps = deps
+
+    # ---- event-bus consumer wiring (MATCH-10, DAILY-5) -------------------- #
+    # When an event bus is injected, subscribe to match.events + daily.generated
+    # and bridge inbound events into the notification pipeline.
+    if event_bus is not None:
+        from services.notification.adapter.event_bridge import EventBusBridge
+        bridge = EventBusBridge(event_bus)
+        async def _sink(event):
+            await deps.usecase.execute(event)
+        bridge.wire(_sink)
+        app.state.event_bridge = bridge
 
     @app.get("/healthz", tags=["meta"])
     def healthz() -> dict:
@@ -145,7 +157,8 @@ def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
     def readyz() -> dict:
         return {"status": "ready",
                 "tone_gate": "active",
-                "crisis_resources": len(CRISIS_RESOURCES)}
+                "crisis_resources": len(CRISIS_RESOURCES),
+                "event_bus": "wired" if event_bus is not None else "off"}
 
     # ---- event ingest ---------------------------------------------------- #
     @app.post("/v1/notify/events", tags=["notify"])
@@ -223,4 +236,6 @@ def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
     return app
 
 
-app = create_app()
+from services.common.eventbus import default_bus  # noqa: E402
+
+app = create_app(event_bus=default_bus())

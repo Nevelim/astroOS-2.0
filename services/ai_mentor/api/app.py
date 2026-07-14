@@ -124,6 +124,8 @@ def _resolve_voice(raw: str) -> VoiceProfile:
 # App factory
 # --------------------------------------------------------------------------- #
 def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
+    from services.common.observability import setup_telemetry, instrument_app
+    setup_telemetry("astroos-ai-mentor")
     deps = deps or default_dependencies()
     app = FastAPI(title="AstroOS AI Mentor", version="1.0.0",
                   docs_url="/docs", redoc_url=None)
@@ -205,6 +207,7 @@ def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
         app.state.usage[member_id] = used + 1
         return JSONResponse(status_code=200, content=_serialize(result, limit, used))
 
+    instrument_app(app)
     return app
 
 

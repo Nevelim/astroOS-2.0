@@ -13,6 +13,8 @@ COPY pyproject.toml pytest.ini ./
 RUN pip install --no-cache-dir \
     fastapi uvicorn[standard] tzdata pydantic httpx \
     python-socketio python-engineio \
+    opentelemetry-api opentelemetry-sdk \
+    opentelemetry-instrumentation-fastapi opentelemetry-exporter-otlp \
     skyfield sxtwl pytest pytest-cov pytest-asyncio aiohttp
 
 # Copy source

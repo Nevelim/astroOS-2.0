@@ -133,6 +133,8 @@ def _parse_time(s: Optional[str]):
 # --------------------------------------------------------------------------- #
 def create_app(deps: Optional[Dependencies] = None,
                event_bus=None) -> FastAPI:
+    from services.common.observability import setup_telemetry, instrument_app
+    setup_telemetry("astroos-notification")
     deps = deps or default_dependencies()
     app = FastAPI(title="AstroOS Notification", version="1.0.0",
                   docs_url="/docs", redoc_url=None)
@@ -233,6 +235,7 @@ def create_app(deps: Optional[Dependencies] = None,
             } for n in rows],
         })
 
+    instrument_app(app)
     return app
 
 

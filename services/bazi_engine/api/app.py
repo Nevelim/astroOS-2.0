@@ -58,6 +58,8 @@ def default_dependencies() -> Dependencies:
 
 def create_app(deps: Optional[Dependencies] = None,
                event_bus=None) -> FastAPI:
+    from services.common.observability import setup_telemetry, instrument_app
+    setup_telemetry("astroos-bazi-engine")
     deps = deps or default_dependencies()
     app = FastAPI(
         title="AstroOS BaZi Engine",
@@ -188,6 +190,7 @@ def create_app(deps: Optional[Dependencies] = None,
         return JSONResponse(status_code=202, content={"published": True,
                                                       "type": "bazi.computed"})
 
+    instrument_app(app)
     return app
 
 

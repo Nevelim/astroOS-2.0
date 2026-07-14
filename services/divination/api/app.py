@@ -79,6 +79,8 @@ def _serialize_card(card: TarotCard, reversed_: bool, position: str) -> dict:
 
 
 def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
+    from services.common.observability import setup_telemetry, instrument_app
+    setup_telemetry("astroos-divination")
     deps = deps or default_dependencies()
     app = FastAPI(title="AstroOS Divination", version="1.0.0",
                   docs_url="/docs", redoc_url=None)
@@ -153,6 +155,7 @@ def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
             "question": payload.question,
         })
 
+    instrument_app(app)
     return app
 
 

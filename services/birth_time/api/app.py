@@ -57,6 +57,8 @@ def default_dependencies() -> Dependencies:
 
 
 def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
+    from services.common.observability import setup_telemetry, instrument_app
+    setup_telemetry("astroos-birth-time")
     deps = deps or default_dependencies()
     app = FastAPI(
         title="AstroOS Birth-Time Resolution",
@@ -223,6 +225,7 @@ def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
             },
         )
 
+    instrument_app(app)
     return app
 
 

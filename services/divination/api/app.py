@@ -61,6 +61,8 @@ def _problem(status: int, slug: str, title: str, detail: str,
 
 
 def _serialize_card(card: TarotCard, reversed_: bool, position: str) -> dict:
+    from services.divination.domain.tarot_interpretations import interpretation_for
+    upright_meaning, reversed_meaning = interpretation_for(card.id)
     return {
         "card": {
             "id": card.id,
@@ -72,6 +74,8 @@ def _serialize_card(card: TarotCard, reversed_: bool, position: str) -> dict:
             "element": card.element,
             "keywordsUpright": list(card.keywords_upright),
             "keywordsReversed": list(card.keywords_reversed),
+            "meaningUpright": upright_meaning,
+            "meaningReversed": reversed_meaning,
         },
         "reversed": reversed_,
         "position": position,

@@ -139,6 +139,28 @@ export interface BaziDateSelectionDTO {
   dates: BaziDateSelectionResultDTO[];
 }
 
+export interface BaziDailyForecastDTO {
+  date: string;
+  day_master_stem: string;
+  score: number;
+  label: string;
+  stem_element: string;
+  branch_element: string;
+  ten_god: string | null;
+  pillar: { stem: string; branch: string; stem_hanzi: string; branch_hanzi: string };
+  reason: string;
+}
+export interface BaziCompatibilityDTO {
+  score: number;          // 0-100
+  label: string;          // "harmonious" | "balanced" | "challenging"
+  dynamic: string;
+  dynamic_ru: string;
+  harmony_zones: string[];
+  conflict_zones: string[];
+  remedies: string[];
+  is_noble_combination: boolean;
+}
+
 export interface IChingHexagramDTO {
   primaryNumber: number;
   primaryName: string;
@@ -329,4 +351,11 @@ export const api = {
     request<BaziForecastDTO>(`/api/bazi/forecast?birth_data_hash=${encodeURIComponent(birthDataHash)}&years=${years}`),
   baziDateSelection: (data: { day_master_stem: string; goal?: string; days_ahead?: number; top_n?: number; start_date?: string }) =>
     request<BaziDateSelectionDTO>("/api/bazi/date-selection", { method: "POST", body: JSON.stringify(data) }),
+  baziCompatibility: (stemA: string, stemB: string) =>
+    request<BaziCompatibilityDTO>("/api/bazi/compatibility", {
+      method: "POST",
+      body: JSON.stringify({ day_master_stem_a: stemA, day_master_stem_b: stemB }),
+    }),
+  baziDailyForecast: (dayMasterStem: string, targetDate?: string) =>
+    request<BaziDailyForecastDTO>(`/api/bazi/daily-forecast?day_master_stem=${encodeURIComponent(dayMasterStem)}${targetDate ? `&target_date=${targetDate}` : ""}`),
 };

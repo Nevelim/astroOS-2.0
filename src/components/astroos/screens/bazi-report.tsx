@@ -20,11 +20,14 @@ import {
   api,
   type BaZiDTO,
   type BaziForecastDTO,
+  type BaziCompatibilityDTO,
+  type BaziDailyForecastDTO,
 } from "@/lib/astroos/real/api-client";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Sparkles, Star, TrendingUp, Award, Heart, ShoppingBag,
   Palette, Home, Briefcase, Compass, Calendar, Users, AlertCircle,
+  Share2, History, Download,
 } from "lucide-react";
 
 // Element → display (color + label).
@@ -168,9 +171,29 @@ export function BaZiReportScreen({ onNavigate }: BaZiReportScreenProps) {
         <DateSelectionCard bazi={bazi} L={L} locale={locale} />
       </FadeIn>
 
+      {/* Блок: Совместимость с партнёром */}
+      <FadeIn delay={0.28}>
+        <CompatibilityCard bazi={bazi} el={el} L={L} locale={locale} />
+      </FadeIn>
+
       {/* Блок 10: Знаменитые двойники */}
       <FadeIn delay={0.3}>
         <FamousPeopleCard bazi={bazi} el={el} L={L} locale={locale} />
+      </FadeIn>
+
+      {/* Ежедневный прогноз (столп дня) */}
+      <FadeIn delay={0.31}>
+        <DailyForecastCard bazi={bazi} el={el} L={L} locale={locale} />
+      </FadeIn>
+
+      {/* Сообщество: Day Master share-визитка */}
+      <FadeIn delay={0.32}>
+        <ShareCard bazi={bazi} el={el} L={L} locale={locale} />
+      </FadeIn>
+
+      {/* Кабинет: история + сравнение */}
+      <FadeIn delay={0.34}>
+        <CabinetCard bazi={bazi} el={el} L={L} locale={locale} meMember={meMember} />
       </FadeIn>
     </div>
   );
@@ -485,6 +508,123 @@ function DateSelectionCard({ bazi, L, locale }: any) {
   );
 }
 
+function CompatibilityCard({ bazi, el, L, locale }: any) {
+  const [partnerDm, setPartnerDm] = useState("己");
+  const [report, setReport] = useState<BaziCompatibilityDTO | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const HANZI_TO_STEM: Record<string, string> = {
+    "甲": "jia", "乙": "yi", "丙": "bing", "丁": "ding", "戊": "wu",
+    "己": "ji", "庚": "geng", "辛": "xin", "壬": "ren", "癸": "gui",
+  };
+  const STEM_HANZI = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"];
+  const myStem = HANZI_TO_STEM[bazi.dayMaster] ?? "jia";
+
+  const compute = async () => {
+    const partnerStem = HANZI_TO_STEM[partnerDm] ?? "ji";
+    setLoading(true);
+    try {
+      const r = await api.baziCompatibility(myStem, partnerStem);
+      setReport(r);
+    } catch {
+      setReport(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const scoreColor = report
+    ? (report.score >= 75 ? "#5BB89C" : report.score >= 55 ? "#E8B86D" : "#D98E7A")
+    : "#9A9AA8";
+
+  return (
+    <GlassCard variant="rose" className="p-4 mb-4">
+      <div className="flex items-center gap-2 mb-3">
+        <Heart className="w-4 h-4" style={{ color: "#D98E7A" }} />
+        <h3 className="font-serif text-lg" style={{ color: "#F5F0E8" }}>
+          {L("Совместимость с партнёром", "Partner compatibility", "साथी संगतता")}
+        </h3>
+      </div>
+      <div className="flex items-center gap-3 mb-3">
+        <span className="text-[11px]" style={{ color: "#9A9AA8" }}>
+          {L("Ваш DM", "Your DM", "आपका DM")}
+        </span>
+        <span className="text-xl font-serif px-2 py-1 rounded" style={{
+          background: `${el(bazi.dayMasterElement).color}20`, color: el(bazi.dayMasterElement).color,
+        }}>
+          {bazi.dayMaster}
+        </span>
+        <span style={{ color: "#9A9AA8" }}>×</span>
+        <label className="flex items-center gap-1">
+          <span className="text-[11px]" style={{ color: "#9A9AA8" }}>
+            {L("Партнёр", "Partner", "साथी")}
+          </span>
+          <select value={partnerDm} onChange={(e) => setPartnerDm(e.target.value)}
+            className="rounded px-2 py-1 text-sm" style={{ background: "#0B0B0F", border: "1px solid #2A2A35", color: "#F5F0E8" }}>
+            {STEM_HANZI.map((h) => <option key={h} value={h}>{h}</option>)}
+          </select>
+        </label>
+        <CosmicButton onClick={compute} disabled={loading} variant="rose" className="ml-auto text-xs">
+          {loading ? "…" : L("Расчёт", "Compute", "गणना")}
+        </CosmicButton>
+      </div>
+      <AnimatePresence>
+        {report && (
+          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+            {/* Score ring */}
+            <div className="flex items-center gap-4 mb-3">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center shrink-0"
+                style={{ border: `3px solid ${scoreColor}`, background: `${scoreColor}15` }}>
+                <span className="text-xl font-mono" style={{ color: scoreColor }}>{report.score}</span>
+              </div>
+              <div>
+                <p className="text-sm font-medium capitalize" style={{ color: scoreColor }}>
+                  {report.label === "harmonious" ? L("Гармоничный союз", "Harmonious", "सामंजस्यपूर्ण")
+                    : report.label === "balanced" ? L("Сбалансированный", "Balanced", "संतुलित")
+                    : L("Сложный", "Challenging", "चुनौतीपूर्ण")}
+                </p>
+                <p className="text-[11px]" style={{ color: "#F5F0E8A0" }}>
+                  {locale === "ru" ? report.dynamic_ru : report.dynamic}
+                </p>
+                {report.is_noble_combination && (
+                  <span className="text-[10px] px-1.5 py-0.5 rounded inline-block mt-1" style={{ background: "#E8B86D20", color: "#E8B86D" }}>
+                    {L("★ Благородное сочетание (天干五合)", "★ Noble combination (天干五合)", "★ नोबल संयोजन")}
+                  </span>
+                )}
+              </div>
+            </div>
+            {/* Zones + remedies */}
+            <div className="grid grid-cols-2 gap-2 text-[11px]">
+              <div>
+                <p style={{ color: "#5BB89C" }}>{L("Сильные стороны", "Harmony zones", "सामंजस्य")}</p>
+                {report.harmony_zones.map((z, i) => (
+                  <p key={i} style={{ color: "#F5F0E8A0" }}>+ {z}</p>
+                ))}
+              </div>
+              <div>
+                <p style={{ color: "#D98E7A" }}>{L("Зоны конфликта", "Conflict zones", "संघर्ष क्षेत्र")}</p>
+                {report.conflict_zones.length > 0 ? report.conflict_zones.map((z, i) => (
+                  <p key={i} style={{ color: "#F5F0E8A0" }}>− {z}</p>
+                )) : <p style={{ color: "#9A9AA8" }}>—</p>}
+              </div>
+            </div>
+            {report.remedies.length > 0 && (
+              <div className="mt-2 pt-2 border-t" style={{ borderColor: "#2A2A35" }}>
+                <p className="text-[10px] uppercase tracking-wider mb-1" style={{ color: "#9A9AA8" }}>
+                  {L("Рекомендации по гармонизации", "Harmonization", "सामंजस्यीकरण")}
+                </p>
+                {report.remedies.map((r, i) => (
+                  <p key={i} className="text-[11px]" style={{ color: "#F5F0E8C0" }}>• {r}</p>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </GlassCard>
+  );
+}
+
 function FamousPeopleCard({ bazi, el, L, locale }: any) {
   // Frontend mirror of the backend famous-people dataset (subset).
   const people = FAMOUS_BY_DM[bazi.dayMaster] ?? [];
@@ -585,6 +725,179 @@ function balanceMeaning(bazi: any, el: any, L: any, locale: string): string {
     : locale === "hi"
     ? `आपके लिए अनुकूल तत्व: ${favName}। इसे अपने जीवन में जोड़ें।`
     : `Your favorable element: ${favName}. Bring more of it into your life.`;
+}
+
+function DailyForecastCard({ bazi, el, L, locale }: any) {
+  const [forecast, setForecast] = useState<BaziDailyForecastDTO | null>(null);
+  const HANZI_TO_STEM: Record<string, string> = {
+    "甲": "jia", "乙": "yi", "丙": "bing", "丁": "ding", "戊": "wu",
+    "己": "ji", "庚": "geng", "辛": "xin", "壬": "ren", "癸": "gui",
+  };
+
+  useEffect(() => {
+    const stem = HANZI_TO_STEM[bazi.dayMaster] ?? "jia";
+    api.baziDailyForecast(stem).then(setForecast).catch(() => setForecast(null));
+  }, [bazi.dayMaster]);
+
+  if (!forecast) return null;
+  const labelColor = forecast.label === "excellent" || forecast.label === "good"
+    ? "#5BB89C" : forecast.label === "avoid" ? "#D98E7A" : "#E8B86D";
+  const stemDisp = el(forecast.stem_element);
+  const branchDisp = el(forecast.branch_element);
+
+  return (
+    <GlassCard variant="neutral" className="p-4 mb-4">
+      <div className="flex items-center gap-2 mb-3">
+        <Calendar className="w-4 h-4" style={{ color: "#5BB89C" }} />
+        <h3 className="font-serif text-lg" style={{ color: "#F5F0E8" }}>
+          {L("Прогноз на сегодня", "Today's forecast", "आज का पूर्वानुमान")}
+        </h3>
+        <span className="text-[10px] ml-auto" style={{ color: "#9A9AA8" }}>{forecast.date}</span>
+      </div>
+      <div className="flex items-center gap-4 p-3 rounded" style={{ background: `${labelColor}10` }}>
+        <div className="text-center shrink-0">
+          <span className="text-2xl block" style={{ fontFamily: "serif", color: "#F5F0E8" }}>
+            {forecast.pillar.stem_hanzi}{forecast.pillar.branch_hanzi}
+          </span>
+          <p className="text-[9px]" style={{ color: "#9A9AA8" }}>
+            {L("Столп дня", "Day pillar", "दिन स्तंभ")}
+          </p>
+        </div>
+        <div className="flex-1">
+          <span className="text-[11px] px-2 py-0.5 rounded" style={{ background: `${labelColor}20`, color: labelColor }}>
+            {forecast.label}
+          </span>
+          <p className="text-[11px] mt-1.5" style={{ color: "#F5F0E8C0" }}>{forecast.reason}</p>
+        </div>
+      </div>
+    </GlassCard>
+  );
+}
+
+function ShareCard({ bazi, el, L, locale }: any) {
+  const disp = el(bazi.dayMasterElement);
+  const [copied, setCopied] = useState(false);
+
+  const shareText = locale === "ru"
+    ? `Мой Day Master — ${bazi.dayMaster} (${disp.ru} ${bazi.dayMasterYinYang === "yang" ? "Ян" : "Инь"}). Узнай свой на AstroOS!`
+    : locale === "hi"
+    ? `मेरा दिन स्वामी — ${bazi.dayMaster} (${disp.hi}). AstroOS पर अपना जानें!`
+    : `My Day Master is ${bazi.dayMaster} (${disp.en}). Discover yours on AstroOS!`;
+
+  const share = () => {
+    if (navigator.share) {
+      navigator.share({ title: "AstroOS BaZi", text: shareText, url: window.location.href })
+        .catch(() => {});
+    } else {
+      navigator.clipboard?.writeText(shareText + " " + window.location.href);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
+
+  return (
+    <GlassCard variant="gold" ornamental className="p-4 mb-4">
+      <div className="flex items-center gap-2 mb-3">
+        <Share2 className="w-4 h-4" style={{ color: "#E8B86D" }} />
+        <h3 className="font-serif text-lg" style={{ color: "#F5F0E8" }}>
+          {L("Поделиться Day Master", "Share Day Master", "साझा करें")}
+        </h3>
+      </div>
+      <div className="flex items-center gap-4 p-3 rounded" style={{ background: `linear-gradient(135deg, ${disp.color}20, transparent)` }}>
+        <div className="w-16 h-16 rounded-full flex items-center justify-center shrink-0"
+          style={{ border: `2px solid ${disp.color}`, background: `${disp.color}15` }}>
+          <span className="text-3xl" style={{ fontFamily: "serif", color: disp.color }}>{bazi.dayMaster}</span>
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-serif text-base" style={{ color: disp.color }}>
+            {disp[locale === "ru" ? "ru" : locale === "hi" ? "hi" : "en"]} {bazi.dayMasterYinYang === "yang" ? "☀" : "☾"}
+          </p>
+          <p className="text-[11px] mt-0.5" style={{ color: "#F5F0E8A0" }}>{shareText}</p>
+        </div>
+      </div>
+      <CosmicButton onClick={share} variant="gold" className="mt-3 text-xs">
+        <Share2 className="w-3 h-3 inline mr-1" />
+        {copied ? (L("Скопировано!", "Copied!", "कॉपी हुआ!")) : (L("Поделиться", "Share", "साझा करें"))}
+      </CosmicButton>
+    </GlassCard>
+  );
+}
+
+function CabinetCard({ bazi, el, L, locale, meMember }: any) {
+  // Save current chart to localStorage history.
+  const [history, setHistory] = useState<any[]>([]);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("bazi-history");
+      setHistory(raw ? JSON.parse(raw) : []);
+    } catch { setHistory([]); }
+  }, []);
+
+  const saveCurrent = () => {
+    const entry = {
+      date: new Date().toISOString(),
+      name: meMember.displayName,
+      dayMaster: bazi.dayMaster,
+      element: bazi.dayMasterElement,
+    };
+    const next = [entry, ...history.filter((h: any) => h.dayMaster !== entry.dayMaster || h.name !== entry.name)].slice(0, 10);
+    setHistory(next);
+    localStorage.setItem("bazi-history", JSON.stringify(next));
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
+
+  const clearHistory = () => {
+    localStorage.removeItem("bazi-history");
+    setHistory([]);
+  };
+
+  return (
+    <GlassCard variant="neutral" className="p-4 mb-4">
+      <div className="flex items-center gap-2 mb-3">
+        <History className="w-4 h-4" style={{ color: "#5E8FA8" }} />
+        <h3 className="font-serif text-lg" style={{ color: "#F5F0E8" }}>
+          {L("Личный кабинет", "My cabinet", "मेरी कैबिनेट")}
+        </h3>
+      </div>
+      <p className="text-[11px] mb-3" style={{ color: "#9A9AA8" }}>
+        {L("Сохраняйте рассчитанные карты и сравнивайте их позже.", "Save computed charts and compare them later.", "गणना की गई कार्ट रखें।")}
+      </p>
+      <CosmicButton onClick={saveCurrent} variant="outline" className="text-xs">
+        {saved ? (L("✓ Сохранено", "✓ Saved", "✓ सहेजा")) : (L("Сохранить текущую карту", "Save current chart", "वर्तमान सहेजें"))}
+      </CosmicButton>
+      {history.length > 0 && (
+        <div className="mt-3">
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-[10px] uppercase tracking-wider" style={{ color: "#9A9AA8" }}>
+              {L("История", "History", "इतिहास")} ({history.length})
+            </p>
+            <button onClick={clearHistory} className="text-[10px] underline" style={{ color: "#9A9AA8" }}>
+              {L("Очистить", "Clear", "साफ़")}
+            </button>
+          </div>
+          <div className="space-y-1.5">
+            {history.map((h: any, i: number) => {
+              const disp = el(h.element);
+              return (
+                <div key={i} className="flex items-center gap-2 p-2 rounded" style={{ background: "#1C1C26" }}>
+                  <span className="text-lg" style={{ fontFamily: "serif", color: disp.color }}>{h.dayMaster}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs" style={{ color: "#F5F0E8" }}>{h.name}</p>
+                    <p className="text-[10px]" style={{ color: "#9A9AA8" }}>
+                      {disp[locale === "ru" ? "ru" : "en"]} · {new Date(h.date).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </GlassCard>
+  );
 }
 
 export default BaZiReportScreen;

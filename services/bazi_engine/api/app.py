@@ -11,7 +11,7 @@ Birth-Time service). For dev/tests we inject an in-memory provider.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import time
+from datetime import date, time
 from typing import Optional
 
 from fastapi import FastAPI, Request, Response
@@ -356,6 +356,86 @@ def create_app(deps: Optional[Dependencies] = None,
                  "reason": r.reason}
                 for r in results
             ],
+        })
+
+    # ---- daily forecast (столп дня, блок: ежедневный прогноз) ---------- #
+    @app.get("/v1/bazi/daily-forecast", tags=["bazi"])
+    def daily_forecast_endpoint(
+        request: Request,
+        day_master_stem: str,
+        target_date: Optional[str] = None,
+    ) -> JSONResponse:
+        """The daily forecast (流日) for a date vs the Day Master.
+
+        Query params: day_master_stem (required), target_date (optional ISO,
+        defaults to today). Returns the day pillar, its elements, a label
+        (excellent/good/neutral/caution/avoid) and a short reason.
+        """
+        from services.bazi_engine.domain.date_selection import daily_forecast
+        try:
+            dm = Stem(day_master_stem.lower())
+        except ValueError:
+            return problem(422, "bazi/daily-forecast-invalid",
+                           "Invalid stem",
+                           f"'{day_master_stem}' is not a valid stem.",
+                           request.url.path)
+        d = date.fromisoformat(target_date) if target_date else date.today()
+        r = daily_forecast(d, dm)
+        return JSONResponse(status_code=200, content={
+            "date": d.isoformat(),
+            "day_master_stem": dm.value,
+            "score": r.score,
+            "label": r.label,
+            "stem_element": r.stem_element.value,
+            "branch_element": r.branch_element.value,
+            "ten_god": r.ten_god.value if r.ten_god else None,
+            "pillar": {"stem": r.day_pillar.stem.value,
+                       "branch": r.day_pillar.branch.value,
+                       "stem_hanzi": _SH[r.day_pillar.stem],
+                       "branch_hanzi": _BH[r.day_pillar.branch]},
+            "reason": r.reason,
+        })
+
+    # ---- partner compatibility (合婚, блок 5) --------------------------- #
+    @app.post("/v1/bazi/compatibility", tags=["bazi"])
+    def bazi_compatibility(payload: dict, request: Request) -> JSONResponse:
+        """Compatibility report for two Day Masters (блок 5 отчёта).
+
+        Body: { "day_master_stem_a": "jia", "day_master_stem_b": "ji" }
+        Returns score (0-100), dynamic, harmony/conflict zones, remedies.
+        """
+        from services.bazi_engine.domain.bazi_compatibility import (
+            bazi_compatibility as _compat)
+        from services.bazi_engine.domain.pillars import Pillar
+        from services.bazi_engine.domain.constants import Branch
+        sa_str = payload.get("day_master_stem_a")
+        sb_str = payload.get("day_master_stem_b")
+        if not sa_str or not sb_str:
+            return problem(422, "bazi/compatibility-invalid",
+                           "Missing stems",
+                           "Both 'day_master_stem_a' and 'day_master_stem_b' are required.",
+                           request.url.path)
+        try:
+            sa = Stem(sa_str.lower())
+            sb = Stem(sb_str.lower())
+        except ValueError:
+            return problem(422, "bazi/compatibility-invalid",
+                           "Invalid stem",
+                           "Stems must be one of: jia, yi, bing, ding, wu, ji, geng, xin, ren, gui.",
+                           request.url.path)
+        # Build Day Pillars (branch is a neutral placeholder — only the stem
+        # drives compatibility scoring).
+        report = _compat(Pillar(stem=sa, branch=Branch.ZI),
+                         Pillar(stem=sb, branch=Branch.ZI))
+        return JSONResponse(status_code=200, content={
+            "score": report.score,
+            "label": report.label,
+            "dynamic": report.dynamic,
+            "dynamic_ru": report.dynamic_ru,
+            "harmony_zones": list(report.harmony_zones),
+            "conflict_zones": list(report.conflict_zones),
+            "remedies": list(report.remedies),
+            "is_noble_combination": report.is_noble_combination,
         })
 
     # ---- event publishing (BAZI-6: bazi.computed → Remedies prefetch) ---- #

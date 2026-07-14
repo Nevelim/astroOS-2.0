@@ -86,7 +86,8 @@ class SkyfieldEphemeris:
             ecl_lng = equatorial_to_ecliptic_longitude(ra.degrees, dec.degrees)
             retro = self._is_retrograde(planet, utc, lat, lng)
             out.append(PlanetPosition(
-                planet=planet, ecliptic_longitude_deg=ecl_lng, retrograde=retro
+                planet=planet, ecliptic_longitude_deg=ecl_lng, retrograde=retro,
+                ra_deg=ra.degrees, dec_deg=dec.degrees,
             ))
         return tuple(out)
 

@@ -44,6 +44,10 @@ class PlanetPosition:
     planet: Planet
     ecliptic_longitude_deg: float
     retrograde: bool = False
+    # Equatorial coordinates — needed for astrocartography (in-mundo line calc).
+    # Optional: populated by the ephemeris adapter when available.
+    ra_deg: Optional[float] = None       # right ascension in degrees [0,360)
+    dec_deg: Optional[float] = None      # declination in degrees [-90,90]
 
     @property
     def sign(self) -> Sign:

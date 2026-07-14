@@ -400,6 +400,23 @@ def create_app(deps: Optional[Dependencies] = None) -> FastAPI:
             "retrograde_count": len(retrograde_list),
         })
 
+    # ---- planetary returns: Saturn/Jupiter/Nodal life milestones -------- #
+    @app.get("/v1/returns", tags=["astro"])
+    def planetary_returns(birth_year: int,
+                          max_age: int = 100) -> JSONResponse:
+        """All planetary returns/milestones (Saturn, Jupiter, Nodal, etc.)."""
+        from services.astro_engine.domain.returns import returns_for
+        events = returns_for(birth_year, max_age=max_age)
+        return JSONResponse(status_code=200, content={
+            "birth_year": birth_year,
+            "events": [
+                {"name": e.name, "planet": e.planet, "age": e.age,
+                 "theme": e.theme, "cycle_number": e.cycle_number,
+                 "is_half_return": e.is_half_return}
+                for e in events
+            ],
+        })
+
     instrument_app(app)
     return app
 

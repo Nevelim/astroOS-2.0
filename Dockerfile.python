@@ -23,5 +23,5 @@ COPY de421.bsp* ./
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:3009/healthz')" || exit 0
 
-EXPOSE 3001 3002 3003 3004 3005 3007 3008 3009
+EXPOSE 3001 3002 3003 3004 3005 3007 3008 3009 3011
 CMD ["uvicorn", "services.birth_time.api.app:app", "--host", "0.0.0.0", "--port", "3009"]

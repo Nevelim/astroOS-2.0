@@ -9,6 +9,7 @@
 #   3007 Daily Content
 #   3008 Notification
 #   3009 Birth-Time Resolution  (infra-service)
+#   3011 Divination (Tarot + I Ching)
 #   3000 BFF / Next.js (started separately via `npm run dev`)
 #
 # Usage:  ./start-services.sh          # background, logs to logs/*.log
@@ -44,6 +45,7 @@ services=(
   "ai-mentor|3003|services.ai_mentor.api.app:app"
   "notification|3008|services.notification.api.app:app"
   "remedies|3005|services.remedies.api.app:app"
+  "divination|3011|services.divination.api.app:app"
 )
 
 for svc in "${services[@]}"; do
@@ -75,3 +77,4 @@ echo "  Match       http://127.0.0.1:3004/docs"
 echo "  Mentor      http://127.0.0.1:3003/docs"
 echo "  Notification http://127.0.0.1:3008/docs"
 echo "  Remedies    http://127.0.0.1:3005/docs"
+echo "  Divination  http://127.0.0.1:3011/docs"

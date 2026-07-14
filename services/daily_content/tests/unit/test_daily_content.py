@@ -108,7 +108,11 @@ class TestDailyAPI:
     def test_affirmation_pisces_en(self, client):
         r = client.get("/v1/daily/pisces/affirmation", params={"lang": "en"})
         assert r.status_code == 200
-        assert "compassion" in r.json()["body"].lower()
+        # The affirmation is now transit-generated (dynamic), so we verify
+        # structural properties rather than a fixed template word.
+        body = r.json()["body"]
+        assert len(body) > 5
+        assert body[0].isupper()  # starts with a capital (sentence)
 
     def test_invalid_sign_404(self, client):
         r = client.get("/v1/daily/invalidsign")

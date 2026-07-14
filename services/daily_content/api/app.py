@@ -32,9 +32,23 @@ class Dependencies:
 
 
 def default_dependencies() -> Dependencies:
+    # Production path: transit-based generator using live planetary positions
+    # (dynamic, day-specific content). Falls back to static templates if the
+    # ephemeris (skyfield/de421) is unavailable.
+    from services.daily_content.adapter.transit_generator import (
+        TransitContentGenerator,
+    )
+    from services.daily_content.adapter.skyfield_positions import (
+        default_positions_provider,
+    )
+    provider = default_positions_provider()
+    if provider is not None:
+        generator = TransitContentGenerator(provider)
+    else:
+        generator = TemplateContentGenerator()
     return Dependencies(
         usecase=GenerateDailyContent(
-            generator=TemplateContentGenerator(),
+            generator=generator,
             cache=InMemoryContentCache(),
         )
     )

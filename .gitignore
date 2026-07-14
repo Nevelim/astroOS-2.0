@@ -40,7 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-local-*
 .claude
 .z-ai-config
 *.log
@@ -62,3 +61,14 @@ bazi-service.log
 chat-service.log
 # Temp tool output
 tool-results/
+
+# Local dev artifacts
+db/
+*.db
+*.db-journal
+logs/
+.env.local
+.env.*.local
+de421.bsp
+de430.bsp
+de422.bsp

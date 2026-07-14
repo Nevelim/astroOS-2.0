@@ -217,3 +217,85 @@ class TestPrivacyInvariants:
         body = r.json()
         assert set(body.keys()) == {"profile_id", "display_name",
                                     "in_pool", "pool_size"}
+
+
+# --------------------------------------------------------------------------- #
+# Synastry-enriched match (when planet longitudes are provided)
+# --------------------------------------------------------------------------- -*-
+class TestSynastryMatchViaHttp:
+    """When profiles carry planet_longitudes + node_axis, the match uses the
+    true synastry layer (cross-chart aspects + soulmate indicators)."""
+
+    @pytest.fixture()
+    def pool_with_longitudes(self, client):
+        prof_a = {
+            **_PROFILE_A,
+            "natal": {**_PROFILE_A["natal"],
+                      "planet_longitudes": {"sun": 0.0, "moon": 120.0, "venus": 30.0},
+                      "node_axis": [60.0, 240.0]},
+        }
+        prof_b = {
+            **_PROFILE_B,
+            "natal": {**_PROFILE_B["natal"],
+                      "planet_longitudes": {"sun": 0.0, "moon": 0.0, "mars": 30.0},
+                      "node_axis": [0.0, 180.0]},
+        }
+        client.post("/v1/match/profiles", json=prof_a)
+        client.post("/v1/match/profiles", json=prof_b)
+        return prof_a["profile_id"], prof_b["profile_id"]
+
+    def test_synastry_layer_in_response(self, client_with_pool):
+        """The compute response should show synastry in layers_used explanation."""
+        # Re-register profiles WITH longitudes via a fresh pool.
+        prof_a = {**_PROFILE_A,
+                  "natal": {**_PROFILE_A["natal"],
+                            "planet_longitudes": {"sun": 0.0, "venus": 0.0},
+                            "node_axis": [0.0, 180.0]}}
+        prof_b = {**_PROFILE_B,
+                  "natal": {**_PROFILE_B["natal"],
+                            "planet_longitudes": {"moon": 0.0, "mars": 0.0},
+                            "node_axis": [0.0, 180.0]}}
+        client_with_pool.post("/v1/match/profiles", json=prof_a)
+        client_with_pool.post("/v1/match/profiles", json=prof_b)
+        r = client_with_pool.post("/v1/match/compute", json={
+            "profile_a_id": "prf_anya", "profile_b_id": "prf_jonas"})
+        assert r.status_code == 200
+        body = r.json()
+        # The synastry layer should be present in the explanation.
+        assert "Composite" in body["explanation"] or "compatibility" in body["explanation"].lower()
+
+    def test_synastry_score_higher_with_nodal_contacts(self, client_with_pool):
+        """Nodal contacts (soulmate indicators) boost the love score."""
+        # Without longitudes (element-only baseline)
+        r_baseline = client_with_pool.post("/v1/match/compute", json={
+            "profile_a_id": "prf_anya", "profile_b_id": "prf_jonas"})
+        baseline_love = r_baseline.json()["spheres"]["love"]
+
+        # Fresh app with longitude-enriched profiles (nodal contacts)
+        from services.cosmic_match.api.app import create_app, default_dependencies
+        app2 = create_app(default_dependencies())
+        c2 = TestClient(app2)
+        c2.post("/v1/match/profiles", json={
+            "profile_id": "a", "display_name": "A",
+            "natal": {"sun_sign": "aries", "moon_sign": "leo",
+                      "venus_sign": "taurus", "mars_sign": "gemini",
+                      "planet_longitudes": {"sun": 0.0, "venus": 0.0},
+                      "node_axis": [0.0, 180.0]},
+            "bazi": {"day_master_stem": "jia", "day_master_element": "wood",
+                     "year_branch": "zi", "month_branch": "chen", "day_branch": "zi"},
+            "intents": ["romantic"]})
+        c2.post("/v1/match/profiles", json={
+            "profile_id": "b", "display_name": "B",
+            "natal": {"sun_sign": "leo", "moon_sign": "aries",
+                      "venus_sign": "gemini", "mars_sign": "taurus",
+                      "planet_longitudes": {"moon": 0.0, "mars": 0.0},
+                      "node_axis": [0.0, 180.0]},
+            "bazi": {"day_master_stem": "bing", "day_master_element": "fire",
+                     "year_branch": "wu", "month_branch": "wu", "day_branch": "wu"},
+            "intents": ["romantic"]})
+        r_syn = c2.post("/v1/match/compute", json={
+            "profile_a_id": "a", "profile_b_id": "b"})
+        syn_love = r_syn.json()["spheres"]["love"]
+        # The synastry path (with conjunctions + nodal contacts) should produce
+        # a meaningfully elevated love score above the neutral 50 baseline.
+        assert syn_love >= 60

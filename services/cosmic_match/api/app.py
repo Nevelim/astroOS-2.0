@@ -53,6 +53,13 @@ class NatalDTO(BaseModel):
     venus_sign: str = Field(..., examples=["taurus"])
     mars_sign: str = Field(..., examples=["gemini"])
     ascendant_sign: Optional[str] = None
+    # Optional planet longitudes — enable true synastry (cross-chart aspects).
+    # Keys are planet names, values are ecliptic degrees. Privacy-safe.
+    planet_longitudes: Optional[dict] = Field(
+        None, examples=[{"sun": 25.5, "moon": 143.9, "venus": 28.2}])
+    node_axis: Optional[list] = Field(
+        None, min_length=2, max_length=2,
+        examples=[[332.0, 152.0]])  # [north_deg, south_deg]
 
 
 class BaZiDTO(BaseModel):
@@ -92,6 +99,8 @@ class ProfileDTO(BaseModel):
                 sun_sign=self.natal.sun_sign, moon_sign=self.natal.moon_sign,
                 venus_sign=self.natal.venus_sign, mars_sign=self.natal.mars_sign,
                 ascendant_sign=self.natal.ascendant_sign,
+                planet_longitudes=self.natal.planet_longitudes,
+                node_axis=tuple(self.natal.node_axis) if self.natal.node_axis else None,
             ) if self.natal else None,
             bazi=BaZiSummary(
                 day_master_stem=self.bazi.day_master_stem,
